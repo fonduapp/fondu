@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
+import AssessmentScreen from '../screens/AssessmentScreen';
+import { createStackNavigator } from 'react-navigation-stack';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 40;
@@ -37,7 +39,12 @@ export default class HomeScreen extends Component {
   render() {
     let { scrollBarValue } = this.state;
     return (
-      <View style={styles.container}>
+      <View style={styles.notificationBar}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('Assessment')}>
+              <Text style={styles.notificationText}>
+                  Take your routine assessment now!
+              </Text>
+            </TouchableOpacity>
             <View style={styles.containerLabel}>
               <View style={styles.containerLabelContainer}>
                 <Text style={styles.textContainer}>Focus</Text>
@@ -73,8 +80,8 @@ export default class HomeScreen extends Component {
                 <View style={styles.welcomeSubContainer}>
                   <View style={styles.mainImageContainer}>
                   </View>
-                  <Text style={styles.mainText}>Some behavior here</Text>
-                  <Text>The definition of the behavior here</Text>
+                  <Text style={styles.mainHeaderText}>Some behavior here</Text>
+                  <Text style={styles.mainParagraphText}>The definition of the behavior here</Text>
 
                   <View style={styles.recommendedSectionsContainer}>
                     <View style={[styles.recommendedSection,{backgroundColor: theme.PRIMARY_COLOR}]} />
@@ -86,8 +93,8 @@ export default class HomeScreen extends Component {
                 <View style={styles.welcomeSubContainer}>
                   <View style={styles.mainImageContainer}>
                   </View>
-                  <Text style={styles.mainText}>Some other behavior here</Text>
-                  <Text>The definition of the behavior here</Text>
+                  <Text style={styles.mainHeaderText}>Some other behavior here</Text>
+                  <Text style={styles.mainParagraphText}>The definition of the behavior here</Text>
 
                   <View style={styles.recommendedSectionsContainer}>
                     <View style={[styles.recommendedSection,{backgroundColor: 'powderblue'}]} />
@@ -117,13 +124,31 @@ HomeScreen.navigationOptions = {
   headerRight: (<View style={{padding: 30}}><Icon name='whatshot' /></View>)
 };
 
+
+const AppNavigator = createStackNavigator({
+  Home:  HomeScreen,
+  Assessment: AssessmentScreen,
+});
+
 const styles = StyleSheet.create({
+  notificationBar:{
+    backgroundColor: theme.PRIMARY_COLOR_4,
+    flex: 1,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+  },
+  notificationText:{
+    padding: mainPadding,
+    color: theme.TERTIARY_COLOR,
+    fontWeight: 'bold',
+    textAlign:'center',
+  },
   textContainer: {
-    color: theme.PRIMARY_COLOR
+    color: theme.PRIMARY_COLOR,
   },
   container: {
     flex: 1,
-    color: '#7695FF'
+    color: '#7695FF',
   },
   containerLabel:{
     flexDirection: 'row',
@@ -167,9 +192,14 @@ const styles = StyleSheet.create({
     width: width,
     alignItems: 'center',
   },
-  mainText:{
+  mainHeaderText:{
     fontSize: 20,
     fontWeight: 'bold',
+    color: theme.TERTIARY_COLOR,
+  },
+  mainParagraphText:{
+    fontSize: 15,
+    color: theme.TERTIARY_COLOR,
   },
   mainImageContainer:{
     width: width/3,

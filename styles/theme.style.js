@@ -5,8 +5,12 @@ export default {
   PRIMARY_COLOR: '#7695FF', //blue
   PRIMARY_COLOR_2: '#FFE356', //yello
   PRIMARY_COLOR_3: '#FF7D71', //red
+  PRIMARY_COLOR_4: '#FFC3BD', // light red
+  PRIMARY_COLOR_5: '#FF998E', // medium red
+  PRIMARY_COLOR_6: '#FF7d71', // dark red
   SECONDARY_COLOR: '#FFF7EA', //beige
   SECONDARY_COLOR_2: '#BDCCFF', //beige
+  TERTIARY_COLOR: '#475279',
   FONT_WEIGHT_LIGHT: 200,
   FONT_WEIGHT_MEDIUM: 600,
   FONT_WEIGHT_HEAVY: 800
