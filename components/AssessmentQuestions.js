@@ -4,12 +4,15 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
   Dimensions,
   ScrollView,
   TouchableOpacity
 } from 'react-native';
+import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/Ionicons';
+import theme from '../styles/theme.style.js';
+import RadioButton from '../components/RadioButton'
+
 const { width, height } = Dimensions.get('window')
 let arrnew = []
 const jsonData = {"quiz" : {
@@ -17,12 +20,14 @@ const jsonData = {"quiz" : {
     "question1" : {
       "correctoption" : "option3",
       "options" : {
-        "option1" : "Java",
-        "option2" : "PHP",
-        "option3" : "Javascript",
-        "option4" : "IOS"
+        "option1" : "Extremely Satisfied",
+        "option2" : "Somewhat Satisfied",
+        "option3" : "Neutral",
+        "option4" : "Somewhat Unsatisfied",
+        "option5" : "Extremely Unsatisfied",
       },
-      "question" : "React is a ____ library"
+      "question" : "How satisfied are you with this relationship?",
+      "description": "Think about how your partner has made you feel during your interactions.",
     },
     "question2" : {
       "correctoption" : "option4",
@@ -77,9 +82,12 @@ export default class AssessmentQuestions extends Component {
     arrnew = Object.keys(jdata).map( function(k) { return jdata[k] });
     this.state = {
       question : arrnew[this.qno].question,
+      description: arrnew[this.qno].description,
       options : arrnew[this.qno].options,
       correctoption : arrnew[this.qno].correctoption,
-      countCheck : 0
+      countCheck : 0,
+      pressStatus: false,
+
     }
 
   }
@@ -115,49 +123,57 @@ export default class AssessmentQuestions extends Component {
        }
       }
 
+      let pressStatus = this.state.pressStatus;
+      this.setState({pressStatus: !pressStatus})
+
   }
+
+  updateValue(ans){
+
+  }
+
   render() {
     let _this = this
     const currentOptions = this.state.options
-    const options = Object.keys(currentOptions).map( function(k) {
-      return (  <View key={k} style={{margin:10}}>
-        <Text>{currentOptions[k]}</Text>
 
-      </View>)
-    });
-            // <button countCheck={_this.state.countCheck} onColor={"green"} effect={"tada"} _onPress={(status) => _this._answer(status,k)} text={currentOptions[k]} />
+    const options = {
+        "option1" : "Extremely Satisfied",
+        "option2" : "Somewhat Satisfied",
+        "option3" : "Neutral",
+        "option4" : "Somewhat Unsatisfied",
+        "option5" : "Extremely Unsatisfied",
+      };
 
     return (
-      <ScrollView style={{backgroundColor: '#F5FCFF',paddingTop: 10}}>
-      <View style={styles.container}>
+      <ScrollView style={{flex:1,}}>
+        <View style={styles.container}>
 
-      <View style={{ flex: 1,flexDirection: 'column', justifyContent: "space-between", alignItems: 'center',}}>
+          <View style={{ flex: 1,flexDirection: 'column', justifyContent: "space-between", alignItems: 'center'}}>
 
-      <View style={styles.oval} >
-        <Text style={styles.welcome}>
-          {this.state.question}
-        </Text>
-     </View>
-        <View>
-        { options }
-        </View>
-        <View style={{flexDirection:"row"}}>
-      {/*   <Button
-          onPress={() => this.prev()}
-          title="Prev"
-          color="#841584"
-        />
-        <View style={{margin:15}} />*/}
+            <View style={styles.questionBox}>
+              <Text style={styles.question}>
+                {this.state.question}
+              </Text>
+              <Text style={styles.description}>
+                {this.state.description}
+              </Text>
+            </View>
+            <View style={{marginTop: 20}}>
+              <RadioButton options={options} updateValue={this.updateValue.bind(this)}/>
+            </View>
 
-        <TouchableOpacity onPress={() => this.next()} >
-          <View style={{paddingTop: 5,paddingBottom: 5, paddingRight: 20, paddingLeft: 20, borderRadius:10, backgroundColor:"green"}}>
-            <Icon name="md-arrow-round-forward" size={30} color="white" />
+            <View style={{ alignItems: 'center', marginTop:30,}}>
+              <Button buttonStyle={styles.nextButton} 
+                      onPress={() => this.next()} 
+                      title="Next"
+                      titleStyle={styles.nextButtonTitle}
+                      raised={true} 
+                      icon={{name: 'arrow-forward', color:'white'}} 
+                      iconRight={true}/>
+            </View>
+
           </View>
-        </TouchableOpacity >
-
         </View>
-        </View>
-      </View>
       </ScrollView>
     );
   }
@@ -165,23 +181,48 @@ export default class AssessmentQuestions extends Component {
 
 const styles = StyleSheet.create({
 
-  oval: {
-  width: width * 90/100,
-  borderRadius: 20,
-  backgroundColor: 'green'
+  question: {
+    fontWeight: 'bold',
+    fontSize: 24,
+    color: theme.TERTIARY_COLOR,
+  },
+  description:{
+    marginTop: 5,
+    color: 'gray',
+    fontSize: 15,
+    fontStyle: 'italic',
+  },
+  optionsButton:{
+    backgroundColor:theme.PRIMARY_COLOR,
+    borderRadius: 20,
+    paddingLeft:30,
+    paddingRight:30,
+  },
+  optionsButtonSelected:{
+    backgroundColor:'transparent',
+    borderColor: theme.PRIMARY_COLOR,
+    borderWidth: 2,
+    borderRadius: 20,
+    paddingLeft:30,
+    paddingRight:30,
+  },
+  optionButtonTextSelected:{
+    color: theme.PRIMARY_COLOR,
+  },
+  nextButton:{
+    backgroundColor: theme.PRIMARY_COLOR_6,
+    borderRadius: 20,
+    width: 200,
+  },
+  nextButtonTitle:{
+    fontSize: 20,
+  },
+  questionBox:{
+    margin: 10,
   },
   container: {
     flex: 1,
-    alignItems: 'center'
-  },
-  welcome: {
-    fontSize: 20,
-    margin: 15,
-    color: "white"
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+    alignItems: 'center',
+    padding: 20,
   },
 });

@@ -19,9 +19,7 @@ export default class AssessmentScreen extends Component{
   render() {
     return (
       <ScrollView style={styles.container}>
-        { this.state.quizFinish ? <View style={styles.container}>
-             <Text>done!</Text>
-         </View> :  <AssessmentQuestions quizFinish={(score) => this._quizFinish(score)} /> }
+        <AssessmentQuestions quizFinish={(score) => this._quizFinish(score)} /> 
       </ScrollView>
     );
   }
@@ -31,7 +29,6 @@ export default class AssessmentScreen extends Component{
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 15,
-    backgroundColor: '#fff',
+
   },
 });
