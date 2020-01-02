@@ -40,6 +40,8 @@ HomeStack.path = '';
 const ResourcesStack = createStackNavigator(
   {
     Resources: ResourcesScreen,
+    Article: ArticleScreen,
+
   },
   config
 );
@@ -49,6 +51,7 @@ ResourcesStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-book' : 'md-book'} />
   ),
+
 };
 
 ResourcesStack.path = '';
