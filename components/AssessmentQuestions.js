@@ -9,9 +9,10 @@ import {
   TouchableOpacity
 } from 'react-native';
 import { Button } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/Ionicons';
 import theme from '../styles/theme.style.js';
-import RadioButton from '../components/RadioButton'
+import RadioButton from '../components/RadioButton';
+import { Icon } from 'react-native-elements';
+
 
 const { width, height } = Dimensions.get('window')
 let arrnew = []
@@ -158,19 +159,25 @@ export default class AssessmentQuestions extends Component {
                 {this.state.description}
               </Text>
             </View>
-            <View style={{marginTop: 20}}>
-              <RadioButton options={options} updateValue={this.updateValue.bind(this)}/>
-            </View>
+            <View style={{ flex: 1, marginTop: 20}}>
+              <View style={{}}>
+                <RadioButton  options={options}
+                              color = {theme.PRIMARY_COLOR}
+                              updateValue={this.updateValue.bind(this)} 
+                              icon={["sentiment-very-satisfied",null, "sentiment-neutral", null, "sentiment-very-dissatisfied"]}/>
+              </View>
+                <View style={{marginTop:30}}>
+                <Button buttonStyle={styles.nextButton} 
+                        onPress={() => this.next()} 
+                        title="Next"
+                        titleStyle={styles.nextButtonTitle}
+                        raised={true} 
+                        icon={{name: 'arrow-forward', color:'white'}} 
+                        iconRight={true}/>
+                </View>
+              </View>
 
-            <View style={{ alignItems: 'center', marginTop:30,}}>
-              <Button buttonStyle={styles.nextButton} 
-                      onPress={() => this.next()} 
-                      title="Next"
-                      titleStyle={styles.nextButtonTitle}
-                      raised={true} 
-                      icon={{name: 'arrow-forward', color:'white'}} 
-                      iconRight={true}/>
-            </View>
+
 
           </View>
         </View>
@@ -212,7 +219,8 @@ const styles = StyleSheet.create({
   nextButton:{
     backgroundColor: theme.PRIMARY_COLOR_6,
     borderRadius: 20,
-    width: 200,
+    alignSelf:'stretch'
+
   },
   nextButtonTitle:{
     fontSize: 20,

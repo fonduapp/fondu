@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import theme from '../styles/theme.style.js';
+import { Icon } from 'react-native-elements';
 
 export default class RadioButtons extends Component {
 	state = {
@@ -23,18 +24,26 @@ export default class RadioButtons extends Component {
 
 		return (
 			<View>
-				{Object.keys(options).map((key) => {
+				{Object.keys(options).map((key, index) => {
 					return (
-						<View key={key} style={styles.buttonContainer}>
-							<TouchableOpacity
-								style={value === key ? styles.optionsButtonSelected : styles.optionsButton }
-								onPress={() => {
-										this.updateValue(key)
-									}
+						<View style={{flexDirection:"row", marginBottom: 20}}>
+							<View style = {{marginRight: 30}}>
+								{ this.props.icon[index]!=null ?
+								<Icon name={this.props.icon[index]} size={40} color={this.props.color}/> :
+								<View style={{width:40, height:40}}></View>
 								}
-							>
-							<Text style={value === key ? styles.optionButtonTextSelected : styles.optionButtonText}>{options[key]}</Text>
-							</TouchableOpacity>
+							</View>
+							<View key={key} style={styles.buttonContainer}>
+								<TouchableOpacity
+									style={value === key ? styles.optionsButtonSelected : styles.optionsButton }
+									onPress={() => {
+											this.updateValue(key)
+										}
+									}
+								>
+								<Text style={value === key ? styles.optionButtonTextSelected : styles.optionButtonText}>{options[key]}</Text>
+								</TouchableOpacity>
+							</View>
 						</View>
 					);
 				})}
@@ -48,7 +57,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: 20,
 	},
 	optionsButton:{
 	    backgroundColor:theme.PRIMARY_COLOR,
