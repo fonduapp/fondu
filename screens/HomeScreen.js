@@ -26,6 +26,7 @@ export default class HomeScreen extends Component {
 
   state = {
     scrollBarValue: new Animated.Value(0),
+    assessmentNotif: false, // toggle to determine whether assessment is ready
   };
 
   _moveScrollBar = (event) => {
@@ -39,12 +40,15 @@ export default class HomeScreen extends Component {
   render() {
     let { scrollBarValue } = this.state;
     return (
-      <View style={styles.notificationBar}>
+      <View style={this.state.assessmentNotif ? styles.notificationBar : styles.noNotificationBar}>
+            { this.state.assessmentNotif ? 
             <TouchableOpacity onPress={() => this.props.navigation.navigate('Assessment')}>
               <Text style={styles.notificationText}>
                   Take your routine assessment now!
               </Text>
             </TouchableOpacity>
+            : null
+            }
             <View style={styles.containerLabel}>
               <View style={styles.containerLabelContainer}>
                 <Text style={styles.textContainer}>Focus</Text>
@@ -133,6 +137,11 @@ const AppNavigator = createStackNavigator({
 const styles = StyleSheet.create({
   notificationBar:{
     backgroundColor: theme.PRIMARY_COLOR_4,
+    flex: 1,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+  },
+  noNotificationBar:{
     flex: 1,
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
