@@ -18,7 +18,12 @@ const config = Platform.select({
 const HomeStack = createStackNavigator(
   {
     Home: HomeScreen,
-    Assessment: AssessmentScreen,
+    Assessment: {
+      screen: AssessmentScreen,
+      navigationOptions: {
+        header: null,
+      },
+    }
   },
   config
 );

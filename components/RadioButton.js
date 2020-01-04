@@ -6,11 +6,13 @@ import { Icon } from 'react-native-elements';
 export default class RadioButtons extends Component {
 	state = {
 		value: null,
+		icon: null,
 	};
 
 	constructor(props) {
 		super(props);
 		this.updateValue = this.updateValue.bind(this);
+		this.state={icon:this.props.icon};
 	}
 
 	updateValue(key) {
@@ -26,14 +28,17 @@ export default class RadioButtons extends Component {
 			<View>
 				{Object.keys(options).map((key, index) => {
 					return (
-						<View style={{flexDirection:"row", marginBottom: 20}}>
-							<View style = {{marginRight: 30}}>
-								{ this.props.icon[index]!=null ?
-								<Icon name={this.props.icon[index]} size={40} color={this.props.color}/> :
-								<View style={{width:40, height:40}}></View>
-								}
-							</View>
-							<View key={key} style={styles.buttonContainer}>
+						<View style={{flexDirection:"row", marginBottom: 20}} key={key}>
+							{this.props.icon !=null ?
+								<View style = {{marginRight: 30}}>
+									{this.props.icon[index]!=null ?
+									<Icon name={this.props.icon[index]} size={40} color={this.props.color}/> :
+									<View style={{width:40, height:40}}></View>
+									}
+								</View>
+								: null
+							}
+							<View style={styles.buttonContainer}>
 								<TouchableOpacity
 									style={value === key ? styles.optionsButtonSelected : styles.optionsButton }
 									onPress={() => {
@@ -82,21 +87,5 @@ const styles = StyleSheet.create({
 	},
 	optionButtonTextSelected:{
 	    color: theme.PRIMARY_COLOR,
-	},
-	circle: {
-		height: 20,
-		width: 20,
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: '#ACACAC',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-  
-	checkedCircle: {
-		width: 14,
-		height: 14,
-		borderRadius: 7,
-		backgroundColor: '#794F9B',
 	},
 });
