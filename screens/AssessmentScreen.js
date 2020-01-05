@@ -16,6 +16,7 @@ export default class AssessmentScreen extends Component{
       quizFinish : false,
       score: 0,
       progress:0,
+      assessmentType: 'initial', // initial, routine, relationship
     }
     this.assessmentScreen.bind(this)
 
@@ -41,7 +42,7 @@ export default class AssessmentScreen extends Component{
   }
 
   _exitAssessment(){
-    this.props.navigation.navigate('Home')
+    this.props.navigation.goBack()
   }
 
   assessmentScreen(){

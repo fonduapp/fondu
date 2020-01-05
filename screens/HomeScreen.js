@@ -14,6 +14,7 @@ import {
 import { Icon } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
 import AssessmentScreen from '../screens/AssessmentScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import { createStackNavigator } from 'react-navigation-stack';
 
 const { width } = Dimensions.get('window');
@@ -78,6 +79,7 @@ export default class HomeScreen extends Component {
                 decelerationRate={0}
                 snapToInterval={width}
                 snapToAlignment={"center"}
+                decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
                 onScroll={this._moveScrollBar}>
 
@@ -112,26 +114,39 @@ export default class HomeScreen extends Component {
           </View>
     );
   }
+
+
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: 'FondU',
+      headerStyle: {
+        elevation: 0,
+        shadowOpacity: 0,
+        borderBottomWidth: 0,
+        margin: 10,
+      },
+      headerLayoutPreset: 'center',
+      headerTitleStyle: {textAlign:"center", 
+                         flex:1,
+                         color:theme.PRIMARY_COLOR },
+      headerLeft: (
+                    <TouchableOpacity style={{margin: 25, padding: 10, width: 40, height: 40, backgroundColor: 'grey', borderRadius: 50}} 
+                                      onPress={()=> navigation.navigate('Profile')}>
+                    </TouchableOpacity>
+                  ), 
+      headerRight: (<View style={{padding: 30}}><Icon name='whatshot' /></View>)
+    }
+  };
+
 }
 
-HomeScreen.navigationOptions = {
-  headerTitle: 'FondU',
-  headerStyle: {
-    elevation: 0,
-    shadowOpacity: 0,
-    borderBottomWidth: 0,
-  },
-  headerLayoutPreset: 'center',
-  headerTitleStyle :{textAlign:"center", 
-        flex:1 },
-  headerLeft: (<View style={{padding: 30}}><Icon name='face'/></View>), 
-  headerRight: (<View style={{padding: 30}}><Icon name='whatshot' /></View>)
-};
+
 
 
 const AppNavigator = createStackNavigator({
   Home:  HomeScreen,
   Assessment: AssessmentScreen,
+  Profile: ProfileScreen,
 });
 
 const styles = StyleSheet.create({

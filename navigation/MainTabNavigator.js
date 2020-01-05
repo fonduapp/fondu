@@ -8,6 +8,7 @@ import HomeScreen from '../screens/HomeScreen';
 import AssessmentScreen from '../screens/AssessmentScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
@@ -23,7 +24,13 @@ const HomeStack = createStackNavigator(
       navigationOptions: {
         header: null,
       },
-    }
+    },
+    Profile: {
+      screen: ProfileScreen,
+      navigationOptions: {
+        header: null,
+      },
+    },
   },
   config
 );
@@ -101,8 +108,11 @@ SettingsStack.path = '';
 const tabNavigator = createBottomTabNavigator({
   ResourcesStack,
   HomeStack,
-  SettingsStack,
-});
+  SettingsStack},
+  {
+     initialRouteName: 'HomeStack',
+  }
+);
 
 tabNavigator.path = '';
 
