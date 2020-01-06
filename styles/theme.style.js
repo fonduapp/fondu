@@ -2,14 +2,14 @@ export default {
   FONT_SIZE_SMALL: 12,
   FONT_SIZE_MEDIUM: 14,
   FONT_SIZE_LARGE: 16,
-  PRIMARY_COLOR: '#7695FF', //blue
+  PRIMARY_COLOR: '#7b7fff', //blue
   PRIMARY_COLOR_2: '#FFE356', //yello
   PRIMARY_COLOR_3: '#FF7D71', //red
   PRIMARY_COLOR_4: '#FFC3BD', // light red
   PRIMARY_COLOR_5: '#FF998E', // medium red
   PRIMARY_COLOR_6: '#FF7d71', // dark red
-  PRIMARY_COLOR_7: '#94ADFF', //blue
-  SECONDARY_COLOR: '#FFF7EA', //beige
+  PRIMARY_COLOR_7: '#ABA9FF', //blue
+  SECONDARY_COLOR: '#EFEFFF', //beige
   SECONDARY_COLOR_2: '#BDCCFF', //beige
   TERTIARY_COLOR: '#475279', //dark blue
   FONT_WEIGHT_LIGHT: 200,

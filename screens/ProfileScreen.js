@@ -14,7 +14,10 @@ import {
 } from 'react-native';
 import theme from '../styles/theme.style.js';
 import ProgressNavBar from '../components/NavBar';
-import { Icon } from 'react-native-elements';
+import ProgressRing from '../components/ProgressRing';
+import { Icon, Avatar } from 'react-native-elements';
+import {LineChart} from 'react-native-chart-kit';
+
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;
@@ -26,7 +29,7 @@ export default class ProfileScreen extends Component {
 
   state = {
     scrollBarValue: new Animated.Value(0),
-    assessmentNotif: false, // toggle to determine whether assessment is ready
+    accountPairedNotif: true,
   };
 
   _moveScrollBar = (event) => {
@@ -37,26 +40,44 @@ export default class ProfileScreen extends Component {
 
   };
 
+
+
   render() {
     let { scrollBarValue } = this.state;
+    const line = {
+      labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+      datasets: [
+        {
+          data: [20, 45, 28, 80, 99, 43],
+          strokeWidth: 2, // optional
+        },
+      ],
+    };
+
+    const data = {
+      data: [0.4, ]
+    };
+
     return (
       <View style = {styles.container}>
         <StatusBar hidden />
         <ProgressNavBar navigation={this.props.navigation} title = {"Profile"}/>
-        <View style= {{alignItems: 'center'}}>
-          <View style={styles.mainImageContainer}>
-          </View>
+        <View style= {{alignItems: 'center', marginBottom: 30}}>
+          <Avatar rounded size="xlarge" icon={{name: 'person'}} />
         </View>
         <View style={styles.containerLabel}>
-          <View style={styles.containerLabelContainer}>
+          <TouchableOpacity style={styles.containerLabelContainer}
+                            onPress={() => { this.scroll.scrollTo({ x: 0 }) }}>
             <Text style={styles.textContainer}>Performance</Text>
-          </View>
-          <View style={styles.containerLabelContainer}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.containerLabelContainer}
+                            onPress={() => { this.scroll.scrollTo({ x: width }) }}>
             <Text style={styles.textContainer}>Relationship</Text>
-          </View>
-          <View style={styles.containerLabelContainer}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.containerLabelContainer}
+                            onPress={() => { this.scroll.scrollTo({ x: width*2 }) }}>
             <Text style={styles.textContainer}>Account</Text>
-          </View>
+          </TouchableOpacity>
           
         </View>
         <View style={styles.welcomeContainer}>
@@ -81,16 +102,78 @@ export default class ProfileScreen extends Component {
                 snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
-                onScroll={this._moveScrollBar}>
+                onScroll={this._moveScrollBar}
+                ref={(node) => this.scroll = node}>
 
-                <View style={styles.welcomeSubContainer}>
-                  <View style={styles.mainImageContainer}>
+                <ScrollView contentContainerstyle={styles.scrollContainer}>
+                  <Text style = {[styles.accountHeaderText,{ alignSelf: "flex-start", marginLeft: 30, marginTop: 0}]}>OVERALL RELATIONSHIP HEALTH</Text>
+                  <View style={{alignSelf:"center"}}>
+                    <LineChart
+                      data={line}
+                      width={width} // from react-native
+                      height={220}
+                      yAxisSuffix={'%'}
+                      chartConfig={{
+                        backgroundGradientFrom: 'white',
+                        backgroundGradientTo: 'white',
+                        color: (opacity = 1) => `rgba(123, 127, 255, ${opacity})`,
+                        decimalPlaces: 0,
+                      }}
+                      bezier
+                    />
+
+                    <Text style = {[styles.accountHeaderText,{ alignSelf: "flex-start", marginLeft: 30, marginTop: 40}]}>TOPIC HEALTH</Text>
+
+                    <View style = {{paddingLeft: 20, paddingRight: 20, flexDirection: 'row', justifyContent: 'space-evenly', marginTop:20, marginBottom:5}}>
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 50 }
+                        />
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 70 }
+                        />
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 25 }
+                        />
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 90 }
+                        />
+                    </View>
+                    <View style = {{paddingLeft: 20, paddingRight: 20, flexDirection: 'row', justifyContent: 'space-evenly', marginBottom:40}}>
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 80 }
+                        />
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 30 }
+                        />
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 40 }
+                        />
+                        <ProgressRing
+                          radius={ 35 }
+                          stroke={ 5 }
+                          progress={ 90 }
+                        />
+                    </View>
                   </View>
-                  <Text style={styles.mainHeaderText}>Performance</Text>
 
-                </View>
 
-                <ScrollView contentContainerStyle={styles.relationshipContainer}>
+                </ScrollView>
+
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
                   <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
                                     onPress={()=> this.props.navigation.navigate('Assessment')}>
                     <Text style={styles.relationshipText}>What is my Love Language?</Text>
@@ -106,10 +189,18 @@ export default class ProfileScreen extends Component {
                   </TouchableOpacity>
                 </ScrollView>
 
-                <ScrollView contentContainerStyle={styles.relationshipContainer}>
-                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}>
-                    <Text style={styles.relationshipText}>Pair your account now!</Text>
-                  </TouchableOpacity>
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                  {
+                    this.state.accountPairedNotif ?
+                    <View style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}>
+                      <Text style={styles.relationshipText}>Pair your account now!</Text>
+                      <TouchableOpacity style={{position:'absolute', left:0, top: 0, margin: 10}}
+                            onPress={() => this.setState({ accountPairedNotif:false })}>
+                        <Icon name = 'close' color='white'/>
+                      </TouchableOpacity>
+                    </View>
+                    : null
+                  }
                   <View style={styles.accountSection}>
                     <Text style={styles.accountHeaderText}>RELATIONSHIP STATUS</Text>
                     <View>
@@ -151,6 +242,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor:theme.PRIMARY_COLOR,
+  },
+  contentContainer:{
+    paddingTop: 40,
   },
   welcomeContainer: {
     alignItems: 'center',
@@ -204,11 +298,11 @@ const styles = StyleSheet.create({
     flex:1,
 
   },
-  relationshipContainer:{
-    marginTop: 0,
+  scrollContainer:{
     width: width,
     alignItems: 'stretch',
-    padding: 30,
+    paddingLeft: 30,
+    paddingRight: 30,
 
   },
   relationshipButton:{
@@ -227,12 +321,12 @@ const styles = StyleSheet.create({
   },
   accountHeaderText:{
     color: theme.PRIMARY_COLOR,
-    fontWeight: '600',
-    fontSize: 13,
+    fontWeight: 'bold',
+    fontSize: 11,
   },
   accountText:{
     color: theme.PRIMARY_COLOR,
-    fontWeight: '600',
+    fontWeight: 'normal',
     fontSize: 18,
   },
   accountSection:{

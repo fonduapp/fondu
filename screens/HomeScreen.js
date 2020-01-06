@@ -11,7 +11,7 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { Icon, Avatar } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
 import AssessmentScreen from '../screens/AssessmentScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -51,12 +51,14 @@ export default class HomeScreen extends Component {
             : null
             }
             <View style={styles.containerLabel}>
-              <View style={styles.containerLabelContainer}>
+              <TouchableOpacity style={styles.containerLabelContainer}
+                                onPress={() => { this.scroll.scrollTo({ x: 0 }) }}>
                 <Text style={styles.textContainer}>Focus</Text>
-              </View>
-              <View style={styles.containerLabelContainer}>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.containerLabelContainer}
+                                onPress={() => { this.scroll.scrollTo({ x: width }) }}>
                 <Text style={styles.textContainer}>Strength</Text>
-              </View>
+              </TouchableOpacity>
             </View>
             <View style={styles.welcomeContainer}>
               <Animated.View style={[styles.containerLabel, 
@@ -81,7 +83,9 @@ export default class HomeScreen extends Component {
                 snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
-                onScroll={this._moveScrollBar}>
+                onScroll={this._moveScrollBar}
+                ref={(node) => this.scroll = node}
+                >
 
                 <View style={styles.welcomeSubContainer}>
                   <View style={styles.mainImageContainer}>
@@ -128,10 +132,12 @@ export default class HomeScreen extends Component {
       headerLayoutPreset: 'center',
       headerTitleStyle: {textAlign:"center", 
                          flex:1,
-                         color:theme.PRIMARY_COLOR },
+                         color:theme.PRIMARY_COLOR,
+                         fontWeight: 'bold'},
       headerLeft: (
-                    <TouchableOpacity style={{margin: 25, padding: 10, width: 40, height: 40, backgroundColor: 'grey', borderRadius: 50}} 
+                    <TouchableOpacity style={{margin: 25, borderRadius: 50}} 
                                       onPress={()=> navigation.navigate('Profile')}>
+                                      <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
                   ), 
       headerRight: (<View style={{padding: 30}}><Icon name='whatshot' /></View>)
