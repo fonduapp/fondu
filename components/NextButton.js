@@ -7,13 +7,12 @@ import { Button } from 'react-native-elements';
 export default class NextButton extends Component {
 	render() {
 		return (
-			<Button buttonStyle={styles.nextButton} 
-              onPress={() => this.props.onPress()} 
-              title={this.props.title}
-              titleStyle={styles.nextButtonTitle}
-              raised={true} 
-              icon={{name: 'arrow-forward', color:'white'}} 
-              iconRight={true}/>
+      <TouchableOpacity 
+        onPress={() => this.props.onPress()}
+        style={[styles.nextButton, this.props.buttonStyle]} 
+      >
+      <Text>{this.props.title}</Text>
+      </TouchableOpacity>
 		);
 	}
 }
@@ -22,10 +21,13 @@ const styles = StyleSheet.create({
   nextButton:{
     backgroundColor: theme.PRIMARY_COLOR_6,
     borderRadius: 20,
-    alignSelf:'stretch',
     paddingLeft:30,
     paddingRight: 30,
     marginBottom:0,
+    bottom: 0,
+    height: 30,
+    zIndex: 10,
+
 
   },
   nextButtonTitle:{

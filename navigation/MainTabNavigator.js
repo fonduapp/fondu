@@ -89,26 +89,26 @@ ResourcesStack.navigationOptions = {
 
 ResourcesStack.path = '';
 
-const SettingsStack = createStackNavigator(
+const CalendarStack = createStackNavigator(
   {
     Settings: SettingsScreen,
   },
   config
 );
 
-SettingsStack.navigationOptions = {
-  tabBarLabel: 'Forum',
+CalendarStack.navigationOptions = {
+  tabBarLabel: 'Calendar',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-people' : 'md-people'} />
   ),
 };
 
-SettingsStack.path = '';
+CalendarStack.path = '';
 
 const tabNavigator = createBottomTabNavigator({
   ResourcesStack,
   HomeStack,
-  SettingsStack},
+  CalendarStack},
   {
      initialRouteName: 'HomeStack',
   }
