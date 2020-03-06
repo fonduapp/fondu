@@ -5,9 +5,11 @@ import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
+import AssessmentScreen from '../screens/AssessmentScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import ArticleScreen from '../screens/ArticleScreen';
+import ArticleScreen from '../screens/ArticleScreen';  
+import ProfileScreen from '../screens/ProfileScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
@@ -18,6 +20,18 @@ const config = Platform.select({
 const HomeStack = createStackNavigator(
   {
     Home: HomeScreen,
+    Assessment: {
+      screen: AssessmentScreen,
+      navigationOptions: {
+        header: null,
+      },
+    },
+    Profile: {
+      screen: ProfileScreen,
+      navigationOptions: {
+        header: null,
+      },
+    },
   },
   config
 );
@@ -35,6 +49,28 @@ HomeStack.navigationOptions = {
     />
   ),
 };
+
+HomeStack.navigationOptions = ({ navigation }) => {
+  let tabBarVisible = true;
+  if (navigation.state.index > 0) {
+    tabBarVisible = false;
+  }
+  return {
+    tabBarVisible: tabBarVisible,
+    tabBarLabel: 'Home',
+    tabBarIcon: ({ focused }) => (
+      <TabBarIcon
+        focused={focused}
+        name={
+          Platform.OS === 'ios'
+            ? `ios-home${focused ? '' : '-outline'}`
+            : 'md-home'
+        }
+      />
+    ),
+  };
+};
+
 
 HomeStack.path = '';
 
@@ -57,27 +93,30 @@ ResourcesStack.navigationOptions = {
 
 ResourcesStack.path = '';
 
-const SettingsStack = createStackNavigator(
+const CalendarStack = createStackNavigator(
   {
     Settings: SettingsScreen,
   },
   config
 );
 
-SettingsStack.navigationOptions = {
-  tabBarLabel: 'Forum',
+CalendarStack.navigationOptions = {
+  tabBarLabel: 'Calendar',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-people' : 'md-people'} />
   ),
 };
 
-SettingsStack.path = '';
+CalendarStack.path = '';
 
 const tabNavigator = createBottomTabNavigator({
   ResourcesStack,
   HomeStack,
-  SettingsStack,
-});
+  CalendarStack},
+  {
+     initialRouteName: 'HomeStack',
+  }
+);
 
 tabNavigator.path = '';
 
