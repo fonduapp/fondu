@@ -14,6 +14,7 @@ const config = Platform.select({
   web: { headerMode: 'screen' },
   default: {},
   headerLayoutPreset: 'center',
+
 });
 
 const HomeStack = createStackNavigator(
@@ -35,19 +36,6 @@ const HomeStack = createStackNavigator(
   config
 );
 
-HomeStack.navigationOptions = {
-  tabBarLabel: 'Home',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-home${focused ? '' : '-outline'}`
-          : 'md-home'
-      }
-    />
-  ),
-};
 
 HomeStack.navigationOptions = ({ navigation }) => {
   let tabBarVisible = true;
@@ -111,6 +99,7 @@ const tabNavigator = createBottomTabNavigator({
   CalendarStack},
   {
      initialRouteName: 'HomeStack',
+     tabBarOptions: { showLabel: false }
   }
 );
 
