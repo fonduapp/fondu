@@ -1,14 +1,28 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
+import { ListItem} from 'react-native-elements';
+
 import { ExpoLinksView } from '@expo/samples';
+
+
+const articleList =[
+  {
+  //component details pulled from database
+  }
+]
 
 export default function ResourcesScreen() {
   return (
     <ScrollView style={styles.container}>
-      {/**
-       * Go ahead and delete ExpoLinksView and replace it with your content;
-       * we just wanted to provide you with some helpful links.
-       */}
+      {
+        atricleList.map()(l,i)=>(
+          <ListItem
+            key ={i}
+            title = {l.name}
+            bottomDivider
+            />
+        ))
+      }
       <ExpoLinksView />
     </ScrollView>
   );
