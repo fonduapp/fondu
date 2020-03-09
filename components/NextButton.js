@@ -11,7 +11,7 @@ export default class NextButton extends Component {
         onPress={() => this.props.onPress()}
         style={[styles.nextButton, this.props.buttonStyle]} 
       >
-      <Text>{this.props.title}</Text>
+      <Text style={styles.nextButtonTitle}>{this.props.title}</Text>
       </TouchableOpacity>
 		);
 	}
@@ -25,12 +25,23 @@ const styles = StyleSheet.create({
     paddingRight: 30,
     marginBottom:0,
     bottom: 0,
-    height: 30,
+    height: 50,
+    width: '60%',
     zIndex: 10,
+    display: 'flex',
+    justifyContent:'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
 
 
   },
   nextButtonTitle:{
-    fontSize: 17,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center'
   },
 });
