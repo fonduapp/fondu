@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import DropDownItem from 'react-native-drop-down-item';
 import {
   Image,
   Platform,
@@ -6,6 +7,7 @@ import {
   StyleSheet,
   Text,
   Animated,
+  Alert,
   TouchableOpacity,
   View,
   Dimensions,
@@ -14,6 +16,7 @@ import {
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;
+const B = (props) => <Text style={{fontWeight: 'bold'}}>{props.children}</Text>
 
 
 
@@ -22,86 +25,150 @@ export default class ArticleScreen extends Component {
     super(props);
 
     this.state = {
-      article1: 'Asking for Support',
-      article2: 'Initiating Fun Activites',
+      screen: 'direction',
+      article_title: 'Affectionate Touch',
+      caption: 'Giving your partner a hug before a stressful situation',
+      question: 'What is Affectionate Touch?',
+      about: 'Regularly giving your partner hugs, touches and pats, hand-holding on a daily basis.',
+      researchText: 'Isn’t just telling my partner that I love them enough?',
+      researchDescription: 'Affectionately touching our partners is highly correlated with relationship satisfaction. Not having enough affectionate touch may cause a relationship to end (1). ',
+      researchTheory: 'Human touch has biological effects, and affectionate touch has been shown to increase oxytocin and reduce cortisol (stress hormone).',
+      article1: "Affectionate Communication",
+      article2: "Affectionate Touch",
+      directionList:[
+        {
+          instruction: 'Affectionately touch your partner regularly.',
+          additionalText: 'TODO'
+        },
+        {
+          instruction: 'Softly stroke your partner’s arms or legs.',
+          additionalText: "TODO"
+        },
+      ]
+    }
+    this.switchScreens.bind(this)
 
-      qText: 'Next time I feel the need to make my partner jealous I will…',
-      response1: 'Distance myself from my partner',
-      response2: 'Plan a fun activity with my partner',
-      response3: 'Arrange to meet with my partner to discuss my feelings',
-
-      descriptionText: 'Jealousy induction is the \ tactic of making a partner jealous on purpose, \whether it be for relational rewards or for \ relational revenge (1). There are multiple methods \individuals may induce jealousy including \ distancing, flirting, and presenting alternative \ partners(1).',
-      researchText: 'Though jealousy is not \ necessarily a bad thing, and reactive jealousy can \ indicate a high relationship quality (2),\ purposefully inducing jealousy can harm a \ relationship. Relationships with jealous \ individuals have reported lower relationship\ quality, and jealousy is associated with many\ negative outcomes such as relationship conflict,\ domestic violence, and divorce (3).',
-      suggestionText: 'Instead of inducing jealousy\ in order to get relational rewards (feel more\ confident, need to feel cared for, feel in power),\ there are alternative ways to get these same\ rewards from your partner. Planning a fun outing\ with your partner produces similar results (4), or\ just telling your partner that you are in need of\ support (5).',
-
-    };
   }
-  render(){
-  return(
-    <View style = {styles.container}>
+    _showDirections(){
+      this.setState({ screen: 'direction'})
+    }
 
-    <ScrollView>
-      <View style = {styles.containerTitle}>
-        <Text style = {styles.textContainer}>Jealousy Induction</Text>
-      </View>
-      <View style = {styles.imageContainer}>
-        <Image
-          style = {{width: width/8*7, height: width/2,}}
-          source = {'https://upload.wikimedia.org/wikipedia/commons/d/d8/Swiss_fondue.jpg'}
-        />
+    _showResearch(){
+      this.setState({ screen:'research' })
+    }
+
+
+  switchScreens=(directions)=>{
+    switch(this.state.screen){
+      case 'direction':
+        return(
+          <View style = {[styles.researchContainer, {margin:20}]} >
+          <View style = {[styles.directionContainer,{paddingLeft:20, paddingRight:20, paddingBottom:40}]}>
+            <Text style = {styles.headerText}>DIRECTIONS</Text>
+              <View style = {styles.container}>{directions}</View>
+              </View>
+              <TouchableOpacity
+                style ={{paddingTop:10, paddingLeft:20}}
+                onPress = {() => this._showResearch()}>
+                <Text style = {styles.headerText}>THE RESEARCH BEHIND IT</Text>
+              </TouchableOpacity>
+          </View>
+        );
+        break;
+      case 'research':
+        return(
+          <View style = {[styles.directionContainer, {margin:20}]} >
+            <TouchableOpacity
+              style = {{paddingLeft:20}}
+              onPress = {() => this._showDirections()}>
+
+              <Text style = {styles.headerText}>DIRECTIONS</Text>
+            </TouchableOpacity>
+            <View style = {[styles.researchContainer,{paddingTop:20}]}>
+              <View style = {{paddingLeft:20}}>
+                <Text style = {styles.headerText}>THE RESEARCH BEHIND IT</Text>
+                </View>
+            <View style ={styles.researchSubContainer}>
+              <Text style = {styles.researchTitleText}>{this.state.researchText}</Text>
+              <Text style = {styles.researchBodyText}>{this.state.researchDescription}{'\n\n'}<B>Theory:</B> {this.state.researchTheory}</Text>
+              <DropDownItem
+                contentVisible = {false}
+                header = {
+                <View style = {{textAlign:'left',paddingTop:20}}>
+                    <Text style = {styles.researchTitleText}>Additional Research</Text>
+                </View>
+              }
+              >
+              <Text>TODO</Text>
+              </DropDownItem>
+            </View>
+          </View>
         </View>
+        );
+        break;
+        default:
+          Alert.alert("SCREEN DNE");
+    }
+  }
+
+  render(){
+    let directions = this.state.directionList.map((dir,i) =>{
+      return <DropDownItem
+        key = {i}
+        contentVisible = {false}
+        header = {
+          <View>
+              <Text style = {styles.instructionText}>{dir.instruction}</Text>
+          </View>
+        }
+        >
+        <Text>{dir.additionalText}</Text>
+        </DropDownItem>
+    });
+  return(
+    <View>
+    <ScrollView style ={{height: Dimensions.get('window').height}}>
 
       <View>
-        <Text style = {styles.headerLabel}>Description</Text>
-        <Text style = {styles.contentLabel}>{this.state.descriptionText}</Text>
+      <Image style = {styles.imageContainer}>
+      </Image>
+        <Text style ={[styles.aboutText, {textAlign:'center'}]}>
+          {this.state.caption}
+        </Text>
       </View>
 
       <View>
-        <Text style = {styles.headerLabel}>Research</Text>
-        <Text style = {styles.contentLabel}>{this.state.researchText}</Text>
+        <Text style = {styles.headerLabel}>{this.state.question}</Text>
+        <Text style = {styles.aboutText}>{this.state.about}</Text>
       </View>
 
       <View>
-        <Text style = {styles.headerLabel}>Suggestion</Text>
-        <Text style = {styles.contentLabel}>{this.state.suggestionText}</Text>
-      </View>
-      <View style={styles.welcomeContainerContainer}>
-          <View style={[styles.welcomeContainer, styles.shadowStyle]}>
-            <View style = {styles.questionContainer}>
-                <Text style={styles.questionText}>{this.state.qText}</Text>
-            </View>
-            <View style = {styles.responseContainer}>
-                <Text style = {styles.responseText}>{this.state.response1}</Text>
-            </View>
-            <View style = {styles.responseContainer}>
-                <Text style = {styles.responseText}>{this.state.response2}</Text>
-            </View>
-            <View style = {styles.responseContainer}>
-                <Text style = {styles.responseText}>{this.state.response3}</Text>
-            </View>
-           </View>
+        {this.switchScreens(directions)}
       </View>
 
       <View>
         <Text style = {styles.headerLabel}>Related Articles</Text>
         <View style = {styles.welcomeContainerContainer}>
             <View style = {styles.relatedArticle}>
-                <View style={[styles.relatedArticleContainer,{backgroundColor: '#FF998E'}]}>
+                <View style={styles.relatedArticleContainer}>
                 <Text style = {styles.relatedArticleText}>{this.state.article1}</Text>
                 </View>
-                <View style={[styles.relatedArticleContainer,{backgroundColor: '#FFE356'}]}>
+                <View style={styles.relatedArticleContainer}>
                 <Text style = {styles.relatedArticleText}>{this.state.article2}</Text>
                 </View>
             </View>
         </View>
       </View>
 
-      </ScrollView>
+    </ScrollView>
     </View>
     );
   }
 }
 
+ArticleScreen.navigationOptions = {
+  title: 'Article',
+};
 
 
 const styles = StyleSheet.create({
@@ -110,10 +177,24 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold'
   },
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#03A9F4',
+    overflow: 'hidden',
+},
   container: {
     flex: 1,
     color: '#7695FF',
   },
+  directionContainer:{
+    backgroundColor: '#FF7D71',
+    borderRadius: 50,
+    paddingTop: 20,
+  },
+
   containerTitle:{
     flex: 1,
     color: '#7695FF',
@@ -122,102 +203,109 @@ const styles = StyleSheet.create({
     paddingTop: mainPadding,
   },
   imageContainer:{
+    margin: 50,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerLabel:{
-    fontSize: 16,
-    fontWeight: 'bold',
-    paddingLeft: mainPadding,
-    paddingTop: mainPadding,
-    color: '#7695FF',
-  },
-  contentLabel:{
-    paddingLeft: mainPadding,
-    paddingRight: mainPadding,
-    paddingTop: mainPadding/3,
-    includeFontPadding: true,
-    color: '#828282',
+    backgroundColor: '#03A9F4',
 
-    },
+  },
 
   relatedArticleContainer:{
+    backgroundColor:'#7B80FF',
     flexDirection: 'row',
-    textAlign:'center',
+    justifyContent: 'center',
     alignItems: 'center',
     width: width/11*4,
     height: width/11*4,
     margin: 10,
-    borderRadius:5,
+    borderRadius:10,
   },
 
   relatedArticle:{
     flex:1,
     flexDirection: 'row',
     textAlign:'center',
-    alignItems: 'center',
+    justifyContent: 'space-evenly',
   },
+  researchContainer:{
+    backgroundColor: '#FFCA41',
+    paddingBottom: 20,
+    borderRadius: 50,
+   },
+   researchSubContainer:{
+     paddingRight: 30,
+     backgroundColor: 'rgba(255, 255, 255, 0.5)',
+     borderRadius: 20,
+     padding: 10,
+     paddingTop:20,
+     margin:20,
+   },
 
-  welcomeContainerContainer: {
-    alignItems: 'center',
-    textAlign:'center',
-
-  },
-  welcomeContainer: {
-    alignItems: 'center',
-    textAlign:'center',
-    marginTop: 20,
-    backgroundColor: '#FFFFFF',
-    paddingBottom:20,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    flex:1,
-    width: width/5*4,
-  },
+   mainContainer:{
+     paddingLeft: 20,
+     paddingRight: 20,
+   },
 
   shadowStyle: {
     shadowRadius: 10,
     shadowOpacity: .2,
   },
 
-  responseContainer:{
-    alignItems: 'center',
-    textAlign: 'center',
-    justifyContent: 'center',
-    backgroundColor:'#FF998E',
-    width: width/3*2,
-    margin: 5,
-    height: width/7,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-  },
-
-  questionContainer:{
+  aboutHeaderContainer:{
     alignItems: 'center',
     width: width/3*2,
     paddingBottom: 20,
     paddingTop: 20,
-
   },
 
-  responseText:{
+  headerText:{
     color: '#FFFFFF',
-    fontSize: 12,
+    fontWeight: 'bold',
+    fontSize: 16,
+    paddingLeft:30,
   },
 
   relatedArticleText:{
     color: '#FFFFFF',
     fontWeight: 'bold',
-    fontSize: 14,
+    fontSize: 12,
+    textAlign:'center',
   },
-  questionText:{
-    color: '#FF998E',
-    fontWeight: 'bold',
+  researchTitleText:{
+      paddingLeft:20,
+      paddingBottom:20,
+      fontSize:14,
+      color: '#475279',
+      fontWeight:'bold',
+      justifyContent:'flex-start',
+  },
+  researchBodyText:{
+    paddingLeft:20,
+    color:'#475279',
+    fontSize:12,
+    lineHeight:18,
+  },
+  instructionText:{
+    color: '#FFFFFF',
+    fontSize: 15,
+    paddingTop:20,
+    paddingLeft:50,
+  },
+  aboutText:{
+    color: '#475279',
     fontSize: 13,
+    lineHeight:20,
+    paddingTop:10,
+    paddingLeft:50,
+    paddingRight: 50,
   },
+  headerLabel:{
+    fontSize: 16,
+    fontWeight: 'bold',
+    paddingLeft: 50,
+    paddingTop: mainPadding,
+    color: '#475279',
+  },
+
 
 },);

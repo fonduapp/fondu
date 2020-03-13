@@ -18,7 +18,6 @@ import ProfileScreen from '../screens/ProfileScreen';
 import { createStackNavigator } from 'react-navigation-stack';
 import CustomIcon from '../components/CustomIcon.js';
 import { registerRootComponent, AppLoading } from 'expo';
-import NextButton from '../components/NextButton';
 import ContentModule from '../components/ContentModule';
 import WeekBar from '../components/WeekBar';
 

@@ -7,14 +7,16 @@ import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import AssessmentScreen from '../screens/AssessmentScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
+import SubtopicScreen from '../screens/SubtopicScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import ArticleScreen from '../screens/ArticleScreen';  
+import ArticleScreen from '../screens/ArticleScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
   default: {},
   headerLayoutPreset: 'center',
+
 });
 
 const HomeStack = createStackNavigator(
@@ -36,19 +38,6 @@ const HomeStack = createStackNavigator(
   config
 );
 
-HomeStack.navigationOptions = {
-  tabBarLabel: 'Home',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-home${focused ? '' : '-outline'}`
-          : 'md-home'
-      }
-    />
-  ),
-};
 
 HomeStack.navigationOptions = ({ navigation }) => {
   let tabBarVisible = true;
@@ -77,6 +66,7 @@ HomeStack.path = '';
 const ResourcesStack = createStackNavigator(
   {
     Resources: ResourcesScreen,
+    Subtopics: SubtopicScreen,
     Article: ArticleScreen,
 
   },
@@ -115,6 +105,7 @@ const tabNavigator = createBottomTabNavigator({
   CalendarStack},
   {
      initialRouteName: 'HomeStack',
+     tabBarOptions: { showLabel: false }
   }
 );
 
