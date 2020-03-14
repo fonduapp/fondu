@@ -21,7 +21,8 @@ export default class ResourcesScreen extends React.Component{
     super(props);
     this.state = {
       search:'',
-      isLoading: true,
+      isLoading: false,
+    //  articleList: [],
       articleList:[
         {
           area_name: 'section 1',
@@ -40,7 +41,7 @@ export default class ResourcesScreen extends React.Component{
 /*
   componentDidMount(){
     console.log('hi')
-    return fetch('http://localhost:3000/allAreas/8/abcdefg')
+    return fetch('http://71.59.68.8:3000/allAreas/8/abcdefg')
       .then((response)=>response.json())
       .then((responseJson) =>{
         this.setState({
@@ -54,9 +55,9 @@ export default class ResourcesScreen extends React.Component{
   }
   */
   render(){
-    const { search } = this.state;
 
-    /*
+    const { search } = this.state;
+    /*console.log(this.state.isLoading)
     if (this.state.isLoading){
       return(
         <View style={styles.container}>
@@ -64,18 +65,6 @@ export default class ResourcesScreen extends React.Component{
         </View>
       )
     } else {
-        let articles = this.state.articleList.map((article,i)=>{
-            return <View key = {i}>
-                    <Text>{article.area_name}</Text>
-                  </View>
-            });
-
-      let articles = this.state.articleList.map((article,i)=>{
-          return <View key = {i} style = {styles.articleContainer}>
-                  <Text>{article.area_name}</Text>
-                </View>
-              });
-              */
         let articles = this.state.articleList.map((article,i)=>{
             return <TouchableOpacity
                   key = {i}
@@ -86,6 +75,19 @@ export default class ResourcesScreen extends React.Component{
                     </Text>
                   </TouchableOpacity>
                 });
+              }
+              */
+              let articles = this.state.articleList.map((article,i)=>{
+                  return <TouchableOpacity
+                        key = {i}
+                        style = {styles.articleContainer}
+                        onPress={()=> this.props.navigation.navigate('Subtopics')}>
+                          <Text style = {styles.buttonText}>
+                              {article.area_name}
+                          </Text>
+                        </TouchableOpacity>
+                      });
+
         return(
           <View>
           <SearchBar

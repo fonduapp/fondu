@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 //import theme from '../styles/theme.style.js';
 
-const { width } = Dimensions.get('window');
+const width =  Dimensions.get('window').width;
+const height =  Dimensions.get('window').height;
 const mainPadding = 30;
 const B = (props) => <Text style={{fontWeight: 'bold'}}>{props.children}</Text>
 
@@ -27,7 +28,7 @@ export default class ArticleScreen extends Component {
     this.state = {
       screen: 'direction',
       article_title: 'Affectionate Touch',
-      caption: 'Giving your partner a hug before a stressful situation',
+      caption: '"Giving your partner a hug before a stressful situation"',
       question: 'What is Affectionate Touch?',
       about: 'Regularly giving your partner hugs, touches and pats, hand-holding on a daily basis.',
       researchText: 'Isn’t just telling my partner that I love them enough?',
@@ -62,13 +63,13 @@ export default class ArticleScreen extends Component {
     switch(this.state.screen){
       case 'direction':
         return(
-          <View style = {[styles.researchContainer, {margin:20}]} >
+          <View style = {[styles.researchContainer,{marginTop:20}]}>
           <View style = {[styles.directionContainer,{paddingLeft:20, paddingRight:20, paddingBottom:40}]}>
             <Text style = {styles.headerText}>DIRECTIONS</Text>
               <View style = {styles.container}>{directions}</View>
               </View>
               <TouchableOpacity
-                style ={{paddingTop:10, paddingLeft:20}}
+                style ={{paddingLeft:20, marginTop:20}}
                 onPress = {() => this._showResearch()}>
                 <Text style = {styles.headerText}>THE RESEARCH BEHIND IT</Text>
               </TouchableOpacity>
@@ -77,9 +78,9 @@ export default class ArticleScreen extends Component {
         break;
       case 'research':
         return(
-          <View style = {[styles.directionContainer, {margin:20}]} >
+          <View style = {[styles.directionContainer, ,{marginTop:20}]} >
             <TouchableOpacity
-              style = {{paddingLeft:20}}
+              style = {{paddingLeft:20, marginBottom:20}}
               onPress = {() => this._showDirections()}>
 
               <Text style = {styles.headerText}>DIRECTIONS</Text>
@@ -99,7 +100,7 @@ export default class ArticleScreen extends Component {
                 </View>
               }
               >
-              <Text>TODO</Text>
+              <Text style = {[styles.dropDownText, {color:'#425957'}]}>TODO</Text>
               </DropDownItem>
             </View>
           </View>
@@ -117,19 +118,22 @@ export default class ArticleScreen extends Component {
         key = {i}
         contentVisible = {false}
         header = {
-          <View>
+          <View style = {styles.directionContainer2}>
+            <Image style = {styles.imageContainer2}></Image>
+            <View style = {styles.instructionContainer}>
               <Text style = {styles.instructionText}>{dir.instruction}</Text>
+            </View>
           </View>
         }
         >
-        <Text>{dir.additionalText}</Text>
+        <Text style = {styles.dropDownText}>{dir.additionalText}</Text>
         </DropDownItem>
     });
   return(
     <View>
     <ScrollView style ={{height: Dimensions.get('window').height}}>
 
-      <View>
+      <View style = {styles.container}>
       <Image style = {styles.imageContainer}>
       </Image>
         <Text style ={[styles.aboutText, {textAlign:'center'}]}>
@@ -187,12 +191,21 @@ const styles = StyleSheet.create({
 },
   container: {
     flex: 1,
+    alignItems:'center',
     color: '#7695FF',
   },
   directionContainer:{
     backgroundColor: '#FF7D71',
     borderRadius: 50,
     paddingTop: 20,
+  },
+  directionContainer2:{
+    flexDirection:'row',
+    width: width,
+    paddingTop:10,
+    paddingLeft:50,
+    paddingRight:25,
+
   },
 
   containerTitle:{
@@ -203,11 +216,23 @@ const styles = StyleSheet.create({
     paddingTop: mainPadding,
   },
   imageContainer:{
-    margin: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: width*.4,
+    height: width*.4,
+    marginBottom: 20,
+    borderRadius: 30,
     backgroundColor: '#03A9F4',
+  },
 
+  imageContainer2:{
+    width: width*.1,
+    height: width*.1,
+    margin:10,
+    borderRadius: 10,
+    paddingLeft:20,
+    backgroundColor: '#03A9F4',
+  },
+  instructionContainer:{
+    flex:10,
   },
 
   relatedArticleContainer:{
@@ -239,11 +264,6 @@ const styles = StyleSheet.create({
      padding: 10,
      paddingTop:20,
      margin:20,
-   },
-
-   mainContainer:{
-     paddingLeft: 20,
-     paddingRight: 20,
    },
 
   shadowStyle: {
@@ -288,8 +308,13 @@ const styles = StyleSheet.create({
   instructionText:{
     color: '#FFFFFF',
     fontSize: 15,
+    fontWeight:'bold',
     paddingTop:20,
-    paddingLeft:50,
+  },
+  dropDownText:{
+    color: '#FFFFFF',
+    fontSize: 15,
+    paddingLeft:100,
   },
   aboutText:{
     color: '#475279',
