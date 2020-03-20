@@ -21,27 +21,16 @@ export default class ResourcesScreen extends React.Component{
     super(props);
     this.state = {
       search:'',
-      isLoading: false,
-    //  articleList: [],
-      articleList:[
-        {
-          area_name: 'section 1',
-          area_id:'0'
-        },
-        {
-          area_name: 'section 2',
-          area_id:'1'
-        },
-      ]
+      isLoading: true,
+      articleList: [],
     }
   }
   updateSeach = search =>{
     this.setState({search});
   };
-/*
+
   componentDidMount(){
-    console.log('hi')
-    return fetch('http://71.59.68.8:3000/allAreas/8/abcdefg')
+    return fetch('http://10.0.0.188:3000/allAreas/8/abcdefg')
       .then((response)=>response.json())
       .then((responseJson) =>{
         this.setState({
@@ -53,40 +42,30 @@ export default class ResourcesScreen extends React.Component{
         console.log(error)
       });
   }
-  */
+
   render(){
 
     const { search } = this.state;
-    /*console.log(this.state.isLoading)
+    console.log(this.state.isLoading)
     if (this.state.isLoading){
+
       return(
         <View style={styles.container}>
           <ActivityIndicator />
         </View>
       )
     } else {
+      //console.log(this.state.articleList)
         let articles = this.state.articleList.map((article,i)=>{
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}
                   onPress={()=> this.props.navigation.navigate('Subtopics')}>
                     <Text style = {styles.buttonText}>
-                        {article.area_name}
+                        {article.area_text}
                     </Text>
                   </TouchableOpacity>
                 });
-              }
-              */
-              let articles = this.state.articleList.map((article,i)=>{
-                  return <TouchableOpacity
-                        key = {i}
-                        style = {styles.articleContainer}
-                        onPress={()=> this.props.navigation.navigate('Subtopics')}>
-                          <Text style = {styles.buttonText}>
-                              {article.area_name}
-                          </Text>
-                        </TouchableOpacity>
-                      });
 
         return(
           <View>
@@ -106,6 +85,7 @@ export default class ResourcesScreen extends React.Component{
       );
     }
   }
+}
 
 ResourcesScreen.navigationOptions = {
   title: 'Resources',

@@ -1,0 +1,6 @@
+__test__/
+util/
+*.spec.js
+*.js.snap
+*.html
+coverage/
