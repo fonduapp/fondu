@@ -80,8 +80,31 @@ class SignInScreen extends React.Component {
   }
 
   _signInAsync = async () => {
-    await AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('Main');
+
+    let data={"email": this.state.email,
+      "password": this.state.password};
+
+    //replace with your ip address
+    return fetch('http://192.168.2.194:3000/login',{
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      console.log(responseJson);
+      // AsyncStorage.setItem('authToken', responseJson.authToken);
+      // AsyncStorage.setItem('userId', responseJson.userId.toString());
+      this.props.navigation.navigate('Main');
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+    
   };
 }
 
@@ -91,18 +114,23 @@ class SignUpScreen extends React.Component {
   	headerTintColor:'white',
   };
 
-   constructor(props){
+  constructor(props){
   	super(props);
   	this.state = {
   	  name: '',
       email: '',
       password: '',
       password2:'',
+      relationshipStatus: 0,
+      interval: 3,
+      screen: 0, //first or second screen of sign up
     };
   }
 
   render() {
     return (
+      <>
+      { this.state.screen==0 ? 
       <View style={styles.container}>
       	<Text style = {[styles.header,{marginBottom: '20%'}]}>Create Account</Text>
       	<CustomTextInput title = "Name"
@@ -114,19 +142,76 @@ class SignUpScreen extends React.Component {
       	<CustomTextInput title = "Password"
       					 onChangeText={text => this.setState({password: text})}
       					 value={this.state.password}/>
-      	<CustomTextInput title = "Type your password again"
+      	<CustomTextInput title = "Confirm password"
       					 onChangeText={text => this.setState({password2: text})}
       					 value={this.state.password2}/>
 
-        <NextButton title="Sign Up" onPress={this._signInAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
+        <NextButton title="Sign Up" onPress={()=>this.setState({screen: 1})} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
         <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text>Sign in</Text></TouchableOpacity>
       </View>
+      :
+      <View style={styles.container}>
+        <Text style = {styles.header}>Let's Get Started </Text>
+        <View style = {{width:'60%'}}>
+          <Text>What is your relationship status?</Text>
+          <Picker
+        selectedValue={this.state.language}
+        style={{height: 50}}
+        onValueChange={(itemValue, itemIndex) =>
+          this.setState({relationshipStatus: itemValue})
+        }
+        mode= 'dropdown'
+        >
+        <Picker.Item label="Single" value={0} />
+        <Picker.Item label="In a relationship" value={1} />
+      </Picker>
+          <Text>What is your weekly goal?</Text>
+          <Picker
+        selectedValue={this.state.language}
+        style={{height: 50}}
+        onValueChange={(itemValue, itemIndex) =>
+          this.setState({interval: itemValue})
+        }
+        mode= 'dropdown'
+        >
+        <Picker.Item label="Casual" value={3} />
+        <Picker.Item label="Regular" value={2}/>
+        <Picker.Item label="Serious" value={1} />
+        </Picker>
+        </View>
+        <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR}}/>
+      </View>
+    }
+    </>
     );
   }
 
-  _signInAsync = async () => {
-    await AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('InitialSettings');
+  _signUpAsync = async () => {
+
+    let data={"email": this.state.name,
+          "password": this.state.password,
+          "relationshipStatus": this.state.relationshipStatus,
+          "interval": this.state.interval};
+
+    //replace with your ip address
+    return fetch('http://192.168.2.194:3000/signup',{
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      console.log(responseJson);
+      AsyncStorage.setItem('authToken', responseJson.authToken);
+      AsyncStorage.setItem('userId', responseJson.userId.toString());
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
   };
 }
 
@@ -174,7 +259,7 @@ class InitialSettingsScreen extends React.Component {
 			  <Picker.Item label="Regular" value={2}/>
 			  <Picker.Item label="Serious" value={1} />
 			</Picker>
-		</View>
+		  </View>
         <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR}}/>
       </View>
     );
