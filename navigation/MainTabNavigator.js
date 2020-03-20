@@ -87,7 +87,7 @@ const CalendarStack = createStackNavigator(
 CalendarStack.navigationOptions = {
   tabBarLabel: 'Calendar',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-people' : 'md-people'} />
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-calendar' : 'md-calendar'} />
   ),
 };
 
