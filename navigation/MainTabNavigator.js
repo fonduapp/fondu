@@ -7,7 +7,9 @@ import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import AssessmentScreen from '../screens/AssessmentScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
+import SubtopicScreen from '../screens/SubtopicScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import ArticleScreen from '../screens/ArticleScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const config = Platform.select({
@@ -64,6 +66,9 @@ HomeStack.path = '';
 const ResourcesStack = createStackNavigator(
   {
     Resources: ResourcesScreen,
+    Subtopics: SubtopicScreen,
+    Article: ArticleScreen,
+
   },
   config
 );
@@ -73,6 +78,7 @@ ResourcesStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-book' : 'md-book'} />
   ),
+
 };
 
 ResourcesStack.path = '';
