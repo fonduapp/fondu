@@ -11,12 +11,13 @@ export default class AssessmentScreen extends Component{
 
   constructor(props){
     super(props)
+    const { navigation } = props;
     this.state = {
       screen:'start', // start, quiz, finish
       quizFinish : false,
       score: 0,
       progress:0,
-      assessmentType: 'initial', // initial, routine, relationship
+      assessmentType: JSON.stringify(navigation.getParam('assessmentType','none')),// initial, routine, relationship, none
     }
     this.assessmentScreen.bind(this)
 
@@ -42,7 +43,9 @@ export default class AssessmentScreen extends Component{
   }
 
   _exitAssessment(){
-    this.props.navigation.goBack()
+    this.props.navigation.state.params.assessmentComplete();
+    this.props.navigation.goBack();
+
   }
 
   assessmentScreen(){
@@ -56,7 +59,6 @@ export default class AssessmentScreen extends Component{
 
           <ProgressNavBar navigation={navigation}/>
           <View style={styles.startScreen}>
-
               <View style={styles.mainImageContainer}>
               </View>
               <View style={{flexDirection: 'row', marginBottom: 5}}>
@@ -65,10 +67,11 @@ export default class AssessmentScreen extends Component{
                   ~15 minutes
                 </Text>
               </View>
-              <View style={{marginLeft:70, marginRight:70, marginTop: 10}}>
+              <View style={{marginTop: 10, width:'100%'}}>
+
                 <NextButton 
                 onPress={() => this._startQuiz()} 
-                title="Get Started"></NextButton>
+                title="Get Started"/>
                 <Text style={{color:'white', fontWeight:'bold', fontSize:15, marginTop: 30}}>
                   Why should I take this assessment?
                 </Text>
@@ -88,7 +91,6 @@ export default class AssessmentScreen extends Component{
         <View style={[styles.startScreen, styles.darkContainer]}>
             <View style={styles.mainImageContainer}>
             </View>
-            <View style={{marginLeft:70, marginRight:70, marginTop: 40, marginBottom: 40}}>
               <Text style={{color:'white', fontWeight:'bold', fontSize:25,}}>
                 Congrats, you did it!
               </Text>
@@ -100,7 +102,6 @@ export default class AssessmentScreen extends Component{
               <NextButton 
               onPress={() => this._seeStreaks()} 
               title="Next"></NextButton>
-            </View>
 
         </View> 
         );
@@ -110,11 +111,13 @@ export default class AssessmentScreen extends Component{
           <View style = {{flex:1}}>
             <ProgressNavBar color={theme.PRIMARY_COLOR} navigation={navigation} progress={this.state.progress}/>
             <AssessmentQuestions quizFinish={(score) => this._quizFinish(score)} 
-                                 updateProgress={(progress) => this._updateProgress(progress)}/>
+                                 updateProgress={(progress) => this._updateProgress(progress)}
+                                 assessmentType = {this.state.assessmentType}
+                                 />
           </View>
         );
       case 'streak':
-        setTimeout(this._seeResults.bind(this), 1000);
+        setTimeout(this._exitAssessment.bind(this), 1000);
         return (
         <View style={[styles.startScreen, styles.darkContainer]}>
             <View style={{marginLeft:70, marginRight:70, marginTop: 40, marginBottom: 40}}>
@@ -212,10 +215,10 @@ const styles = StyleSheet.create({
   startScreen: {
     flex:1,
     alignSelf:'stretch',
-    
     alignItems: 'center',
     textAlign:'center',
     justifyContent: 'center',
+    padding: '15%',
 
   },
   mainImageContainer:{

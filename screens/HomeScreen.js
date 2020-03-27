@@ -20,6 +20,7 @@ import CustomIcon from '../components/CustomIcon.js';
 import { registerRootComponent, AppLoading } from 'expo';
 import ContentModule from '../components/ContentModule';
 import WeekBar from '../components/WeekBar';
+import {textStyle} from '../styles/text.style.js';
 
 
 const { width } = Dimensions.get('window');
@@ -31,12 +32,17 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 export default class HomeScreen extends Component {
   constructor(props) {
     super(props)
+    this.state = {
+      scrollBarValue: new Animated.Value(0),
+      assessmentNotif: false, // toggle to determine whether assessment is ready
+      initialAssessTaken: false,
+
+    };
+
+    this.initialAssessComplete.bind(this);
   }
 
-  state = {
-    scrollBarValue: new Animated.Value(0),
-    assessmentNotif: false, // toggle to determine whether assessment is ready
-  };
+  
 
   _moveScrollBar = (event) => {
     Animated.timing(this.state.scrollBarValue, {
@@ -46,8 +52,25 @@ export default class HomeScreen extends Component {
 
   };
 
-  render() {
+  initialAssessComplete(){
+    this.setState({initialAssessTaken: true});
+  }
 
+  getInitialAssess() {
+    return (
+      <TouchableOpacity style = {styles.initialAssessContainer} onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'initial',assessmentComplete:this.initialAssessComplete})}>
+        <Text style= {styles.initialAssessText}>Take your first</Text>
+        <Text style = {[textStyle.header,{textAlign: 'center',}]} >Relationship Assessment</Text>
+        <TouchableOpacity style = {{flexDirection:'row', alignItems:'center', }}>
+          <Icon name='help-outline' color="white"/>
+          <Text style= {styles.initialAssessText}>What is this?</Text>
+        </TouchableOpacity>
+        <Icon style = {{marginTop: '20%'}} name='arrow-downward' color="white" size={48}/>
+      </TouchableOpacity>
+  );
+  }
+
+  getHome() {
     var today = new Date();
     let date =   monthNames[today.getMonth()] + " " + today.getDate();
 
@@ -95,10 +118,17 @@ export default class HomeScreen extends Component {
             </View>
           </View>
     );
+
+  }
+
+  render() {
+
+    return this.state.initialAssessTaken ? this.getHome() : this.getInitialAssess() ;
   }
 
 
   static navigationOptions = ({ navigation }) => {
+    const {params = {}} = navigation.state;
     return {
       headerTitle: 'FondU',
       headerStyle: {
@@ -106,22 +136,27 @@ export default class HomeScreen extends Component {
         shadowOpacity: 0,
         borderBottomWidth: 0,
       },
+      headerTransparent: true,
       headerLayoutPreset: 'center',
       headerTitleStyle: {textAlign:"center", 
                          flex:1,
-                         color:theme.PRIMARY_COLOR,
+                         color: params.initialAssessTaken ? theme.PRIMARY_COLOR : '#FFFFFF',
                          fontWeight: 'bold'},
       headerLeft: (
-                    <TouchableOpacity style={{margin: 25, borderRadius: 50}} 
+                    <TouchableOpacity style={{marginLeft: 25, borderRadius: 50}} 
                                       onPress={()=> navigation.navigate('Profile')}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
                   ), 
-      headerRight: (<View style={{marginRight: 25, flexDirection: 'row'}}>
+      headerTitleContainerStyle: {
+        left: 0, // THIS RIGHT HERE
+      },
+      headerRight: ( params.initialAssessTaken ? <View style={{marginRight: 25, flexDirection: 'row'}}>
                       <CustomIcon name='streak-fire' size={27} color={theme.PRIMARY_COLOR_6}/>
                       <Text style={{marginLeft:5, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>1</Text>
                       <Text style={{marginLeft:7, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>lv 1</Text>
-                    </View>)
+                      </View>: null
+                    )
     }
   };
 
@@ -197,5 +232,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F2F2',
     margin: 30,
   },
+  initialAssessContainer:{
+    backgroundColor: theme.PRIMARY_COLOR_4,
+    flex:1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  initialAssessText:{
+    color: 'white'
+  }
 
 });
