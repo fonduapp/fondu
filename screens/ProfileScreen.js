@@ -10,7 +10,8 @@ import {
   View,
   Dimensions,
   Animated,
-  StatusBar
+  StatusBar,
+  AsyncStorage
 } from 'react-native';
 import theme from '../styles/theme.style.js';
 import ProgressNavBar from '../components/NavBar';
@@ -40,7 +41,25 @@ export default class ProfileScreen extends Component {
 
   };
 
+  _signOut = async () => {
 
+    //clear authToken and userId
+    try {
+        await AsyncStorage.removeItem('authToken');
+        await AsyncStorage.removeItem('userId');
+
+
+        this.props.navigation.navigate('Auth')
+
+
+    }
+    catch(exception) {
+
+      console.log("furk " + exception);
+    }
+
+
+  }
 
   render() {
     let { scrollBarValue } = this.state;
@@ -228,6 +247,10 @@ export default class ProfileScreen extends Component {
                       </View>
                     </View>
                   </View>
+                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
+                                    onPress = {this._signOut}>
+                      <Text style={styles.relationshipText}>Sign out</Text>
+                  </TouchableOpacity>
                 </ScrollView>
 
               </ScrollView>

@@ -21,6 +21,7 @@ import {textStyle} from '../styles/text.style.js';
 
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
+import host from '../constants/Server.js';
 
 
 class LandingScreen extends React.Component {
@@ -101,7 +102,7 @@ class SignInScreen extends React.Component {
       "password": this.state.password};
 
     //replace with your ip address
-    return fetch('http://192.168.2.194:3000/login',{
+    return fetch('http://' + host + ':3000/login',{
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -113,7 +114,7 @@ class SignInScreen extends React.Component {
     .then((responseJson) => {
       console.log(responseJson);
       AsyncStorage.setItem('authToken', responseJson.authToken);
-      AsyncStorage.setItem('userId', responseJson.userId.toString());
+     AsyncStorage.setItem('userId', responseJson.userId.toString());
       this.props.navigation.navigate('Main');
     })
     .catch((error) => {
@@ -274,7 +275,7 @@ class SignUpScreen extends React.Component {
           "interval": this.state.interval};
 
     //replace with your ip address
-    return fetch('http://192.168.2.194:3000/signup',{
+    return fetch('http://' + host + ':3000/signup',{
       method: 'POST',
       headers: {
         Accept: 'application/json',

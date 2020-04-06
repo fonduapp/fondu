@@ -30,7 +30,7 @@ export default class ResourcesScreen extends React.Component{
   };
 
   componentDidMount(){
-    return fetch('http://10.0.0.188:3000/allAreas/8/abcdefg')
+    return fetch('http://192.168.2.194:3000/allAreas/8/abcdefg')
       .then((response)=>response.json())
       .then((responseJson) =>{
         this.setState({

@@ -19,7 +19,8 @@ export default class AssessmentScreen extends Component{
       progress:0,
       assessmentType: JSON.stringify(navigation.getParam('assessmentType','none')),// initial, routine, relationship, none
     }
-    this.assessmentScreen.bind(this)
+    this.assessmentScreen.bind(this);
+    navigation.state.params.assessmentComplete.bind(this);
 
   }
   _startQuiz(){

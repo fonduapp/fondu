@@ -40,12 +40,12 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 	},
 	welcomeSubContainer:{
-	    width: width - 80,
-	    height: width- 80,
+	    width: 300,
+	    height: 300,
 	    alignItems: 'center',
 	    backgroundColor: theme.SECONDARY_COLOR,
-	    marginLeft: 15,
-	    marginRight: 15,
+	    marginLeft: (width - 300)/6,
+	    marginRight: (width - 300)/6,
 	    marginBottom: 15,
 	    borderRadius: 40,
 
