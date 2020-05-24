@@ -21,7 +21,7 @@ export default class ContentModule extends Component {
                 <NextButton
                     onPress={this.props.onPress} 
                     title="Let's start"
-                    buttonStyle = {{ position:'relative', top:-30, alignSelf: 'center', backgroundColor: theme.PRIMARY_COLOR}}/>
+                    buttonStyle = {{ position:'relative', top:-30, alignSelf: 'center', backgroundColor: theme.PRIMARY_COLOR, width: '60%'}}/>
             </View>
 		);
 	}
@@ -40,12 +40,12 @@ const styles = StyleSheet.create({
 		borderRadius: 15,
 	},
 	welcomeSubContainer:{
-	    width: width - 80,
-	    height: width- 80,
+	    width: 300,
+	    height: 300,
 	    alignItems: 'center',
 	    backgroundColor: theme.SECONDARY_COLOR,
-	    marginLeft: 15,
-	    marginRight: 15,
+	    marginLeft: (width - 300)/6,
+	    marginRight: (width - 300)/6,
 	    marginBottom: 15,
 	    borderRadius: 40,
 

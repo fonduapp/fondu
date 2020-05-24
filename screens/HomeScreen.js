@@ -10,6 +10,7 @@ import {
   View,
   Dimensions,
   Animated,
+  AsyncStorage,
 } from 'react-native';
 import { Icon, Avatar } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
@@ -20,6 +21,11 @@ import CustomIcon from '../components/CustomIcon.js';
 import { registerRootComponent, AppLoading } from 'expo';
 import ContentModule from '../components/ContentModule';
 import WeekBar from '../components/WeekBar';
+import {textStyle} from '../styles/text.style.js';
+import ProgressBar from '../components/ProgressBar';
+import { SafeAreaView } from 'react-navigation';
+import host from '../constants/Server.js';
+import { _getAuthTokenUserId } from '../constants/Helper.js'
 
 
 const { width } = Dimensions.get('window');
@@ -27,16 +33,87 @@ const mainPadding = 40;
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+if (Platform.OS === 'android') {
+  SafeAreaView.setStatusBarHeight(0);
+}
+
+
+// _getAuthTokenUserId = async () => {
+//   try {
+//     const authToken = await AsyncStorage.getItem('authToken');
+//     const userId = await AsyncStorage.getItem('userId');
+//     console.log("authToken???" + authToken);
+
+//     return {authToken: authToken, userId: userId};
+//     }catch(error){
+
+//     }
+//   }
 
 export default class HomeScreen extends Component {
   constructor(props) {
     super(props)
+    this.state = {
+      scrollBarValue: new Animated.Value(0),
+      assessmentNotif: false, // toggle to determine whether assessment is ready
+      initialAssessReady: false,
+      initialAssessTaken: false,
+
+    };
   }
 
-  state = {
-    scrollBarValue: new Animated.Value(0),
-    assessmentNotif: false, // toggle to determine whether assessment is ready
-  };
+
+
+  async componentDidMount(){
+    //find initialAssessTaken
+
+    const {authToken, userId} = await _getAuthTokenUserId();
+
+
+    //Get whether user finished initial assessment
+    console.log('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken);
+
+    fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({initialAssessTaken:responseJson.finished_initial});
+      this.props.navigation.setParams({
+        initialAssessTaken: responseJson.finished_initial,
+      });
+      this.setState({initialAssessReady:true});
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+    //Get Streak
+
+    fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      console.log('streak' + responseJson[0].streak);
+      this.props.navigation.setParams({
+        streak: responseJson[0].streak,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+
+  }
 
   _moveScrollBar = (event) => {
     Animated.timing(this.state.scrollBarValue, {
@@ -46,8 +123,47 @@ export default class HomeScreen extends Component {
 
   };
 
-  render() {
+  async initialAssessComplete(){
+    this.setState({initialAssessTaken: true});
+    this.props.navigation.setParams({
+      initialAssessTaken: true,
+    });
+    //update in database
 
+    const {authToken, userId} = await _getAuthTokenUserId();
+
+    const data = {
+      userId: userId,
+      authToken:authToken,
+    };
+
+    fetch('http://' + host +':3000/finishInitial/',{
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+
+    
+  }
+
+  getInitialAssess() {
+    return (
+      <TouchableOpacity style = {styles.initialAssessContainer} onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'initial',assessmentComplete:this.initialAssessComplete.bind(this)})}>
+        <Text style= {styles.initialAssessText}>Take your first</Text>
+        <Text style = {[textStyle.header,{textAlign: 'center',}]} >Relationship Assessment</Text>
+        <TouchableOpacity style = {{flexDirection:'row', alignItems:'center', }}>
+          <Icon name='help-outline' color="white"/>
+          <Text style= {styles.initialAssessText}>What is this?</Text>
+        </TouchableOpacity>
+        <Icon style = {{marginTop: '20%'}} name='arrow-downward' color="white" size={48}/>
+      </TouchableOpacity>
+  );
+  }
+
+  getHome() {
     var today = new Date();
     let date =   monthNames[today.getMonth()] + " " + today.getDate();
 
@@ -62,7 +178,11 @@ export default class HomeScreen extends Component {
             </TouchableOpacity>
             : null
             }
-            <WeekBar/>
+            <View style = {{ flexDirection: 'row', padding: 30, alignItems: 'center'}}>
+              <ProgressBar color = {theme.PRIMARY_COLOR}
+                           progress = {0.5}
+              />
+            </View>
 
             <View style = {{marginLeft: 30, marginBottom: 30}}>
               <Text>Today</Text>
@@ -79,15 +199,20 @@ export default class HomeScreen extends Component {
                 contentContainerStyle={styles.contentContainer}
                 horizontal= {true}
                 decelerationRate={0}
-                snapToInterval={width - 60}
+                snapToInterval={width - (width - 300)*2/3}
                 snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
                 >
 
-                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment')} />
+                <ContentModule title = "Affectionate Touch" 
+                               onPress={() => this.props.navigation.navigate('Assessment')}
+                               style = {{}}
+                />
                 <ContentModule title = "Play Behaviors" onPress={() => this.props.navigation.navigate('Assessment')} />
                 <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment')} />
+                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment')} />
+
 
 
 
@@ -95,10 +220,16 @@ export default class HomeScreen extends Component {
             </View>
           </View>
     );
+
+  }
+
+  render() {
+    return this.state.initialAssessReady ? (this.state.initialAssessTaken ? this.getHome() : this.getInitialAssess()):null ;
   }
 
 
   static navigationOptions = ({ navigation }) => {
+
     return {
       headerTitle: 'FondU',
       headerStyle: {
@@ -106,22 +237,28 @@ export default class HomeScreen extends Component {
         shadowOpacity: 0,
         borderBottomWidth: 0,
       },
+      headerTransparent: !navigation.getParam('initialAssessTaken'),
       headerLayoutPreset: 'center',
       headerTitleStyle: {textAlign:"center", 
                          flex:1,
-                         color:theme.PRIMARY_COLOR,
+                         color: navigation.getParam('initialAssessTaken') ? theme.PRIMARY_COLOR : '#FFFFFF',
                          fontWeight: 'bold'},
       headerLeft: (
-                    <TouchableOpacity style={{margin: 25, borderRadius: 50}} 
+                    <TouchableOpacity style={{marginLeft: 25, borderRadius: 50}} 
                                       onPress={()=> navigation.navigate('Profile')}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
                   ), 
-      headerRight: (<View style={{marginRight: 25, flexDirection: 'row'}}>
+      headerTitleContainerStyle: {
+        left: 0,
+        right:0,
+      },
+      headerRight: ( navigation.getParam('initialAssessTaken') ? <View style={{marginRight: 25, flexDirection: 'row'}}>
                       <CustomIcon name='streak-fire' size={27} color={theme.PRIMARY_COLOR_6}/>
-                      <Text style={{marginLeft:5, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>1</Text>
-                      <Text style={{marginLeft:7, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>lv 1</Text>
-                    </View>)
+                      <Text style={{marginLeft:5, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>{navigation.getParam('streak')}</Text>
+                      <Text style={{marginLeft:7, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>lv ?</Text>
+                      </View>: null
+                    )
     }
   };
 
@@ -163,8 +300,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingTop: 5,
-    paddingLeft: 15,
-    paddingRight: 15,
+    paddingLeft: (width - 300)/3,
+    paddingRight: (width - 300)/3,
 
     
   },
@@ -172,15 +309,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     flex:1,
     width: width,
-  },
-  welcomeSubContainer:{
-    width: width - 80,
-    height: width- 80,
-    alignItems: 'center',
-    backgroundColor: theme.SECONDARY_COLOR,
-    margin: 15,
-    borderRadius: 40,
-
   },
   mainHeaderText:{
     fontSize: 20,
@@ -197,5 +325,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F2F2',
     margin: 30,
   },
+  initialAssessContainer:{
+    backgroundColor: theme.PRIMARY_COLOR_4,
+    flex:1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  initialAssessText:{
+    color: 'white'
+  }
 
 });

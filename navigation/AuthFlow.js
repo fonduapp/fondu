@@ -9,14 +9,19 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  Picker
+  Picker,
+  KeyboardAvoidingView
 } from 'react-native';
 import NextButton from '../components/NextButton';
 import CustomTextInput from '../components/CustomTextInput';
 import theme from '../styles/theme.style.js';
+import { Input } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {textStyle} from '../styles/text.style.js';
 
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
+import host from '../constants/Server.js';
 
 
 class LandingScreen extends React.Component {
@@ -26,7 +31,7 @@ class LandingScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-      	<Text style={styles.title}>fondu</Text>
+      	<Text style={[textStyle.title, styles.headerSpace]}>fondu</Text>
         <NextButton title="Sign In" 
         			onPress={() => this.props.navigation.navigate('SignIn')} 
         			buttonStyle = {{marginBottom:28, backgroundColor: theme.PRIMARY_COLOR}}/>
@@ -57,15 +62,27 @@ class SignInScreen extends React.Component {
   render() {
 
     return (
-      <View style={styles.container}>
-      	<Text style = {styles.header}>Welcome back!</Text>
-      	<CustomTextInput title = "Email"
-      					 onChangeText={text => this.setState({email: text})}
-      					 value={this.state.email}/>
-      	<CustomTextInput title = "Password"
-      					 onChangeText={text => this.setState({password: text})}
-      					 value={this.state.password}/>
-
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
+      	<Text style = {[textStyle.header, styles.headerSpace]}>Welcome back!</Text>
+        <Input
+          containerStyle={{marginBottom: 10}}
+          errorStyle={{ color: 'red' }}
+          errorMessage={this.state.badEmail ? 'Please enter a valid email' : ''}
+          label='EMAIL'
+          labelStyle={styles.labelStyle}
+          inputStyle={{color:'white'}}
+          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+          onChangeText={text => this.setState({email: text})}
+        />
+        <Input
+          containerStyle={{marginBottom: 20}}
+          label='PASSWORD'
+          labelStyle={styles.labelStyle}
+          inputStyle={{color:'white'}}
+          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+          onChangeText={text => this.setState({password: text})}
+          secureTextEntry={true}
+        />
         <NextButton title="Sign In" onPress={this._signInAsync}
         			buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
         <View style={{flexDirection: 'row', width: '60%', justifyContent:'space-between'}}>
@@ -75,7 +92,7 @@ class SignInScreen extends React.Component {
 
 		</View>
 
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -85,7 +102,7 @@ class SignInScreen extends React.Component {
       "password": this.state.password};
 
     //replace with your ip address
-    return fetch('http://192.168.2.194:3000/login',{
+    return fetch('http://' + host + ':3000/login',{
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -96,8 +113,8 @@ class SignInScreen extends React.Component {
     .then((response) => response.json())
     .then((responseJson) => {
       console.log(responseJson);
-      // AsyncStorage.setItem('authToken', responseJson.authToken);
-      // AsyncStorage.setItem('userId', responseJson.userId.toString());
+      AsyncStorage.setItem('authToken', responseJson.authToken);
+     AsyncStorage.setItem('userId', responseJson.userId.toString());
       this.props.navigation.navigate('Main');
     })
     .catch((error) => {
@@ -124,35 +141,99 @@ class SignUpScreen extends React.Component {
       relationshipStatus: 0,
       interval: 3,
       screen: 0, //first or second screen of sign up
+      badEmail: false,
+      badPassword: false,
+      badConfirmPass: false,
     };
+    this.goToSettingsScreen=this.goToSettingsScreen.bind(this);
+
+  }
+
+  checkForValidRegInput(email, password, password2){
+    //check is email is valid
+    var validator = require("email-validator");
+    let validEmail = validator.validate(email); // true
+    if(!validEmail){
+      this.setState({badEmail:true});
+    }else{
+      this.setState({badEmail:false});
+    }
+
+    //check is password is valid and secure
+    let validPassword = (password === password2);
+    if(!validPassword){
+      this.setState({badConfirmPass:true});
+    }else{
+      this.setState({badConfirmPass:false});
+    }
+    //TODO: secure password check
+
+    return validEmail && validPassword;
+
+  }
+
+  goToSettingsScreen(){
+    let validInputs = this.checkForValidRegInput(this.state.email, this.state.password, this.state.password2);
+
+    if(validInputs){
+      this.setState({screen: 1})
+    }
+
   }
 
   render() {
     return (
       <>
       { this.state.screen==0 ? 
-      <View style={styles.container}>
-      	<Text style = {[styles.header,{marginBottom: '20%'}]}>Create Account</Text>
-      	<CustomTextInput title = "Name"
-      					 onChangeText={text => this.setState({name: text})}
-      					 value={this.state.name}/>
-      	<CustomTextInput title = "Email"
-      					 onChangeText={text => this.setState({email: text})}
-      					 value={this.state.email}/>
-      	<CustomTextInput title = "Password"
-      					 onChangeText={text => this.setState({password: text})}
-      					 value={this.state.password}/>
-      	<CustomTextInput title = "Confirm password"
-      					 onChangeText={text => this.setState({password2: text})}
-      					 value={this.state.password2}/>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
+      	<Text style = {[textStyle.header, styles.headerSpace, {marginBottom: '20%'}]}>Create Account</Text>
+        <Input
+          containerStyle={{marginBottom: 10}}
+          label='NAME'
+          labelStyle={styles.labelStyle}
+          inputStyle={{color:'white'}}
+          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+          onChangeText={text => this.setState({name: text})}
 
-        <NextButton title="Sign Up" onPress={()=>this.setState({screen: 1})} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
-        <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text>Sign in</Text></TouchableOpacity>
-      </View>
+        />
+        <Input
+          containerStyle={{marginBottom: 10}}
+          errorStyle={{ color: 'red' }}
+          errorMessage={this.state.badEmail ? 'Please enter a valid email' : ''}
+          label='EMAIL'
+          labelStyle={styles.labelStyle}
+          inputStyle={{color:'white'}}
+          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+          onChangeText={text => this.setState({email: text})}
+        />
+        <Input
+          containerStyle={{marginBottom: 10}}
+          label='PASSWORD'
+          labelStyle={styles.labelStyle}
+          inputStyle={{color:'white'}}
+          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+          onChangeText={text => this.setState({password: text})}
+          secureTextEntry={true}
+        />
+        <Input
+          containerStyle={{marginBottom: 20}}
+          errorStyle={{ color: 'red' }}
+          errorMessage={this.state.badConfirmPass ? 'Passwords do not match' : ''}
+          label='CONFIRM PASSWORD'
+          labelStyle={styles.labelStyle}
+          inputStyle={{color:'white'}}
+          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+          onChangeText={text => this.setState({password2: text})}
+          secureTextEntry={true}
+        />
+
+        <NextButton title="Sign Up" onPress={this.goToSettingsScreen} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
+        <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={{color:'rgba(255,255,255,0.8)', }}>Sign in</Text></TouchableOpacity>
+      </KeyboardAvoidingView>
       :
       <View style={styles.container}>
-        <Text style = {styles.header}>Let's Get Started </Text>
-        <View style = {{width:'60%'}}>
+        <Text style = {[textstyle.header, styles.headerSpace]}>Let's Get Started </Text>
+        <View>
           <Text>What is your relationship status?</Text>
           <Picker
         selectedValue={this.state.language}
@@ -174,9 +255,9 @@ class SignUpScreen extends React.Component {
         }
         mode= 'dropdown'
         >
-        <Picker.Item label="Casual" value={3} />
-        <Picker.Item label="Regular" value={2}/>
-        <Picker.Item label="Serious" value={1} />
+        <Picker.Item label="Casual (Every 3 days)" value={3} />
+        <Picker.Item label="Regular (Every 2 days)" value={2}/>
+        <Picker.Item label="Serious (Every day)" value={1} />
         </Picker>
         </View>
         <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR}}/>
@@ -188,13 +269,13 @@ class SignUpScreen extends React.Component {
 
   _signUpAsync = async () => {
 
-    let data={"email": this.state.name,
+    let data={"email": this.state.email,
           "password": this.state.password,
           "relationshipStatus": this.state.relationshipStatus,
           "interval": this.state.interval};
 
     //replace with your ip address
-    return fetch('http://192.168.2.194:3000/signup',{
+    return fetch('http://' + host + ':3000/signup',{
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -207,6 +288,7 @@ class SignUpScreen extends React.Component {
       console.log(responseJson);
       AsyncStorage.setItem('authToken', responseJson.authToken);
       AsyncStorage.setItem('userId', responseJson.userId.toString());
+      this.props.navigation.navigate('Main');
     })
     .catch((error) => {
       console.error(error);
@@ -215,61 +297,6 @@ class SignUpScreen extends React.Component {
   };
 }
 
-class InitialSettingsScreen extends React.Component {
-  static navigationOptions = {
-    headerTransparent: true,
-    headerTintColor:'white',
-  };
-
-  constructor(props){
-  	super(props);
-  	this.state = {
-  	  relationshipStatus: '',
-      interval: 0,
-    };
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-      	<Text style = {styles.header}>Let's Get Started </Text>
-      	<View style = {{width:'60%'}}>
-	      	<Text>What is your relationship status?</Text>
-	      	<Picker
-			  selectedValue={this.state.language}
-			  style={{height: 50}}
-			  onValueChange={(itemValue, itemIndex) =>
-			    this.setState({relationshipStatus: itemValue})
-			  }
-			  mode= 'dropdown'
-			  >
-			  <Picker.Item label="Single" value="single" />
-			  <Picker.Item label="In a relationship" value="relationship" />
-			</Picker>
-	      	<Text>What is your weekly goal?</Text>
-	      	<Picker
-			  selectedValue={this.state.language}
-			  style={{height: 50}}
-			  onValueChange={(itemValue, itemIndex) =>
-			    this.setState({interval: itemValue})
-			  }
-			  mode= 'dropdown'
-			  >
-			  <Picker.Item label="Casual" value={3} />
-			  <Picker.Item label="Regular" value={2}/>
-			  <Picker.Item label="Serious" value={1} />
-			</Picker>
-		  </View>
-        <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR}}/>
-      </View>
-    );
-  }
-
-  _signUpAsync = async () => {
-    await AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('Main');
-  };
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -277,19 +304,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: theme.PRIMARY_COLOR_7,
+    paddingLeft: '20%',
+    paddingRight: '20%',
   },
-  title: {
-  	fontSize: 36,
-  	padding: 150,
-  	color: 'white',
+  labelStyle: {
+    color: 'rgba(255,255,255, 0.5)',
+    fontSize: 13,
   },
-  header: {
-  	fontSize:36, 
-  	fontWeight: 'bold', 
-  	color:'white', 
-  	width:'60%', 
-  	marginBottom: '40%'
-  },
+  headerSpace:{
+    marginBottom: '40%'
+  }
 });
 
 // const AppStack = createStackNavigator({ Home: HomeScreen, Other: OtherScreen });
@@ -302,7 +326,6 @@ const AuthStack = createStackNavigator({
 				    },
 					SignIn: SignInScreen,
 					SignUp: SignUpScreen,
-					InitialSettings: InitialSettingsScreen,
 
 
 				});
