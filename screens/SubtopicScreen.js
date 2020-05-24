@@ -10,6 +10,8 @@ import {
 import { ListItem, SearchBar} from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
+import { _getAuthTokenUserId } from '../constants/Helper.js'
+
 
 const screenWidth =  Dimensions.get('window').width;
 const screenHeight =  Dimensions.get('window').height;
@@ -21,20 +23,7 @@ export default class SubtopicScreen extends React.Component{
     this.state = {
       search:'',
       isLoading: true,
-      subList:[
-        {
-          area_name: 'subsection 1',
-          area_id:'0'
-        },
-        {
-          area_name: 'subsection 2',
-          area_id:'1'
-        },
-        {
-          area_name: 'subsection 3',
-          area_id:'2'
-        },
-      ]
+      subList:[],
     }
   }
 
@@ -42,26 +31,27 @@ export default class SubtopicScreen extends React.Component{
     this.setState({search});
   };
 
-/*
-  componentDidMount(){
-    console.log('hi')
-    return fetch('http://localhost:3000/allAreas/8/abcdefg')
+  //const {areaID} = this.props.route.params
+  async componentDidMount(){
+    const {authToken, userId} = await _getAuthTokenUserId();
+
+    //const path = 'http://10.0.0.188:3000/allBehaviors/8/abcdefg/' + JSON.stringify(areaID)
+    const path = 'http://192.241.153.104:3000/allBehaviors/'+ userID + '/'+ authToken +'/2'
+    return fetch(path)
       .then((response)=>response.json())
       .then((responseJson) =>{
         this.setState({
           isLoading: false,
-          articleList:responseJson
+          subList:responseJson
         })
       })
       .catch((error)=>{
         console.log(error)
       });
   }
-  */
+
   render(){
     const { search } = this.state;
-
-    /*
     if (this.state.isLoading){
       return(
         <View style={styles.container}>
@@ -69,25 +59,13 @@ export default class SubtopicScreen extends React.Component{
         </View>
       )
     } else {
-        let articles = this.state.articleList.map((article,i)=>{
-            return <View key = {i}>
-                    <Text>{article.area_name}</Text>
-                  </View>
-            });
-
-      let articles = this.state.articleList.map((article,i)=>{
-          return <View key = {i} style = {styles.articleContainer}>
-                  <Text>{article.area_name}</Text>
-                </View>
-              });
-              */
         let articles = this.state.subList.map((article,i)=>{
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}
                   onPress={()=> this.props.navigation.navigate('Article')}>
                     <Text style = {styles.buttonText}>
-                        {article.area_name}
+                        {article.behavior_name}
                     </Text>
                   </TouchableOpacity>
                 });
@@ -109,6 +87,7 @@ export default class SubtopicScreen extends React.Component{
       );
     }
   }
+}
 
 SubtopicScreen.navigationOptions = {
   title: 'Subtopics',
