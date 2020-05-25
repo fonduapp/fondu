@@ -29,10 +29,13 @@ export default class ResourcesScreen extends React.Component{
     this.setState({search});
   };
 
-  componentDidMount(){
-    return fetch('http://192.168.2.194:3000/allAreas/8/abcdefg')
+  async componentDidMount(){
+    const {authToken, userId} = await _getAuthTokenUserId();
+
+    return fetch('http://192.241.153.104:3000/allAreas/'+ userId +'/'+ authToken)
       .then((response)=>response.json())
       .then((responseJson) =>{
+        console.log('resources: ' + JSON.stringify(responseJson))
         this.setState({
           isLoading: false,
           articleList:responseJson
@@ -60,9 +63,12 @@ export default class ResourcesScreen extends React.Component{
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}
-                  onPress={()=> this.props.navigation.navigate('Subtopics')}>
+                  onPress={()=> this.props.navigation.navigate('Subtopics', {
+                    areaID: article.area_id,
+                  })
+                }>
                     <Text style = {styles.buttonText}>
-                        {article.area_text}
+                        {article.area_name}
                     </Text>
                   </TouchableOpacity>
                 });
