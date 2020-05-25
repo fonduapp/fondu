@@ -103,9 +103,9 @@ export default class HomeScreen extends Component {
     })
     .then((response) => response.json())
     .then((responseJson) => {
-      console.log('streak' + responseJson[0].streak);
+      //console.log('streak' + responseJson[0].streak);
       this.props.navigation.setParams({
-        streak: responseJson[0].streak,
+        streak: 0//responseJson[0].streak,
       });
     })
     .catch((error) => {
@@ -146,7 +146,7 @@ export default class HomeScreen extends Component {
       body: JSON.stringify(data)
     })
 
-    
+
   }
 
   getInitialAssess() {
@@ -170,7 +170,7 @@ export default class HomeScreen extends Component {
 
     return (
       <View style={this.state.assessmentNotif ? styles.notificationBar : styles.noNotificationBar}>
-            { this.state.assessmentNotif ? 
+            { this.state.assessmentNotif ?
             <TouchableOpacity onPress={() => this.props.navigation.navigate('Assessment')}>
               <Text style={styles.notificationText}>
                   Take your routine assessment now!
@@ -187,7 +187,7 @@ export default class HomeScreen extends Component {
             <View style = {{marginLeft: 30, marginBottom: 30}}>
               <Text>Today</Text>
               <Text style = {{fontSize: 30}}>{date}</Text>
-              
+
             </View>
 
 
@@ -205,7 +205,7 @@ export default class HomeScreen extends Component {
                 showsHorizontalScrollIndicator={false}
                 >
 
-                <ContentModule title = "Affectionate Touch" 
+                <ContentModule title = "Affectionate Touch"
                                onPress={() => this.props.navigation.navigate('Assessment')}
                                style = {{}}
                 />
@@ -239,16 +239,16 @@ export default class HomeScreen extends Component {
       },
       headerTransparent: !navigation.getParam('initialAssessTaken'),
       headerLayoutPreset: 'center',
-      headerTitleStyle: {textAlign:"center", 
+      headerTitleStyle: {textAlign:"center",
                          flex:1,
                          color: navigation.getParam('initialAssessTaken') ? theme.PRIMARY_COLOR : '#FFFFFF',
                          fontWeight: 'bold'},
       headerLeft: (
-                    <TouchableOpacity style={{marginLeft: 25, borderRadius: 50}} 
+                    <TouchableOpacity style={{marginLeft: 25, borderRadius: 50}}
                                       onPress={()=> navigation.navigate('Profile')}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
-                  ), 
+                  ),
       headerTitleContainerStyle: {
         left: 0,
         right:0,
@@ -296,14 +296,14 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    
+
   },
   contentContainer: {
     paddingTop: 5,
     paddingLeft: (width - 300)/3,
     paddingRight: (width - 300)/3,
 
-    
+
   },
   welcomeContainer: {
     marginTop: 10,

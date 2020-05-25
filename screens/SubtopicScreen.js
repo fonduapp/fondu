@@ -33,10 +33,10 @@ export default class SubtopicScreen extends React.Component{
 
   //const {areaID} = this.props.route.params
   async componentDidMount(){
-    const {authToken, userId} = await _getAuthTokenUserId();
+    //const {authToken, userId} = await _getAuthTokenUserId();
 
     //const path = 'http://10.0.0.188:3000/allBehaviors/8/abcdefg/' + JSON.stringify(areaID)
-    const path = 'http://192.241.153.104:3000/allBehaviors/'+ userID + '/'+ authToken +'/2'
+    const path = 'http://192.241.153.104:3000/allBehaviors/2/abcdefg/2'
     return fetch(path)
       .then((response)=>response.json())
       .then((responseJson) =>{

@@ -17,6 +17,8 @@ import {
   Dimensions,
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
+import { createISC, renderText } from '../constants/Helper.js'
+
 
 //import theme from '../styles/theme.style.js';
 const content = '<Section>Support</Section><Subsection>Properly Giving Advice</Subsection><Description>Making sure the advice you give solves the issue, is delivered politely, and is asked for.</Description>'
@@ -76,8 +78,12 @@ export default class ArticleScreen extends Component {
       iscite:[],
       reportProb: false,
       showRef: false,
-    }
-    this.switchScreens.bind(this)
+    };
+    this.switchScreens.bind(this);
+    this.createISC = createISC.bind(this);
+    this.renderText = renderText.bind(this);
+
+
   }
 
 
@@ -107,68 +113,6 @@ export default class ArticleScreen extends Component {
       this.setState({showRef:false});
       console.log("ref state" + this.state.showRef)
     }
-
-/* renderText returns a list of the text within the specified tag*/
-    renderText(content, tag) {
-      let pattern;
-  if (tag == 'descript'){
-    pattern = /<Description>(.*?)<\/Description>/i;
-  }else if (tag == 'example'){
-    pattern = /<Example>(.*?)<\/Example>/i;
-  }else if (tag == 'question'){
-    pattern = /<Question>(.*?)<\/Question>/i;
-  }else if (tag == 'answer'){
-    pattern = /<Answer>(.*?)<\/Answer>/i;
-  }else if (tag == 'theory'){
-    pattern = /<Theory>(.*?)<\/Theory>/i;
-  }else if (tag == 'research'){
-      pattern = /<Research>(.*?)<\/Research>/gi;
-  }else if (tag == 'suggestion'){
-      pattern = /<Suggestion>(.*?)<\/Suggestion>/gi;
-  }else if (tag == 'ref'){
-      pattern = /<Reference>(.*?)<\/Reference>/gi;
-  }else if (tag == 'isc'){
-      pattern = /<isc>(.*?)<\/isc>/gi;
-  }
-  //console.log(tag)
-  //console.log(content.match(pattern))
-  return content.match(pattern);
-}
-
-//parses through text with given tags, and turns the isc into a button
-  createISC(text, tag, endtag){
-    console.log("tag to read\t\t\t"+tag);
-    let result = text.map((res,i) =>{
-      res = res.replace(tag,'');
-      res = res.replace(endtag,'');
-      var x = this.renderText(res, 'isc');
-      var start = 0;
-      if (x){
-      let citations = x.map((cit,i) =>{
-        var index = res.indexOf('<isc>',start);
-        var sub = res.substring(start, index);
-        start = res.indexOf('</isc>') + 6;
-        cit = cit.replace('<isc>','');
-        cit = cit.replace('</isc>','');
-        return <Text style = {{flexDirection: 'row'}}>
-          <Text>{sub}</Text>
-          <Text style = {{fontWeight:"bold"}} onPress={() => this.show()}>{cit}</Text>
-          </Text>
-      });
-      var remaining = res.substring(start);
-      return<Text style = {{flexDirection: 'row'}}>
-        {citations}
-        <Text>{remaining}</Text>
-        </Text>
-      }else{
-        return<Text style = {{flexDirection: 'row'}}>
-          <Text>{res}</Text>
-          </Text>
-      }
-    });
-    return result;
-  }
-
 
     //const {behaviorId} = this.props.route.params
     componentDidMount(){
@@ -263,13 +207,10 @@ export default class ArticleScreen extends Component {
       return <Text>{ref}</Text>
     })
 
-    let a = this.state.Thoery;
-
-    console.log('A\t' + a);
-
-    let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
-    let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
-    let research = this.createISC(this.state.research, '<Research>', '</Research>');
+    var show = false;
+    let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>', show);
+    let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>', show);
+    let research = this.createISC(this.state.research, '<Research>', '</Research>', show);
     let directions = this.state.suggestion.map((dir,i) =>{
       dir = dir.replace('<Suggestion>','');
       dir = dir.replace('</Suggestion>','');
