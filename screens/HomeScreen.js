@@ -38,18 +38,6 @@ if (Platform.OS === 'android') {
 }
 
 
-// _getAuthTokenUserId = async () => {
-//   try {
-//     const authToken = await AsyncStorage.getItem('authToken');
-//     const userId = await AsyncStorage.getItem('userId');
-//     console.log("authToken???" + authToken);
-
-//     return {authToken: authToken, userId: userId};
-//     }catch(error){
-
-//     }
-//   }
-
 export default class HomeScreen extends Component {
   constructor(props) {
     super(props)
@@ -103,9 +91,8 @@ export default class HomeScreen extends Component {
     })
     .then((response) => response.json())
     .then((responseJson) => {
-      console.log('streak' + responseJson[0].streak);
       this.props.navigation.setParams({
-        streak: responseJson[0].streak,
+        streak: responseJson.streak,
       });
     })
     .catch((error) => {
@@ -145,8 +132,10 @@ export default class HomeScreen extends Component {
       },
       body: JSON.stringify(data)
     })
+  }
 
-    
+  async routineAssessComplete(){
+    //TODO
   }
 
   getInitialAssess() {
@@ -206,12 +195,12 @@ export default class HomeScreen extends Component {
                 >
 
                 <ContentModule title = "Affectionate Touch" 
-                               onPress={() => this.props.navigation.navigate('Assessment')}
+                               onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
                                style = {{}}
                 />
-                <ContentModule title = "Play Behaviors" onPress={() => this.props.navigation.navigate('Assessment')} />
-                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment')} />
-                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment')} />
+                <ContentModule title = "Play Behaviors" onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})} />
+                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})} />
+                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})} />
 
 
 

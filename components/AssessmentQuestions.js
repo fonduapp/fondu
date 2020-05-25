@@ -10,114 +10,80 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
-import RadioButton from '../components/RadioButton';
+import QuizRadioButton from '../components/QuizRadioButton';
 import { Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { _getAuthTokenUserId } from '../constants/Helper.js'
+import host from '../constants/Server.js';
+import {textStyle} from '../styles/text.style.js';
 
 
 
 
 const { width, height } = Dimensions.get('window')
-let arrnew = []
-const jsonData = {"quiz" : {
-  "quiz1" : {
-    "question1" : {
-      "correctoption" : "option3",
-      "options" : {
-        "option1" : "Extremely Satisfied",
-        "option2" : "Somewhat Satisfied",
-        "option3" : "Neutral",
-        "option4" : "Somewhat Unsatisfied",
-        "option5" : "Extremely Unsatisfied",
-      },
-      "question" : "How satisfied are you with this relationship?",
-      "description": "Think about how your partner has made you feel during your interactions.",
-      "icon": true,
-    },
-    "question2" : {
-      "correctoption" : "option4",
-      "options" : {
-          "option1" : "XML",
-          "option2" : "YML",
-          "option3" : "HTML",
-          "option4" : "JSX"
-        },
-      "question" : "____ tag syntax is used in React",
-      "icon": false,
-    },
-    "question3" : {
-      "correctoption" : "option1",
-      "options" : {
-          "option1" : "Single root DOM node",
-          "option2" : "Double root DOM node",
-          "option3" : "Multiple root DOM node",
-          "option4" : "None of the above"
-        },
-      "question" : "Application built with just React usually have ____"
-    },
-    "question4" : {
-      "correctoption" : "option2",
-      "options" : {
-          "option1" : "mutable",
-          "option2" : "immutable",
-          "option3" : "variable",
-          "option4" : "none of the above"
-        },
-      "question" : "React elements are ____"
-    },
-    "question5" : {
-      "correctoption" : "option3",
-      "options" : {
-          "option1" : "functions",
-          "option2" : "array",
-          "option3" : "components",
-          "option4" : "json data"
-        },
-      "question" : "React allows to split UI into independent and reusable pieses of ____"
-    }
-  }
-}
-}
+var jsonData = []
 export default class AssessmentQuestions extends Component {
   constructor(props){
     super(props);
     this.qno = 0
     this.score = 0
 
-    const jdata = jsonData.quiz.quiz1
-    arrnew = Object.keys(jdata).map( function(k) { return jdata[k] });
     this.state = {
-      question : arrnew[this.qno].question,
-      description: arrnew[this.qno].description,
-      options : arrnew[this.qno].options,
-      correctoption : arrnew[this.qno].correctoption,
+      question : null,//jsonData[this.qno].text,
+      description: null,//jsonData[this.qno].suggestion,
+      options : [],//jsonData[this.qno].answers,
       countCheck : 0,
-      icon: arrnew[this.qno].icon,
-
     }
+
+  }
+  async componentDidMount(){
+    const {authToken, userId} = await _getAuthTokenUserId();
+
+
+    //Get whether user finished initial assessment
+    console.log('http://'+host+':3000/initial/' + userId + '/' + authToken);
+
+    fetch('http://'+host+':3000/initial/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      jsonData = responseJson
+      //convert json string to json object
+      jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
+      this.setState({question:jsonData[this.qno].text,
+                     description:jsonData[this.qno].suggestion,
+                     options:jsonData[this.qno].answers});
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
 
   }
   prev(){
     if(this.qno > 0){
       this.qno--
-      this.setState({ question: arrnew[this.qno].question, 
-                      options: arrnew[this.qno].options, 
-                      correctoption : arrnew[this.qno].correctoption, 
-                      icon : arrnew[this.qno].icon})
+      this.setState({ question: jsonData[this.qno].text,
+                      description: jsonData[this.qno].suggestion,
+                      options: jsonData[this.qno].answers})
     }
   }
   next(){
-    this.props.updateProgress((this.qno+1)/arrnew.length);
+    this.props.updateProgress((this.qno+1)/jsonData.length);
 
-    if(this.qno < arrnew.length-1){
+    if(this.qno < jsonData.length-1){
       this.qno++
 
       this.setState({ countCheck: 0, 
-                      question: arrnew[this.qno].question, 
-                      options: arrnew[this.qno].options, 
-                      correctoption : arrnew[this.qno].correctoption, 
-                      icon : arrnew[this.qno].icon})
+                      question: jsonData[this.qno].text,
+                      description: jsonData[this.qno].suggestion,
+                      options: jsonData[this.qno].answers})
     }else{
       
       this.props.quizFinish(this.score*100/5)
@@ -134,9 +100,9 @@ export default class AssessmentQuestions extends Component {
       }else{
         const count = this.state.countCheck - 1
         this.setState({ countCheck: count })
-        if(this.state.countCheck < 1 || ans == this.state.correctoption){
-        this.score -= 1
-       }
+       //  if(this.state.countCheck < 1 || ans == this.state.correctoption){
+       //  this.score -= 1
+       // }
       }
 
       let pressStatus = this.state.pressStatus;
@@ -155,38 +121,24 @@ export default class AssessmentQuestions extends Component {
     const options = this.state.options
 
     return (
-      <ScrollView style={{flex:1,}}>
-        <View style={styles.container}>
-
-          <View style={{ flex: 1,flexDirection: 'column', justifyContent: "space-between", alignItems: 'center'}}>
-
-            <View style={styles.questionBox}>
-              <Text style={styles.question}>
-                {this.state.question}
-              </Text>
-              <Text style={styles.description}>
-                {this.state.description}
-              </Text>
-            </View>
-            <View style={{ flex: 1, marginTop: 20}}>
-              <View style={{}}>
-                <RadioButton  options={options}
-                              color = {theme.PRIMARY_COLOR}
-                              updateValue={this.updateValue.bind(this)} 
-                              icon={this.state.icon ? ["sentiment-very-satisfied",null, "sentiment-neutral", null, "sentiment-very-dissatisfied"]
-                                                    : null}/>
-              </View>
-                <View style={{marginTop:30}}>
-                <NextButton title="Next" onPress={() => this.next()}>
-                </NextButton>
-                </View>
-              </View>
-
-
-
+      <>
+      <View style={{backgroundColor:'grey', width: 100, height:100, position:'absolute',top:80, left: 50, zIndex:2}}>
+      </View>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
+          <View>
+            <Text style={[styles.question, textStyle.subheader]}>
+              {this.state.question}
+            </Text>
           </View>
-        </View>
+          <View style={{ marginTop: 20}}>
+            <QuizRadioButton  options={options}
+                          color = {theme.PRIMARY_COLOR}
+                          updateValue={this.updateValue.bind(this)} 
+            />
+          </View>
       </ScrollView>
+      <NextButton title="NEXT >" onPress={() => this.next()} buttonStyle={styles.buttonStyle}/>
+      </>
     );
   }
 }
@@ -194,9 +146,8 @@ export default class AssessmentQuestions extends Component {
 const styles = StyleSheet.create({
 
   question: {
-    fontWeight: 'bold',
     fontSize: 24,
-    color: theme.TERTIARY_COLOR,
+    color: theme.TEXT_COLOR,
   },
   description:{
     marginTop: 5,
@@ -204,29 +155,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontStyle: 'italic',
   },
-  optionsButton:{
-    backgroundColor:theme.PRIMARY_COLOR,
-    borderRadius: 20,
-    paddingLeft:30,
-    paddingRight:30,
-  },
-  optionsButtonSelected:{
-    backgroundColor:'transparent',
-    borderColor: theme.PRIMARY_COLOR,
-    borderWidth: 2,
-    borderRadius: 20,
-    paddingLeft:30,
-    paddingRight:30,
+  buttonStyle:{
+    position:'relative', 
+    top:-45, 
+    alignSelf: 'center', 
+    width: '60%'
+
   },
   optionButtonTextSelected:{
     color: theme.PRIMARY_COLOR,
   },
-  questionBox:{
-    margin: 10,
-  },
+  scrollContainer:{
+    backgroundColor: "white", 
+    margin: 20,
+    marginTop: 30,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+  }
+  ,
   container: {
-    flex: 1,
     alignItems: 'center',
-    padding: 20,
+    padding: 30,
+    paddingTop: 60,
+    flexDirection: 'column', 
   },
 });

@@ -232,7 +232,7 @@ class SignUpScreen extends React.Component {
       </KeyboardAvoidingView>
       :
       <View style={styles.container}>
-        <Text style = {[textstyle.header, styles.headerSpace]}>Let's Get Started </Text>
+        <Text style = {[textStyle.header, styles.headerSpace]}>Let's Get Started </Text>
         <View>
           <Text>What is your relationship status?</Text>
           <Picker
