@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import theme from '../styles/theme.style.js';
+import {textStyle} from '../styles/text.style.js';
 import { Icon } from 'react-native-elements';
 
-export default class RadioButtons extends Component {
+
+export default class QuizRadioButton extends Component {
 	state = {
 		value: null,
 		icon: null,
@@ -22,22 +24,11 @@ export default class RadioButtons extends Component {
 	render() {
 		const { options } = this.props;
 		const { value } = this.state;
-
-
 		return (
 			<View>
-				{Object.keys(options).map((key, index) => {
+				{options.map((item, key) => {
 					return (
-						<View style={{flexDirection:"row", marginBottom: 20}} key={key}>
-							{this.props.icon !=null ?
-								<View style = {{marginRight: 30}}>
-									{this.props.icon[index]!=null ?
-									<Icon name={this.props.icon[index]} size={40} color={this.props.color}/> :
-									<View style={{width:40, height:40}}></View>
-									}
-								</View>
-								: null
-							}
+						<View style={{flexDirection:"row", marginBottom: 10}} key={key}>
 							<View style={styles.buttonContainer}>
 								<TouchableOpacity
 									style={value === key ? styles.optionsButtonSelected : styles.optionsButton }
@@ -46,7 +37,7 @@ export default class RadioButtons extends Component {
 										}
 									}
 								>
-								<Text style={value === key ? styles.optionButtonTextSelected : styles.optionButtonText}>{options[key]}</Text>
+								<Text style={[value === key ? styles.optionButtonTextSelected : styles.optionButtonText, textStyle.paragraph]}>{options[key].answer}</Text>
 								</TouchableOpacity>
 							</View>
 						</View>
@@ -64,28 +55,27 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	optionsButton:{
-	    backgroundColor:theme.PRIMARY_COLOR,
-	    borderRadius: 20,
-	    alignItems: 'center',
-	    width:250,
-	    padding: 10,
-	   	borderColor: theme.PRIMARY_COLOR,
-	    borderWidth: 2,
+	    borderRadius: 16,
+	    width: '100%',
+	    padding: 15,
+	   	borderColor: theme.SECONDARY_COLOR,
+	    borderWidth: 1.5,
 	},
 	optionsButtonSelected:{
-	    backgroundColor:'transparent',
-	    borderColor: theme.PRIMARY_COLOR,
+	    backgroundColor:theme.PRIMARY_COLOR,
+	    width: '100%',
+	    borderColor:'transparent',
 	    borderWidth: 2,
-	    borderRadius: 20,
-	    alignItems: 'center',
-	    width:250,
-	    padding: 10,
+	    borderRadius: 16,
+	    padding: 15,
 
 	},
 	optionButtonText:{
-		color: 'white',
+		color: theme.TEXT_COLOR,
+		opacity: 0.7
+		
 	},
 	optionButtonTextSelected:{
-	    color: theme.PRIMARY_COLOR,
+	    color: "white",
 	},
 });

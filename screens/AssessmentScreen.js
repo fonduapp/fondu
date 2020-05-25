@@ -58,13 +58,13 @@ export default class AssessmentScreen extends Component{
         return (
         <View style={styles.darkContainer}>
 
-          <ProgressNavBar navigation={navigation}/>
+          <ProgressNavBar navigation={navigation} color={theme.TEXT_COLOR}/>
           <View style={styles.startScreen}>
               <View style={styles.mainImageContainer}>
               </View>
               <View style={{flexDirection: 'row', marginBottom: 5}}>
-                <Icon name="access-time" color="white" size={17}/>
-                <Text style={{color:'white', marginBottom:5, marginLeft:5, fontSize:13 }}>
+                <Icon name="access-time" color={theme.TEXT_COLOR} size={17}/>
+                <Text style={{color:theme.TEXT_COLOR, marginBottom:5, marginLeft:5, fontSize:13 }}>
                   ~15 minutes
                 </Text>
               </View>
@@ -73,10 +73,10 @@ export default class AssessmentScreen extends Component{
                 <NextButton 
                 onPress={() => this._startQuiz()} 
                 title="Get Started"/>
-                <Text style={{color:'white', fontWeight:'bold', fontSize:15, marginTop: 30}}>
+                <Text style={{color:theme.TEXT_COLOR, fontWeight:'bold', fontSize:15, marginTop: 30}}>
                   Why should I take this assessment?
                 </Text>
-                <Text style={{color:'white', marginTop: 15, fontSize:15, lineHeight: 20,}}>
+                <Text style={{color:theme.TEXT_COLOR, marginTop: 15, fontSize:15, lineHeight: 20,}}>
                 This purpose of this short assessment is to allow us to 
                 better understand your relationship behaviors and relationship 
                 health so that we can figure out how to best help you.
@@ -92,7 +92,7 @@ export default class AssessmentScreen extends Component{
         <View style={[styles.startScreen, styles.darkContainer]}>
             <View style={styles.mainImageContainer}>
             </View>
-              <Text style={{color:'white', fontWeight:'bold', fontSize:25,}}>
+              <Text style={{color:theme.TEXT_COLOR, fontWeight:'bold', fontSize:25,}}>
                 Congrats, you did it!
               </Text>
               <Text style={styles.startEndParagraph}>
@@ -109,7 +109,7 @@ export default class AssessmentScreen extends Component{
 
       case 'quiz':
         return (
-          <View style = {{flex:1}}>
+          <View style={[styles.darkContainer]}>
             <ProgressNavBar color={theme.PRIMARY_COLOR} navigation={navigation} progress={this.state.progress}/>
             <AssessmentQuestions quizFinish={(score) => this._quizFinish(score)} 
                                  updateProgress={(progress) => this._updateProgress(progress)}
@@ -199,15 +199,16 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-
-
   },
   darkContainer: {
     flex: 1,
-    backgroundColor:theme.PRIMARY_COLOR_7,
+    backgroundColor:theme.SECONDARY_COLOR,
+  },
+  headerText:{
+    color:theme.TEXT_COLOR,
   },
   startEndParagraph:{
-    color:'white', 
+    color:theme.TEXT_COLOR, 
     marginTop: 15,
     marginBottom: 20,
     fontSize:15, 

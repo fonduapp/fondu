@@ -21,13 +21,20 @@ export default class ContentModule extends Component {
                 <NextButton
                     onPress={this.props.onPress} 
                     title="Let's start"
-                    buttonStyle = {{ position:'relative', top:-30, alignSelf: 'center', backgroundColor: theme.PRIMARY_COLOR, width: '60%'}}/>
+                    buttonStyle = {styles.buttonStyle}/>
             </View>
 		);
 	}
 }
 
 const styles = StyleSheet.create({
+	buttonStyle:{
+		position:'relative', 
+		top:-40, alignSelf: 'center', 
+		backgroundColor: theme.PRIMARY_COLOR, 
+		width: '60%'
+
+	},
 	outerProgressBar:{
 		backgroundColor:'lightgray',
 		height:15,

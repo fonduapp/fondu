@@ -9,9 +9,10 @@ export default {
   PRIMARY_COLOR_5: '#FF998E', // medium red
   PRIMARY_COLOR_6: '#FF7d71', // dark red
   PRIMARY_COLOR_7: '#ABA9FF', //blue
-  SECONDARY_COLOR: '#EFEFFF', //beige
+  SECONDARY_COLOR: '#F3F4Fc', //off-white
   SECONDARY_COLOR_2: '#BDCCFF', //beige
-  TERTIARY_COLOR: '#475279', //dark blue
+  TEXT_COLOR: '#475279', //dark blue
+
   FONT_WEIGHT_LIGHT: 200,
   FONT_WEIGHT_MEDIUM: 600,
   FONT_WEIGHT_HEAVY: 800
