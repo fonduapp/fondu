@@ -3,6 +3,8 @@ import { useState } from 'react';
 
 import DropDownItem from 'react-native-drop-down-item';
 import Modal from 'react-native-modal';
+import ReferencePopUp from '../components/ReferencePopUp';
+
 import {
   Image,
   Platform,
@@ -85,7 +87,6 @@ export default class ArticleScreen extends Component {
 
 
   }
-
 
     _showDirections(){
       this.setState({ screen: 'direction'})
@@ -201,16 +202,10 @@ export default class ArticleScreen extends Component {
   }
 
   render(){
-    let references = this.state.reference.map((ref,i) =>{
-      ref = ref.replace('<Reference>', '');
-      ref = ref.replace('</Reference>', '');
-      return <Text>{ref}</Text>
-    })
-
-    var show = false;
-    let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>', show);
-    let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>', show);
-    let research = this.createISC(this.state.research, '<Research>', '</Research>', show);
+    //console.log("setState" + this.state.showRef);
+    let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
+    let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
+    let research = this.createISC(this.state.research, '<Research>', '</Research>');
     let directions = this.state.suggestion.map((dir,i) =>{
       dir = dir.replace('<Suggestion>','');
       dir = dir.replace('</Suggestion>','');
@@ -231,6 +226,7 @@ export default class ArticleScreen extends Component {
         </DropDownItem>
     });
   return(
+
     <View>
     <ScrollView style ={{height: Dimensions.get('window').height}}>
 
@@ -258,16 +254,11 @@ export default class ArticleScreen extends Component {
               <Text>Report a Problem</Text>
         </TouchableOpacity>
 
-        <Modal
-        style = {styles.modalContainer}
-        isVisible = {this.state.showRef}
-        onBackdropPress={()=>this.hide()}
->
-          <View>
-            <Text style={[styles.problemText,{fontSize: 18, textAlign:'center'}]}>{references}</Text>
-          </View>
-        </Modal>
-
+        <ReferencePopUp
+          showRef = {this.state.showRef}
+          refs = {this.state.reference}
+          hide ={this.hide}
+          />
 
         <Modal
         style = {styles.modalContainer}

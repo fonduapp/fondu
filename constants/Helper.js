@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {
   AsyncStorage,
   Text,
+  View,
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
 
@@ -76,6 +77,7 @@ export function createISC(text, tag, endtag){
             <Text style = {{fontWeight:"bold"}} onPress={() => this.setState({showRef:true})}>{cit}</Text>
             </Text>
         });
+
         var remaining = res.substring(start);
         return<Text style = {{flexDirection: 'row'}}>
           {citations}
