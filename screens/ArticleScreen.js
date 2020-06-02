@@ -4,6 +4,7 @@ import { useState } from 'react';
 import DropDownItem from 'react-native-drop-down-item';
 import Modal from 'react-native-modal';
 import ReferencePopUp from '../components/ReferencePopUp';
+import ReportProbPopUp from '../components/ReportProbPopUp';
 
 import {
   Image,
@@ -84,33 +85,23 @@ export default class ArticleScreen extends Component {
     this.switchScreens.bind(this);
     this.createISC = createISC.bind(this);
     this.renderText = renderText.bind(this);
-
-
   }
 
     _showDirections(){
       this.setState({ screen: 'direction'})
     }
-
     _showResearch(){
       this.setState({ screen:'research' })
     }
-
     showProbReport = () => {
       this.setState({reportProb:true});
       console.log("problem state" + this.state.reportProb)
-
     }
     hideProbReport = () => {
       this.setState({reportProb:false});
       console.log("problem state" + this.state.reportProb)
     }
-//show and hide reference popup
-    show = () => {
-      this.setState({showRef:true});
-      console.log("ref state" + this.state.showRef)
-    }
-    hide = () => {
+    hideReferences = () => {
       this.setState({showRef:false});
       console.log("ref state" + this.state.showRef)
     }
@@ -118,7 +109,7 @@ export default class ArticleScreen extends Component {
     //const {behaviorId} = this.props.route.params
     componentDidMount(){
       const info_path = 'http://192.241.153.104:3000/behavior/2/abcdefg/1/'
-      const rarticle_path = 'http://192.241.153.104:3000/relatedBehaviors/2/abcdefg/5'
+      const rarticle_path = 'http://192.241.153.104:3000/relatedBehaviors/2/abcdefg/2'
 
       return fetch('http://192.241.153.104:3000/behavior/2/abcdefg/1/')
         .then((response)=>response.json())
@@ -138,6 +129,8 @@ export default class ArticleScreen extends Component {
         fetch(rarticle_path)
           .then((response)=>response.json())
           .then((responseJson) =>{
+            console.log("Article " + responseJson);
+
           this.setState({
             isLoading:false,
             article1:responseJson.name,
@@ -202,7 +195,6 @@ export default class ArticleScreen extends Component {
   }
 
   render(){
-    //console.log("setState" + this.state.showRef);
     let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
     let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
     let research = this.createISC(this.state.research, '<Research>', '</Research>');
@@ -250,38 +242,20 @@ export default class ArticleScreen extends Component {
 
       <View>
       <TouchableOpacity
-            onPress={()=>probscreen.showProbReport()}>
+            onPress={()=>this.showProbReport()}>
               <Text>Report a Problem</Text>
         </TouchableOpacity>
 
         <ReferencePopUp
           showRef = {this.state.showRef}
           refs = {this.state.reference}
-          hide ={this.hide}
+          hide ={this.hideReferences}
           />
 
-        <Modal
-        style = {styles.modalContainer}
-        isVisible = {this.state.reportProb}
-        onBackdropPress={()=>this.hideProbReport()}
->
-          <View>
-            <Text style={[styles.problemText,{fontSize: 18, textAlign:'center'}]}>Report a Problem</Text>
-            <Text style={styles.problemText}>Description</Text>
-            <TextInput
-            style = {styles.problemInput}
-            multiline
-            numberOfLines={6}
-            />
-            <TouchableOpacity
-            style = {styles.submitButton}>
-              <Text style = {{fontWeight:'bold', color:'#FFFFFF'}}>Submit</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-        </View>
-
-        <View>
+        <ReportProbPopUp
+          isVisible = {this.state.reportProb}
+          hide ={this.hideProbReport}
+        />
         <Text style = {styles.headerLabel}>Related Articles</Text>
         <View style = {styles.welcomeContainerContainer}>
             <View style = {styles.relatedArticle}>
@@ -339,7 +313,6 @@ const styles = StyleSheet.create({
     paddingRight:25,
 
   },
-
   containerTitle:{
     flex: 1,
     color: '#7695FF',
@@ -464,52 +437,4 @@ const styles = StyleSheet.create({
     paddingTop: mainPadding,
     color: '#475279',
   },
-
-  //problem report pop up styling
-  problemText:{
-    color: '#7B80FF',
-    fontWeight:'bold',
-    fontSize: 16,
-    lineHeight:20,
-    marginBottom:20,
-
-  },
-
-  problemInput:{
-    backgroundColor:'#EAEEFF',
-    borderRadius: 10,
-    padding:width/16,
-    paddingTop:width/16,
-
-    textAlignVertical: "top",
-    height: width*5/12,
-    justifyContent:'flex-start',
-
-  },
-  modalContainer:{
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingLeft:width/16,
-    paddingRight:width/16,
-    paddingTop: width/16,
-    width: width*3/4,
-    maxHeight: height*1/2,
-    top: height/4,
-    left: width*1/8,
-    justifyContent:'flex-start'
-  },
-
-  submitButton:{
-    backgroundColor: '#7B80FF',
-    borderRadius:50,
-    justifyContent:'center',
-    marginTop:15,
-    padding:5,
-    paddingLeft:20,
-    paddingRight:20,
-    alignSelf:'flex-end',
-  },
-
-
-
 },);
