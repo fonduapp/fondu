@@ -32,10 +32,10 @@ class LandingScreen extends React.Component {
     return (
       <View style={styles.container}>
       	<Text style={[textStyle.title, styles.headerSpace]}>fondu</Text>
-        <NextButton title="Sign In" 
-        			onPress={() => this.props.navigation.navigate('SignIn')} 
+        <NextButton title="Sign In"
+        			onPress={() => this.props.navigation.navigate('SignIn')}
         			buttonStyle = {{marginBottom:28, backgroundColor: theme.PRIMARY_COLOR}}/>
-        <NextButton title="Sign Up" 
+        <NextButton title="Sign Up"
         			onPress={() => this.props.navigation.navigate('SignUp')}
         			buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
         <TouchableOpacity><Text style = {{color:'white'}}>Forgot password?</Text></TouchableOpacity>
@@ -121,7 +121,7 @@ class SignInScreen extends React.Component {
       console.error(error);
     });
 
-    
+
   };
 }
 
@@ -184,7 +184,7 @@ class SignUpScreen extends React.Component {
   render() {
     return (
       <>
-      { this.state.screen==0 ? 
+      { this.state.screen==0 ?
       <KeyboardAvoidingView style={styles.container} behavior="padding">
       	<Text style = {[textStyle.header, styles.headerSpace, {marginBottom: '20%'}]}>Create Account</Text>
         <Input
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
 });
 
 // const AppStack = createStackNavigator({ Home: HomeScreen, Other: OtherScreen });
-const AuthStack = createStackNavigator({ 
+const AuthStack = createStackNavigator({
 					Landing: {
 				      screen: LandingScreen,
 				      navigationOptions: {

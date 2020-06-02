@@ -30,9 +30,11 @@ export default class ResourcesScreen extends React.Component{
   };
 
   async componentDidMount(){
-    const {authToken, userId} = await _getAuthTokenUserId();
+    //const {authToken, userId} = await _getAuthTokenUserId();
+    //console.log('userid ' + userId + "\t authToken " + authToken);
 
-    return fetch('http://192.241.153.104:3000/allAreas/'+ userId +'/'+ authToken)
+
+    return fetch('http://192.241.153.104:3000/allAreas/2/abcdefg')
       .then((response)=>response.json())
       .then((responseJson) =>{
         console.log('resources: ' + JSON.stringify(responseJson))
