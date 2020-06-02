@@ -64,6 +64,7 @@ export default class AssessmentQuestions extends Component {
       jsonData = responseJson
       //convert json string to json object
       jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
+      this.shuffleArray(jsonData[this.qno].answers)
       this.setState({question:jsonData[this.qno].text,
                      description:jsonData[this.qno].suggestion,
                      options:jsonData[this.qno].answers,
@@ -76,6 +77,22 @@ export default class AssessmentQuestions extends Component {
 
 
   }
+  shuffleArray(arr){
+    var ctr = arr.length, temp, index;
+
+// While there are elements in the array
+    while (ctr > 0) {
+// Pick a random index
+        index = Math.floor(Math.random() * ctr);
+// Decrease ctr by 1
+        ctr--;
+// And swap the last element with it
+        temp = arr[ctr];
+        arr[ctr] = arr[index];
+        arr[index] = temp;
+    }
+  }
+
   prev(){
     if(this.qno > 0){
       this.qno--
@@ -111,6 +128,7 @@ export default class AssessmentQuestions extends Component {
 
     if(this.qno < jsonData.length-1){
       this.qno++
+      this.shuffleArray(jsonData[this.qno].answers)
 
       this.setState({ countCheck: 0,
                       question: jsonData[this.qno].text,
