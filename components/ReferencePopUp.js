@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import DropDownItem from 'react-native-drop-down-item';
 import Modal from 'react-native-modal';
+
 import {
   Image,
   Platform,

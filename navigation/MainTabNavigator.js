@@ -11,6 +11,7 @@ import SubtopicScreen from '../screens/SubtopicScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ArticleScreen from '../screens/ArticleScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import CalenderScreen from '../screens/CalenderScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
@@ -85,7 +86,8 @@ ResourcesStack.path = '';
 
 const CalendarStack = createStackNavigator(
   {
-    Settings: SettingsScreen,
+    Calendar: CalenderScreen,
+    //Settings: SettingsScreen,
   },
   config
 );
