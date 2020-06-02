@@ -6,18 +6,23 @@ const textStyle = StyleSheet.create({
   },
   header: {
   	fontSize:36, 
-  	fontWeight: 'bold', 
-  	// fontFamily: "Poppins_700Bold", 
+  	fontFamily: 'poppins-bold',
+  	fontSize: 24,
+  },
+  caption:{
+  	fontFamily: 'poppins-medium',
+  	fontSize: 13,
   },
   subheader:{
   	fontFamily: 'poppins-bold',
-  	fontSize: 20,
+  	fontSize: 15,
   },
   subtitle:{
   	fontFamily: 'poppins-medium',
   },
   paragraph: {
-  	fontFamily: 'poppins-medium', 
+  	fontFamily: 'poppins-medium',
+  	fontSize: 14,
   }
 
 })

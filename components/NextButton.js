@@ -2,16 +2,18 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import theme from '../styles/theme.style.js';
 import { Button } from 'react-native-elements';
+import {textStyle} from '../styles/text.style.js';
 
 
 export default class NextButton extends Component {
 	render() {
 		return (
       <TouchableOpacity 
+        disabled = {this.props.disabled}
         onPress={() => this.props.onPress()}
         style={[styles.nextButton, this.props.buttonStyle]} 
       >
-      <Text style={styles.nextButtonTitle}>{this.props.title}</Text>
+      <Text style={[styles.nextButtonTitle]}>{this.props.title}</Text>
       </TouchableOpacity>
 		);
 	}
@@ -40,8 +42,8 @@ const styles = StyleSheet.create({
   },
   nextButtonTitle:{
     fontSize: 14,
-    fontWeight: 'bold',
     color: 'white',
-    textAlign: 'center'
+    textAlign: 'center',
+    fontFamily: 'poppins-bold'
   },
 });

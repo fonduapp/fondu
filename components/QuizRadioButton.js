@@ -5,7 +5,7 @@ import {textStyle} from '../styles/text.style.js';
 import { Icon } from 'react-native-elements';
 
 
-export default class QuizRadioButton extends Component {
+class QuizRadioButton extends Component {
 	state = {
 		value: null,
 		icon: null,
@@ -47,6 +47,41 @@ export default class QuizRadioButton extends Component {
 		);
 	}
 }
+
+class QuizButton extends Component {
+	state = {
+		value: null,
+		icon: null,
+	};
+
+	constructor(props) {
+		super(props);
+		this.updateValue = this.updateValue.bind(this);
+		this.state={icon:this.props.icon};
+	}
+
+	updateValue(key) {
+		this.props.updateValue(key);
+		this.setState({value: key,});
+	}
+
+	render() {
+		const { option} = this.props;
+		const { value } = this.state;
+		return (
+			<View>
+				<View style={{flexDirection:"row", marginBottom: 10}}>
+					<View style={[ styles.optionsButtonSelected, {backgroundColor: option.exp === 10 ? theme.CORRECT_COLOR : theme.INCORRECT_COLOR}]}>
+						<Text style={[styles.optionButtonTextSelected, textStyle.paragraph]}>{option.answer}</Text>
+					</View>
+				</View>
+
+			</View>
+		);
+	}
+}
+
+export {QuizRadioButton, QuizButton}
 
 const styles = StyleSheet.create({
 	buttonContainer: {

@@ -44,7 +44,7 @@ export default class HomeScreen extends Component {
     this.state = {
       scrollBarValue: new Animated.Value(0),
       assessmentNotif: false, // toggle to determine whether assessment is ready
-      initialAssessReady: false,
+      initialAssessReady: true,
       initialAssessTaken: false,
 
     };
@@ -59,26 +59,24 @@ export default class HomeScreen extends Component {
 
 
     //Get whether user finished initial assessment
-    console.log('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken);
-
-    fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      this.setState({initialAssessTaken:responseJson.finished_initial});
-      this.props.navigation.setParams({
-        initialAssessTaken: responseJson.finished_initial,
-      });
-      this.setState({initialAssessReady:true});
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    // fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
+    //   method: 'GET',
+    //   headers: {
+    //     Accept: 'application/json',
+    //     'Content-Type': 'application/json',
+    //   },
+    // })
+    // .then((response) => response.json())
+    // .then((responseJson) => {
+    //   this.setState({initialAssessTaken:responseJson.finished_initial});
+    //   this.props.navigation.setParams({
+    //     initialAssessTaken: responseJson.finished_initial,
+    //   });
+    //   this.setState({initialAssessReady:true});
+    // })
+    // .catch((error) => {
+    //   console.error(error);
+    // });
 
     //Get Streak
 
