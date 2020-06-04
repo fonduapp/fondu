@@ -25,7 +25,9 @@ export default class ArticleScreen extends Component {
       isCollapsed:true,
       screen:'closed',
       mood:[0,0,0,0,0],
+      markedDates:{},
     };
+
     }
     open = () => {
       this.setState({screen:'open'});
@@ -47,6 +49,31 @@ export default class ArticleScreen extends Component {
         }
       }
 
+      selectDate = (day, value) => {
+        let markedDates = {...this.state.markedDates,...{ [day.dateString]: { value} } }
+        console.log('pressed dates1' + day.dateString)
+        //markedDates[day.dateString] =  2;
+        console.log('pressed dates2' + markedDates[day.dateString])
+
+        this.setState({markedDates:markedDates});
+        console.log('pressed dates3' + this.state.markedDates)
+      }
+
+      onDaySelect = (day) => {
+            const _selectedDay = day.dateString;
+
+            let marked = true;
+            if (this.state.markedDates[_selectedDay]) {
+              // Already in marked dates, so reverse current marked state
+              marked = !this.state.markedDates[_selectedDay].marked;
+            }
+            // Create a new object using object property spread since it should be immutable
+            // Reading: https://davidwalsh.name/merge-objects
+            const updatedMarkedDates = {...this.state.markedDates, ...{ [_selectedDay]: {customStyles:{container: {backgroundColor: '#7B80FF', borderRadius:100},}}}}
+            console.log(this.state.markedDates)
+            // Triggers component to render again, picking up the new state
+            this.setState({ markedDates: updatedMarkedDates });
+        }
 
     switchScreens=(moods)=>{
       switch(this.state.screen){
@@ -57,7 +84,7 @@ export default class ArticleScreen extends Component {
             style = {styles.closedContainer}
             onPress={()=>this.open()}>
             <View>
-            <Text style = {styles.titleText}>hihihihihihihihihihih</Text>
+            <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             </View>
             </TouchableOpacity>
             </View>
@@ -67,7 +94,7 @@ export default class ArticleScreen extends Component {
           return(
             <View style = {styles.openContainer}>
 
-            <Text style = {styles.titleText}>hihihihihihihihihihih</Text>
+            <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             <View style={styles.moodButtonContainer}>
               {moods}
             </View>
@@ -95,8 +122,7 @@ export default class ArticleScreen extends Component {
       return(
         <View>
         <Calendar
-  onDayPress={(day) => {console.log('selected day', day)}}
-  onDayLongPress={(day) => {console.log('selected day', day)}}
+  onDayPress={this.onDaySelect}
   monthFormat={'yyyy MM'}
   onMonthChange={(month) => {console.log('month changed', month)}}
   hideArrows={false}
@@ -109,6 +135,8 @@ export default class ArticleScreen extends Component {
   onPressArrowRight={addMonth => addMonth()}
   disableArrowLeft={false}
   disableArrowRight={false}
+  markedDates ={this.state.markedDates}
+  markingType={'custom'}
 />
   {this.switchScreens(moods)}
   </View>
@@ -159,6 +187,10 @@ const styles = StyleSheet.create({
       width:width/10,
       borderRadius: 50,
       alignSelf:'center',
+    },
+    selectedStyle:{
+        backgroundColor:'#FF0000',
+        borderRadius:100,
     },
 
     moodButtonContainer:{
