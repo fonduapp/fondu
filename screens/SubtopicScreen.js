@@ -70,7 +70,7 @@ export default class SubtopicScreen extends React.Component{
                   </TouchableOpacity>
                 });
         return(
-          <View>
+          <>
           <SearchBar
             containerStyle = {styles.searchContainer}
             inputContainerStyle = {{backgroundColor:"#D4D3FF"}}
@@ -83,7 +83,7 @@ export default class SubtopicScreen extends React.Component{
           <View style = {styles.container}>
             {articles}
         </View>
-        </View>
+        </>
       );
     }
   }

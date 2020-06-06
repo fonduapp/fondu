@@ -76,7 +76,7 @@ export default class ResourcesScreen extends React.Component{
                 });
 
         return(
-          <View style = {styles.container}>
+          <>
           <SearchBar
             containerStyle = {styles.searchContainer}
             inputContainerStyle = {{backgroundColor:"#D4D3FF"}}
@@ -88,6 +88,7 @@ export default class ResourcesScreen extends React.Component{
           />
             {articles}
         </View>
+        </>
       );
     }
   }

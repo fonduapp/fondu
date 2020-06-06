@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Text, View, StatusBar } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, StatusBar, Image } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
 import AssessmentQuestions  from '../components/AssessmentQuestions';
 import theme from '../styles/theme.style.js';
 import { Button, Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
 import ProgressNavBar from '../components/NavBar';
+import {textStyle} from '../styles/text.style.js';
+import { _getAuthTokenUserId } from '../constants/Helper.js'
+import host from '../constants/Server.js';
+
 
 export default class AssessmentScreen extends Component{
 
@@ -18,6 +22,9 @@ export default class AssessmentScreen extends Component{
       score: 0,
       progress:0,
       assessmentType: JSON.stringify(navigation.getParam('assessmentType','none')),// initial, routine, relationship, none
+      questionDone:false,
+      questionRight: false,
+      recArea:'nothing',
     }
     this.assessmentScreen.bind(this);
     navigation.state.params.assessmentComplete.bind(this);
@@ -30,6 +37,11 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen:'finish', score : score })
   }
 
+  _questionFinish(result, check){
+    this.setState({questionRight: result})
+    this.setState({questionDone:check})
+  }
+
   _updateProgress(progress){
 
     this.setState({ progress: progress})
@@ -39,7 +51,28 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen: 'streak'})
   }
 
-  _seeResults(){
+  async _seeResults(){
+    const {authToken, userId} = await _getAuthTokenUserId();
+
+    //find recommended behavior
+    console.log('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken)
+    fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({
+        recArea: responseJson.area_id,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
     this.setState({ screen:'result' })
   }
 
@@ -64,7 +97,7 @@ export default class AssessmentScreen extends Component{
               </View>
               <View style={{flexDirection: 'row', marginBottom: 5}}>
                 <Icon name="access-time" color={theme.TEXT_COLOR} size={17}/>
-                <Text style={{color:theme.TEXT_COLOR, marginBottom:5, marginLeft:5, fontSize:13 }}>
+                <Text style={[{color:theme.TEXT_COLOR, marginBottom:5, marginLeft:5,},textStyle.caption]}>
                   ~15 minutes
                 </Text>
               </View>
@@ -73,10 +106,10 @@ export default class AssessmentScreen extends Component{
                 <NextButton 
                 onPress={() => this._startQuiz()} 
                 title="Get Started"/>
-                <Text style={{color:theme.TEXT_COLOR, fontWeight:'bold', fontSize:15, marginTop: 30}}>
+                <Text style={[{color:theme.TEXT_COLOR, marginTop: 30},textStyle.subheader]}>
                   Why should I take this assessment?
                 </Text>
-                <Text style={{color:theme.TEXT_COLOR, marginTop: 15, fontSize:15, lineHeight: 20,}}>
+                <Text style={[{color:theme.TEXT_COLOR, marginTop: 15, lineHeight: 20, opacity: 0.5},textStyle.paragraph]}>
                 This purpose of this short assessment is to allow us to 
                 better understand your relationship behaviors and relationship 
                 health so that we can figure out how to best help you.
@@ -92,83 +125,63 @@ export default class AssessmentScreen extends Component{
         <View style={[styles.startScreen, styles.darkContainer]}>
             <View style={styles.mainImageContainer}>
             </View>
-              <Text style={{color:theme.TEXT_COLOR, fontWeight:'bold', fontSize:25,}}>
-                Congrats, you did it!
-              </Text>
-              <Text style={styles.startEndParagraph}>
-              By taking this assessment routinely, we’re able to better assess 
-              your relationship health and behaviors and inform you of healthy 
-              next steps!
-              </Text>
-              <NextButton 
-              onPress={() => this._seeStreaks()} 
-              title="Next"></NextButton>
+            <Text style={[textStyle.header, {color:theme.TEXT_COLOR}]}>
+              Congrats, you did it!
+            </Text>
+            <Text style={[textStyle.paragraph,{marginTop:30, marginBottom: 15, opacity: 0.5}]}>
+            By taking this assessment routinely, we’re able to better assess 
+            your relationship health and behaviors and inform you of healthy 
+            next steps!
+            </Text>
+            <NextButton 
+            onPress={() => this._seeStreaks()} 
+            title="Next"/>
 
         </View> 
         );
 
       case 'quiz':
         return (
-          <View style={[styles.darkContainer]}>
+          <View style={this.state.questionDone ? (this.state.questionRight? styles.correctContainer : styles.incorrectContainer) : styles.darkContainer}>
+
             <ProgressNavBar color={theme.PRIMARY_COLOR} navigation={navigation} progress={this.state.progress}/>
-            <AssessmentQuestions quizFinish={(score) => this._quizFinish(score)} 
+            <AssessmentQuestions quizFinish={(score) => this._quizFinish(score)}
+                                 questionFinish={(result,check) => this._questionFinish(result,check)}
                                  updateProgress={(progress) => this._updateProgress(progress)}
                                  assessmentType = {this.state.assessmentType}
                                  />
           </View>
         );
       case 'streak':
-        setTimeout(this._exitAssessment.bind(this), 1000);
+        setTimeout(this._seeResults.bind(this), 1000);
         return (
         <View style={[styles.startScreen, styles.darkContainer]}>
-            <View style={{marginLeft:70, marginRight:70, marginTop: 40, marginBottom: 40}}>
-              <Text style={{color:'white', fontWeight:'bold', fontSize:25,}}>
+            <Image source = {require('../assets/images/streak-fire.png')} style={{width: 120, height: 120}}/>
+            <Text style={[{marginLeft:70, marginRight:70, marginTop: 40}, textStyle.header,{color:theme.TEXT_COLOR}]}>
                 Streak +1
-              </Text>
-            </View>
-            <View style={styles.mainImageContainer}>
-            </View>
-
+            </Text>
         </View> 
         );
       case 'result':
         return (
         <View style={[styles.startScreen, styles.darkContainer]}>
-            <View style={{flex:1, 
-                    marginLeft:50, 
-                    marginRight:50, 
-                    marginTop: 100, 
-                    marginBottom: 100, 
-                    backgroundColor: 'white', 
-                    borderRadius:40,
-                    padding: 35,
-                  }}>
-              <Text style={{color:theme.PRIMARY_COLOR, fontWeight:'bold', fontSize:25,}}>
-                Here are your results compared to previous weeks.
-              </Text>
-              <View style={{flex:1, flexDirection:'column', justifyContent:'center', marginTop:40, marginBottom: 40}}>
-                <View style={{flex:1, flexDirection:'row'}}>
-                  <Icon name='arrow-upward' color = {theme.PRIMARY_COLOR} size ={40}/>
-                  <Text style={{color:theme.PRIMARY_COLOR, fontWeight:'bold', fontSize:25, marginRight: 20}}>10%</Text>
-                  <Text style={{color:theme.PRIMARY_COLOR, fontWeight:'bold', fontSize:25,}}>Topic 1</Text>
-                </View>
-                <View style={{flex:1, flexDirection:'row'}}>
-                  <Icon name='arrow-downward' color = {theme.PRIMARY_COLOR_6} size ={40}/>
-                  <Text style={{color:theme.PRIMARY_COLOR_6, fontWeight:'bold', fontSize:25, marginRight: 20}}>10%</Text>
-                  <Text style={{color:theme.PRIMARY_COLOR_6, fontWeight:'bold', fontSize:25,}}>Topic 1</Text>
-                </View>
-                <View style={{flex:1, flexDirection:'row'}}>
-                  <Icon name='arrow-downward' color = {theme.PRIMARY_COLOR_6} size ={40}/>
-                  <Text style={{color:theme.PRIMARY_COLOR_6, fontWeight:'bold', fontSize:25, marginRight: 20}}>10%</Text>
-                  <Text style={{color:theme.PRIMARY_COLOR_6, fontWeight:'bold', fontSize:25,}}>Topic 1</Text>
-                </View>
-
-              </View>
-
-              <NextButton 
-              onPress={() => this._exitAssessment()} 
-              title="I'm ready to improve!"></NextButton>
+            <Text style={[textStyle.header, {color:theme.TEXT_COLOR, alignSelf:'flex-start'}]}>
+              Your Results
+            </Text>
+            <Text style={[textStyle.paragraph, {color:theme.TEXT_COLOR}]}>
+              Based on the results of this assessment, we have calculated areas that you should focus on a bit more on and areas that you are already excelling at.
+            </Text>
+            <View style={styles.mainImageContainer}>
             </View>
+            <Text style={[textStyle.caption, {color:theme.TEXT_COLOR}]}>
+              YOUR RECOMMENDED FOCUS
+            </Text>
+            <Text style={[textStyle.header, {color:theme.PRIMARY_COLOR_6}]}>
+              {this.state.recArea}
+            </Text>
+            <NextButton 
+            onPress={() => this._exitAssessment()} 
+            title="Next"/>
 
         </View> 
         );
@@ -203,6 +216,14 @@ const styles = StyleSheet.create({
   darkContainer: {
     flex: 1,
     backgroundColor:theme.SECONDARY_COLOR,
+  },
+  correctContainer: {
+    flex: 1,
+    backgroundColor: theme.CORRECT_COLOR_BG,
+  },
+  incorrectContainer: {
+    flex: 1,
+    backgroundColor: theme.INCORRECT_COLOR_BG,
   },
   headerText:{
     color:theme.TEXT_COLOR,

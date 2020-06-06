@@ -6,11 +6,12 @@ import {
   View,
   Dimensions,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  Image
 } from 'react-native';
 import { Button } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
-import QuizRadioButton from '../components/QuizRadioButton';
+import {QuizRadioButton, QuizButton} from '../components/QuizRadioButton';
 import { Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
@@ -30,10 +31,15 @@ export default class AssessmentQuestions extends Component {
     this.score = 0
 
     this.state = {
-      question : null,//jsonData[this.qno].text,
-      description: null,//jsonData[this.qno].suggestion,
-      options : [],//jsonData[this.qno].answers,
+      question : null,
+      description: null,
+      options : [],
+      questionId: 0,
       countCheck : 0,
+      qFeedback: false,
+      selectedOption:-1,
+      authToken:null,
+      userId:null,
     }
 
   }
@@ -43,6 +49,8 @@ export default class AssessmentQuestions extends Component {
 
     //Get whether user finished initial assessment
     console.log('http://'+host+':3000/initial/' + userId + '/' + authToken);
+
+    this.setState({authToken: authToken, userId: userId});
 
     fetch('http://'+host+':3000/initial/' + userId + '/' + authToken,{
       method: 'GET',
@@ -56,9 +64,12 @@ export default class AssessmentQuestions extends Component {
       jsonData = responseJson
       //convert json string to json object
       jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
+      this.shuffleArray(jsonData[this.qno].answers)
       this.setState({question:jsonData[this.qno].text,
                      description:jsonData[this.qno].suggestion,
-                     options:jsonData[this.qno].answers});
+                     options:jsonData[this.qno].answers,
+                     behaviorId:jsonData[this.qno].behavior_id,
+                     questionId:jsonData[this.qno].question_id})
     })
     .catch((error) => {
       console.error(error);
@@ -66,24 +77,69 @@ export default class AssessmentQuestions extends Component {
 
 
   }
+  shuffleArray(arr){
+    var ctr = arr.length, temp, index;
+
+// While there are elements in the array
+    while (ctr > 0) {
+// Pick a random index
+        index = Math.floor(Math.random() * ctr);
+// Decrease ctr by 1
+        ctr--;
+// And swap the last element with it
+        temp = arr[ctr];
+        arr[ctr] = arr[index];
+        arr[index] = temp;
+    }
+  }
+
   prev(){
     if(this.qno > 0){
       this.qno--
       this.setState({ question: jsonData[this.qno].text,
                       description: jsonData[this.qno].suggestion,
-                      options: jsonData[this.qno].answers})
+                      options: jsonData[this.qno].answers,
+                      behaviorId:jsonData[this.qno].behavior_id,
+                      questionId:jsonData[this.qno].question_id})
     }
   }
+
+  async check(){
+
+    this.setState({qFeedback: true});
+    this.props.questionFinish(this.state.options[this.state.selectedOption].exp===10, true);
+
+    console.log('http://' + host +':3000/addExp/' + this.state.userId + '/' + this.state.authToken + '/' + this.state.questionId + '/' + this.state.options[this.state.selectedOption].exp)
+
+    //send answer to the db
+    fetch('http://' + host +':3000/addExp/' + this.state.userId + '/' + this.state.authToken + '/' + this.state.questionId + '/' + this.state.options[this.state.selectedOption].exp,{
+      method: 'POST',
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  }
   next(){
+    this.setState({qFeedback: false});
+    this.props.questionFinish(true, false);
     this.props.updateProgress((this.qno+1)/jsonData.length);
+    this.setState({selectedOption:-1})
 
     if(this.qno < jsonData.length-1){
       this.qno++
+      this.shuffleArray(jsonData[this.qno].answers)
 
-      this.setState({ countCheck: 0, 
+      this.setState({ countCheck: 0,
                       question: jsonData[this.qno].text,
                       description: jsonData[this.qno].suggestion,
-                      options: jsonData[this.qno].answers})
+                      options: jsonData[this.qno].answers,
+                      behaviorId:jsonData[this.qno].behavior_id,
+                      questionId:jsonData[this.qno].question_id,
+                    })
+
+
+      
     }else{
       
       this.props.quizFinish(this.score*100/5)
@@ -111,19 +167,33 @@ export default class AssessmentQuestions extends Component {
   }
 
   updateValue(ans){
+    this.setState({selectedOption: ans});
+
+  }
+
+  findCorrectAnswer(options){
+    for (let i = 0; i < options.length; i++) {
+      if(options[i].exp===10)
+        return options[i];
+    }
 
   }
 
   render() {
     let _this = this
-    const currentOptions = this.state.options
 
     const options = this.state.options
 
+    const correctAnswer = (this.findCorrectAnswer(options));
+
+    let userId = this.state.userId
+    let authToken = this.state.authToken
+
+
+    let imgsrc = 'http://'+host+':3000/behaviorImage/' + userId + '/' + authToken+'/' + this.state.behaviorId
     return (
       <>
-      <View style={{backgroundColor:'grey', width: 100, height:100, position:'absolute',top:80, left: 50, zIndex:2}}>
-      </View>
+      <Image source={{uri:imgsrc}} style = {{height: 120, width:120, margin: 5, position:'absolute',top:50, left: 30, zIndex:2}}/>
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
           <View>
             <Text style={[styles.question, textStyle.subheader]}>
@@ -131,13 +201,39 @@ export default class AssessmentQuestions extends Component {
             </Text>
           </View>
           <View style={{ marginTop: 20}}>
+            {this.state.qFeedback?
+            <View>
+              <QuizButton  option={options[this.state.selectedOption]}
+                            color = {theme.PRIMARY_COLOR}
+                            updateValue={this.updateValue.bind(this)} 
+              />
+              <Text style ={[textStyle.subheader,{color:options[this.state.selectedOption].exp===10?theme.CORRECT_COLOR:theme.INCORRECT_COLOR, paddingLeft: 15, fontSize: 15}]}>
+                {options[this.state.selectedOption].exp===10?"Nice!":"Correct answer:"}
+              </Text>
+              {options[this.state.selectedOption].exp<10?
+              <Text style ={[textStyle.paragraph,{color:theme.INCORRECT_COLOR, paddingLeft: 15, marginBottom: 10, opacity: 0.6}]}>
+              {correctAnswer.answer}
+              </Text>
+              :null
+              }
+              
+              <Text style ={[textStyle.paragraph,{color:theme.TEXT_COLOR, paddingLeft: 15, opacity: 0.6}]}>
+                {options[this.state.selectedOption].research}
+              </Text>
+            </View>
+              :
             <QuizRadioButton  options={options}
                           color = {theme.PRIMARY_COLOR}
                           updateValue={this.updateValue.bind(this)} 
             />
+            }
           </View>
       </ScrollView>
-      <NextButton title="NEXT >" onPress={() => this.next()} buttonStyle={styles.buttonStyle}/>
+      
+      <NextButton title="NEXT >" 
+                  disabled = {this.state.selectedOption <0} 
+                  onPress={() => this.state.qFeedback ? this.next() : this.check()} 
+                  buttonStyle={[styles.buttonStyle,{backgroundColor:this.state.selectedOption >=0 ? theme.PRIMARY_COLOR_6 : theme.INACTIVE_COLOR}]}/>
       </>
     );
   }
