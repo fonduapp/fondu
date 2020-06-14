@@ -12,8 +12,8 @@ import theme from '../styles/theme.style.js';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
 
-const screenWidth =  Dimensions.get('window').width;
-const screenHeight =  Dimensions.get('window').height;
+const width =  Dimensions.get('window').width;
+const height =  Dimensions.get('window').height;
 
 export default class ResourcesScreen extends React.Component{
 
@@ -32,12 +32,10 @@ export default class ResourcesScreen extends React.Component{
   async componentDidMount(){
     //const {authToken, userId} = await _getAuthTokenUserId();
     //console.log('userid ' + userId + "\t authToken " + authToken);
-
-
     return fetch('http://192.241.153.104:3000/allAreas/2/abcdefg')
       .then((response)=>response.json())
       .then((responseJson) =>{
-        console.log('resources: ' + JSON.stringify(responseJson))
+        //console.log('resources: ' + JSON.stringify(responseJson))
         this.setState({
           isLoading: false,
           articleList:responseJson
@@ -51,7 +49,7 @@ export default class ResourcesScreen extends React.Component{
   render(){
 
     const { search } = this.state;
-    console.log(this.state.isLoading)
+    //console.log(this.state.isLoading)
     if (this.state.isLoading){
 
       return(
@@ -86,9 +84,7 @@ export default class ResourcesScreen extends React.Component{
             onChangeText={this.updateSeach}
             value = {search}
           />
-          <View style = {styles.container}>
             {articles}
-        </View>
         </>
       );
     }
@@ -112,13 +108,14 @@ const styles = StyleSheet.create({
     backgroundColor:"#D4D3FF",
     marginLeft:20,
     marginRight:20,
-    height: screenHeight * .05,
+    height: height * .06,
+    width: width*.8,
     justifyContent:'center',
   },
   articleContainer:{
     borderRadius: 15,
-    width: screenWidth *.85,
-    height: screenHeight *.15,
+    width: width *.85,
+    height: height *.15,
     justifyContent: 'center',
     marginTop: 20,
     backgroundColor:'#7B80FF',
