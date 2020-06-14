@@ -32,12 +32,10 @@ export default class ResourcesScreen extends React.Component{
   async componentDidMount(){
     //const {authToken, userId} = await _getAuthTokenUserId();
     //console.log('userid ' + userId + "\t authToken " + authToken);
-
-
     return fetch('http://192.241.153.104:3000/allAreas/2/abcdefg')
       .then((response)=>response.json())
       .then((responseJson) =>{
-        console.log('resources: ' + JSON.stringify(responseJson))
+        //console.log('resources: ' + JSON.stringify(responseJson))
         this.setState({
           isLoading: false,
           articleList:responseJson
@@ -51,7 +49,7 @@ export default class ResourcesScreen extends React.Component{
   render(){
 
     const { search } = this.state;
-    console.log(this.state.isLoading)
+    //console.log(this.state.isLoading)
     if (this.state.isLoading){
 
       return(
@@ -87,7 +85,6 @@ export default class ResourcesScreen extends React.Component{
             value = {search}
           />
             {articles}
-        </View>
         </>
       );
     }
