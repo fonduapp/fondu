@@ -62,7 +62,7 @@ class SignInScreen extends React.Component {
   render() {
 
     return (
-      <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <KeyboardAvoidingView style={styles.container} behavior="height">
       	<Text style = {[textStyle.header, styles.headerSpace]}>Welcome back!</Text>
         <Input
           containerStyle={{marginBottom: 10}}
@@ -185,7 +185,7 @@ class SignUpScreen extends React.Component {
     return (
       <>
       { this.state.screen==0 ?
-      <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <KeyboardAvoidingView style={styles.container} behavior="height">
       	<Text style = {[textStyle.header, styles.headerSpace, {marginBottom: '20%'}]}>Create Account</Text>
         <Input
           containerStyle={{marginBottom: 10}}
