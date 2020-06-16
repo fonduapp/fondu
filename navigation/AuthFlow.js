@@ -141,6 +141,7 @@ class SignUpScreen extends React.Component {
       relationshipStatus: 0,
       interval: 3,
       screen: 0, //first or second screen of sign up
+      badName: false,
       badEmail: false,
       badPassword: false,
       badConfirmPass: false,
@@ -149,7 +150,11 @@ class SignUpScreen extends React.Component {
 
   }
 
-  checkForValidRegInput(email, password, password2){
+  checkForValidRegInput(name, email, password, password2){
+    // check if name is valid
+    const validName = name.length > 0;
+    this.setState({ badName: !validName });
+
     //check is email is valid
     var validator = require("email-validator");
     let validEmail = validator.validate(email); // true
@@ -158,22 +163,25 @@ class SignUpScreen extends React.Component {
     }else{
       this.setState({badEmail:false});
     }
+    
+    // check if password is secure
+    const securePassword = /(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/.test(password);
+    this.setState({ badPassword: !securePassword });
 
-    //check is password is valid and secure
+    //check is password is valid
     let validPassword = (password === password2);
     if(!validPassword){
       this.setState({badConfirmPass:true});
     }else{
       this.setState({badConfirmPass:false});
     }
-    //TODO: secure password check
 
-    return validEmail && validPassword;
+    return validName && validEmail && securePassword && validPassword;
 
   }
 
   goToSettingsScreen(){
-    let validInputs = this.checkForValidRegInput(this.state.email, this.state.password, this.state.password2);
+    let validInputs = this.checkForValidRegInput(this.state.name, this.state.email, this.state.password, this.state.password2);
 
     if(validInputs){
       this.setState({screen: 1})
@@ -189,6 +197,8 @@ class SignUpScreen extends React.Component {
       	<Text style = {[textStyle.header, styles.headerSpace, {marginBottom: '20%'}]}>Create Account</Text>
         <Input
           containerStyle={{marginBottom: 10}}
+          errorStyle={{ color: 'red' }}
+          errorMessage={this.state.badName ? 'Please enter a name' : ''}
           label='NAME'
           labelStyle={styles.labelStyle}
           inputStyle={{color:'white'}}
@@ -208,6 +218,8 @@ class SignUpScreen extends React.Component {
         />
         <Input
           containerStyle={{marginBottom: 10}}
+          errorStyle={{ color: 'red' }}
+          errorMessage={this.state.badPassword ? 'Must contain at least 8 characters, uppercase and lowercase letters, a digit, and a symbol' : ''}
           label='PASSWORD'
           labelStyle={styles.labelStyle}
           inputStyle={{color:'white'}}
