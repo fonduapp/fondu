@@ -88,7 +88,7 @@ class SignInScreen extends React.Component {
         <View style={{flexDirection: 'row', width: '60%', justifyContent:'space-between'}}>
 
 		 <TouchableOpacity><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Forgot password?</Text></TouchableOpacity>
-		 <TouchableOpacity><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Sign Up</Text></TouchableOpacity>
+		 <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Sign Up</Text></TouchableOpacity>
 
 		</View>
 
