@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   TextInput,
   Picker,
-  KeyboardAvoidingView
 } from 'react-native';
 import NextButton from '../components/NextButton';
 import CustomTextInput from '../components/CustomTextInput';
@@ -31,14 +30,20 @@ class LandingScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-      	<Text style={[textStyle.title, styles.headerSpace]}>fondu</Text>
-        <NextButton title="Sign In"
-        			onPress={() => this.props.navigation.navigate('SignIn')}
-        			buttonStyle = {{marginBottom:28, backgroundColor: theme.PRIMARY_COLOR}}/>
-        <NextButton title="Sign Up"
-        			onPress={() => this.props.navigation.navigate('SignUp')}
-        			buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
-        <TouchableOpacity><Text style = {{color:'white'}}>Forgot password?</Text></TouchableOpacity>
+        <View style={styles.header}>
+          <Text style={textStyle.title}>fondu</Text>
+        </View>
+        <View style={styles.contentContainer}>
+          <NextButton title="Sign In"
+                onPress={() => this.props.navigation.navigate('SignIn')}
+                buttonStyle = {{marginBottom:28, backgroundColor: theme.PRIMARY_COLOR}}/>
+          <NextButton title="Sign Up"
+                onPress={() => this.props.navigation.navigate('SignUp')}
+                buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
+        <View style={styles.footer}>
+          <TouchableOpacity><Text style = {{color:'white'}}>Forgot password?</Text></TouchableOpacity>
+        </View>
+        </View>
       </View>
     );
   }
@@ -62,37 +67,43 @@ class SignInScreen extends React.Component {
   render() {
 
     return (
-      <KeyboardAvoidingView style={styles.container} behavior="height">
-      	<Text style = {[textStyle.header, styles.headerSpace]}>Welcome back!</Text>
-        <Input
-          containerStyle={{marginBottom: 10}}
-          errorStyle={{ color: 'red' }}
-          errorMessage={this.state.badEmail ? 'Please enter a valid email' : ''}
-          label='EMAIL'
-          labelStyle={styles.labelStyle}
-          inputStyle={{color:'white'}}
-          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
-          onChangeText={text => this.setState({email: text})}
-        />
-        <Input
-          containerStyle={{marginBottom: 20}}
-          label='PASSWORD'
-          labelStyle={styles.labelStyle}
-          inputStyle={{color:'white'}}
-          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
-          onChangeText={text => this.setState({password: text})}
-          secureTextEntry={true}
-        />
-        <NextButton title="Sign In" onPress={this._signInAsync}
-        			buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
-        <View style={{flexDirection: 'row', width: '60%', justifyContent:'space-between'}}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style = {textStyle.header}>Welcome back!</Text>
+        </View>
+        <View style={styles.contentContainer}>
+          <Input
+            containerStyle={{marginBottom: 10}}
+            errorStyle={{ color: 'red' }}
+            errorMessage={this.state.badEmail ? 'Please enter a valid email' : ''}
+            label='EMAIL'
+            labelStyle={styles.labelStyle}
+            inputStyle={{color:'white'}}
+            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+            onChangeText={text => this.setState({email: text})}
+          />
+          <Input
+            containerStyle={{marginBottom: 20}}
+            label='PASSWORD'
+            labelStyle={styles.labelStyle}
+            inputStyle={{color:'white'}}
+            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+            onChangeText={text => this.setState({password: text})}
+            secureTextEntry={true}
+          />
+          <NextButton title="Sign In" onPress={this._signInAsync}
+                buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
+        </View>
+        <View style={styles.footer}>
+          <View style={{flexDirection: 'row', width: '60%', justifyContent:'space-between'}}>
 
-		 <TouchableOpacity><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Forgot password?</Text></TouchableOpacity>
-		 <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Sign Up</Text></TouchableOpacity>
+       <TouchableOpacity><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Forgot password?</Text></TouchableOpacity>
+       <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Sign Up</Text></TouchableOpacity>
 
-		</View>
+      </View>
+        </View>
 
-      </KeyboardAvoidingView>
+      </View>
     );
   }
 
@@ -190,62 +201,89 @@ class SignUpScreen extends React.Component {
   }
 
   render() {
+    // only show the first error
+    let nameError = false;
+    let emailError = false;
+    let passwordError = false;
+    let confirmPassError = false;
+    if (this.state.badName) {
+      nameError = true;
+    } else {
+      if (this.state.badEmail) {
+        emailError = true;
+      } else {
+        if (this.state.badPassword) {
+          passwordError = true;
+        } else {
+          if (this.state.badConfirmPass) {
+            confirmPassError = true;
+          }
+        }
+      }
+    }
     return (
       <>
       { this.state.screen==0 ?
-      <KeyboardAvoidingView style={styles.container} behavior="height">
-      	<Text style = {[textStyle.header, styles.headerSpace, {marginBottom: '20%'}]}>Create Account</Text>
-        <Input
-          containerStyle={{marginBottom: 10}}
-          errorStyle={{ color: 'red' }}
-          errorMessage={this.state.badName ? 'Please enter a name' : ''}
-          label='NAME'
-          labelStyle={styles.labelStyle}
-          inputStyle={{color:'white'}}
-          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
-          onChangeText={text => this.setState({name: text})}
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style = {[textStyle.header, {marginBottom: '20%'}]}>Create Account</Text>
+        </View>
+        <View style={styles.contentContainer}>
+          <Input
+            containerStyle={{marginBottom: 10}}
+            errorStyle={{ color: 'red' }}
+            errorMessage={nameError ? 'Please enter a name' : ''}
+            label='NAME'
+            labelStyle={styles.labelStyle}
+            inputStyle={{color:'white'}}
+            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+            onChangeText={text => this.setState({name: text})}
 
-        />
-        <Input
-          containerStyle={{marginBottom: 10}}
-          errorStyle={{ color: 'red' }}
-          errorMessage={this.state.badEmail ? 'Please enter a valid email' : ''}
-          label='EMAIL'
-          labelStyle={styles.labelStyle}
-          inputStyle={{color:'white'}}
-          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
-          onChangeText={text => this.setState({email: text})}
-        />
-        <Input
-          containerStyle={{marginBottom: 10}}
-          errorStyle={{ color: 'red' }}
-          errorMessage={this.state.badPassword ? 'Must contain at least 8 characters, uppercase and lowercase letters, a digit, and a symbol' : ''}
-          label='PASSWORD'
-          labelStyle={styles.labelStyle}
-          inputStyle={{color:'white'}}
-          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
-          onChangeText={text => this.setState({password: text})}
-          secureTextEntry={true}
-        />
-        <Input
-          containerStyle={{marginBottom: 20}}
-          errorStyle={{ color: 'red' }}
-          errorMessage={this.state.badConfirmPass ? 'Passwords do not match' : ''}
-          label='CONFIRM PASSWORD'
-          labelStyle={styles.labelStyle}
-          inputStyle={{color:'white'}}
-          inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
-          onChangeText={text => this.setState({password2: text})}
-          secureTextEntry={true}
-        />
-
-        <NextButton title="Sign Up" onPress={this.goToSettingsScreen} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
-        <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={{color:'rgba(255,255,255,0.8)', }}>Sign in</Text></TouchableOpacity>
-      </KeyboardAvoidingView>
+          />
+          <Input
+            containerStyle={{marginBottom: 10}}
+            errorStyle={{ color: 'red' }}
+            errorMessage={emailError ? 'Please enter a valid email' : ''}
+            label='EMAIL'
+            labelStyle={styles.labelStyle}
+            inputStyle={{color:'white'}}
+            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+            onChangeText={text => this.setState({email: text})}
+          />
+          <Input
+            containerStyle={{marginBottom: 10}}
+            errorStyle={{ color: 'red' }}
+            errorMessage={passwordError ? 'Must contain at least 8 characters, uppercase and lowercase letters, a digit, and a symbol' : ''}
+            label='PASSWORD'
+            labelStyle={styles.labelStyle}
+            inputStyle={{color:'white'}}
+            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+            onChangeText={text => this.setState({password: text})}
+            secureTextEntry={true}
+          />
+          <Input
+            containerStyle={{marginBottom: 20}}
+            errorStyle={{ color: 'red' }}
+            errorMessage={confirmPassError ? 'Passwords do not match' : ''}
+            label='CONFIRM PASSWORD'
+            labelStyle={styles.labelStyle}
+            inputStyle={{color:'white'}}
+            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
+            onChangeText={text => this.setState({password2: text})}
+            secureTextEntry={true}
+          />
+          <NextButton title="Sign Up" onPress={this.goToSettingsScreen} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
+        </View>
+        <View style={styles.footer}>
+          <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={{color:'rgba(255,255,255,0.8)', }}>Sign in</Text></TouchableOpacity>
+        </View>
+      </View>
       :
       <View style={styles.container}>
-        <Text style = {[textStyle.header, styles.headerSpace]}>Let's Get Started </Text>
-        <View>
+        <View style={styles.header}>
+          <Text style = {textStyle.header}>Let's Get Started </Text>
+        </View>
+        <View style={styles.contentContainer}>
           <Text>What is your relationship status?</Text>
           <Picker
         selectedValue={this.state.language}
@@ -273,6 +311,7 @@ class SignUpScreen extends React.Component {
         </Picker>
         </View>
         <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR}}/>
+        <View style={styles.footer}/>
       </View>
     }
     </>
@@ -319,13 +358,22 @@ const styles = StyleSheet.create({
     paddingLeft: '20%',
     paddingRight: '20%',
   },
+  header:{
+    flex: 1,
+    marginTop: 200,
+    minHeight: 50,
+  },
+  contentContainer: {
+    alignSelf: 'stretch',
+  },
+  footer: {
+    alignSelf: 'center',
+    height: 100,
+  },
   labelStyle: {
     color: 'rgba(255,255,255, 0.5)',
     fontSize: 13,
   },
-  headerSpace:{
-    marginBottom: '40%'
-  }
 });
 
 // const AppStack = createStackNavigator({ Home: HomeScreen, Other: OtherScreen });
