@@ -286,7 +286,7 @@ class SignUpScreen extends React.Component {
         <View style={styles.contentContainer}>
           <Text>What is your relationship status?</Text>
           <Picker
-        selectedValue={this.state.language}
+        selectedValue={this.state.relationshipStatus}
         style={{height: 50}}
         onValueChange={(itemValue, itemIndex) =>
           this.setState({relationshipStatus: itemValue})
@@ -298,7 +298,7 @@ class SignUpScreen extends React.Component {
       </Picker>
           <Text>What is your weekly goal?</Text>
           <Picker
-        selectedValue={this.state.language}
+        selectedValue={this.state.interval}
         style={{height: 50}}
         onValueChange={(itemValue, itemIndex) =>
           this.setState({interval: itemValue})
