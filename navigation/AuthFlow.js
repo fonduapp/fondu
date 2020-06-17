@@ -40,9 +40,9 @@ class LandingScreen extends React.Component {
           <NextButton title="Sign Up"
                 onPress={() => this.props.navigation.navigate('SignUp')}
                 buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
+        </View>
         <View style={styles.footer}>
           <TouchableOpacity><Text style = {{color:'white'}}>Forgot password?</Text></TouchableOpacity>
-        </View>
         </View>
       </View>
     );
@@ -309,8 +309,8 @@ class SignUpScreen extends React.Component {
         <Picker.Item label="Regular (Every 2 days)" value={2}/>
         <Picker.Item label="Serious (Every day)" value={1} />
         </Picker>
+        <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
         </View>
-        <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR}}/>
         <View style={styles.footer}/>
       </View>
     }
