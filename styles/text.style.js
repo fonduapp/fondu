@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 const textStyle = StyleSheet.create({
   title: {
-    fontFamily: 'poppins-bold',
+    fontFamily: 'fredokaone-regular',
   	fontSize: 30,
   },
   header: {

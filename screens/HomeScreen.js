@@ -28,11 +28,12 @@ import host from '../constants/Server.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 
 
+
 const { width } = Dimensions.get('window');
 const mainPadding = 40;
-const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
+var originalFetch = require('isomorphic-fetch');
+var fetch = require('fetch-retry')(originalFetch);
+
 if (Platform.OS === 'android') {
   SafeAreaView.setStatusBarHeight(0);
 }
@@ -52,35 +53,11 @@ export default class HomeScreen extends Component {
     };
   }
 
+  async fetchHomeInfo(){
 
-
-  async componentDidMount(){
-    //find initialAssessTaken
-
-    const {authToken, userId} = await _getAuthTokenUserId();
-
-
-    //Get whether user finished initial assessment
-    fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      this.setState({initialAssessTaken:responseJson.finished_initial});
-      this.props.navigation.setParams({
-        initialAssessTaken: responseJson.finished_initial,
-      });
-      this.setState({initialAssessReady:true});
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
+    const {authToken, userId} = await _getAuthTokenUserId()
     //Get Streak
+    console.log("!!!!" + 'http://' + host +':3000/streak/' + userId + '/' + authToken)
 
     fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
       method: 'GET',
@@ -138,7 +115,41 @@ export default class HomeScreen extends Component {
     .catch((error) => {
       console.error(error);
     });
+  }
 
+  async componentDidMount(){
+    //find initialAssessTaken
+
+    const {authToken, userId} = await _getAuthTokenUserId()
+    let initialAssessTaken = false
+
+    //Get whether user finished initial assessment
+    // fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
+    //   method: 'GET',
+    //   headers: {
+    //     Accept: 'application/json',
+    //     'Content-Type': 'application/json',
+    //   },
+    // })
+    // .then((response) => response.json())
+    // .then((responseJson) => {
+    //   this.setState({initialAssessTaken:responseJson.finished_initial});
+    //   this.props.navigation.setParams({
+    //     initialAssessTaken: responseJson.finished_initial,
+    //   });
+    //   this.setState({initialAssessReady:true});
+
+    //   initialAssessTaken = responseJson.finished_initial
+    // })
+    // .catch((error) => {
+    //   console.error(error)
+    // });
+
+    
+
+    if(initialAssessTaken){
+      this.fetchHomeInfo()
+    }
 
 
 
@@ -174,6 +185,8 @@ export default class HomeScreen extends Component {
       },
       body: JSON.stringify(data)
     })
+
+    this.fetchHomeInfo()
   }
 
   async routineAssessComplete(){

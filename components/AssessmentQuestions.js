@@ -24,6 +24,9 @@ import {textStyle} from '../styles/text.style.js';
 
 const { width, height } = Dimensions.get('window')
 var jsonData = []
+var originalFetch = require('isomorphic-fetch');
+var fetch = require('fetch-retry')(originalFetch);
+
 export default class AssessmentQuestions extends Component {
   constructor(props){
     super(props);
@@ -47,8 +50,7 @@ export default class AssessmentQuestions extends Component {
     const {authToken, userId} = await _getAuthTokenUserId();
 
 
-    //Get whether user finished initial assessment
-    console.log('http://'+host+':3000/initial/' + userId + '/' + authToken);
+
 
     this.setState({authToken: authToken, userId: userId});
 
@@ -85,6 +87,9 @@ export default class AssessmentQuestions extends Component {
       break;
 
       case "initial":
+
+        //Get whether user finished initial assessment
+        console.log('http://'+host+':3000/initial/' + userId + '/' + authToken);
         //get initial questions
         fetch('http://'+host+':3000/initial/' + userId + '/' + authToken,{
           method: 'GET',
