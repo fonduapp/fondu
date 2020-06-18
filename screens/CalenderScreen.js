@@ -90,7 +90,7 @@ export default class ArticleScreen extends Component {
           });
       }
 
-      componentDidUpdate(){
+      async componentDidUpdate(){
         //const {authToken, userId} = await _getAuthTokenUserId();
         //console.log('userid ' + userId + "\t authToken " + authToken);
         console.log('updating ')
