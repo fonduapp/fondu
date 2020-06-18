@@ -2,16 +2,24 @@ import { StyleSheet } from 'react-native';
 
 const textStyle = StyleSheet.create({
   title: {
-  	fontSize: 36,
+    fontFamily: 'fredokaone-regular',
+  	fontSize: 30,
   },
   header: {
-  	fontSize:36, 
   	fontFamily: 'poppins-bold',
   	fontSize: 24,
+  },
+  header2: {
+    fontFamily: 'poppins-bold',
+    fontSize: 20,
   },
   caption:{
   	fontFamily: 'poppins-medium',
   	fontSize: 13,
+  },
+  footer:{
+    fontFamily: 'poppins-bold',
+    fontSize: 10,
   },
   subheader:{
   	fontFamily: 'poppins-bold',
@@ -21,7 +29,7 @@ const textStyle = StyleSheet.create({
   	fontFamily: 'poppins-medium',
   },
   paragraph: {
-  	fontFamily: 'poppins-medium',
+  	fontFamily: 'poppins-regular',
   	fontSize: 14,
   }
 

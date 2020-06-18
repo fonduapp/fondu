@@ -1,22 +1,43 @@
 import React, { Component } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Dimensions,} from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Dimensions, Image} from 'react-native';
 import theme from '../styles/theme.style.js';
+import {textStyle} from '../styles/text.style.js';
 import { Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
+import { _getAuthTokenUserId } from '../constants/Helper.js';
+import host from '../constants/Server.js';
 
 const { width } = Dimensions.get('window');
 
 export default class ContentModule extends Component {
 
+	constructor(props){
+		super(props)
+	    this.state = {
+	    	imgsrc:""
+
+	    };
+	}
+
+	async componentDidMount(){
+		
+		const {authToken, userId} = await _getAuthTokenUserId();
+
+		let imgsrc = 'http://'+host+':3000/behaviorImage/' +userId + '/' + authToken+'/' + this.props.behaviorId//this.props.behaviorID
+		console.log(imgsrc)
+		this.setState({imgsrc:imgsrc});
+
+	}
+
 	render() {
+		//const {authToken, userId} = await _getAuthTokenUserId()
+		
+		
 		return (
 	        <View>
                 <View style={styles.welcomeSubContainer}>
-                  <View style={styles.mainImageContainer}>
-                  </View>
-                  <Text style={styles.mainHeaderText}>{this.props.title}</Text>
-                  <Text style={styles.mainParagraphText}>The definition of the behavior here</Text>
-
+                  <Image source={{uri:this.state.imgsrc}} style={styles.mainImageContainer}/>
+                  <Text style={[textStyle.header2,{textAlign:'center', color: theme.TEXT_COLOR}]}>{this.props.title}</Text>
                 </View>
                 <NextButton
                     onPress={this.props.onPress} 
@@ -35,17 +56,6 @@ const styles = StyleSheet.create({
 		width: '60%'
 
 	},
-	outerProgressBar:{
-		backgroundColor:'lightgray',
-		height:15,
-		flex:1,
-		borderRadius: 15,
-		flexDirection: 'row',
-	},
-	innerProgressBar:{
-		height:15,
-		borderRadius: 15,
-	},
 	welcomeSubContainer:{
 	    width: 300,
 	    height: 300,
@@ -55,13 +65,13 @@ const styles = StyleSheet.create({
 	    marginRight: (width - 300)/6,
 	    marginBottom: 15,
 	    borderRadius: 40,
+	    padding:40,
 
   	},
   	mainImageContainer:{
 	    width: width/3,
 	    height:width/3,
-	    backgroundColor: '#F2F2F2',
-	    margin: 30,
+	    margin: 10,
 	  },
 	mainHeaderText:{
 	    fontSize: 20,
