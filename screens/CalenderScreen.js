@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Modal from 'react-native-modal';
-import { format } from "date-fns";
 import Collapsible from 'react-native-collapsible';
+import host from '../constants/Server.js';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import {
   Image,
@@ -26,28 +26,50 @@ export default class ArticleScreen extends Component {
       isCollapsed:true,
       screen:'closed',
       mood:0,
-      moodColors: ['#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'],
+      moodColors: ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'],
       markedDates: {},
       day: Date(),
       entry: '',
     };
-    }
+  }
+
     open = () => {
+      this.setState({
+        mood:0,
+        entry:'',
+      });
       this.setState({screen:'open'});
       console.log("opened")
     }
-    close = () => {
+    async close(){
       this.setState({screen:'closed'});
       this.updateDate((this.state.day).dateString);
       console.log("closed")
+      if (this.state.mood != 0){
+        await fetch('http://'+host+':3000/writeEntry/', {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+                      'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              userId: '2',
+              authToken: 'abcdefg',
+              entryDate: this.state.day,
+              entry:this.state.entry,
+              entryRating:this.state.mood,
+            })
+        }).then((response) => console.log(response))
+        .catch(function(error) {
+          console.log( error.message);
+          throw error;
+        });
+      }
     }
     handleEntry = (text) => {
       this.setState({ entry: text })
     }
-    pressMood = (id) => {
-     this.setState({ mood: id });
-     console.log(this.state.mood)
-    };
+
     updateDate = (_selectedDay) => {
         const updatedMarkedDates = {
         ...this.state.markedDates,
@@ -64,59 +86,37 @@ export default class ArticleScreen extends Component {
     this.setState({ markedDates: updatedMarkedDates });
     };
 
-      componentDidMount(){
-        //const {authToken, userId} = await _getAuthTokenUserId();
-        //console.log('userid ' + userId + "\t authToken " + authToken);
-        console.log('mounting ')
+      async componentDidMount(){
+        console.log('getting month entry')
 
-        var currDate = new Date("2020-02-02T10:34:23");
+        var currDate = new Date();
         const month = JSON.stringify(currDate.getMonth()+1);
         const year = JSON.stringify(currDate.getFullYear());
         console.log('month '+ month + ' year ' + year)
-
-        return fetch('http://192.241.153.104:3000/monthEntries/2/abcdefg/' + month + '/' + year)
-          .then((response)=>response.text())
-          console.log('text')
-          console.log(response)
-          .then((responseJson) =>{
-            //console.log((responseJson))
-            //dates = JSON.parse(responseJson);
-            // dates.map((date, id) =>{
-            //   this.updateDate(currDate.dateString);
-            // })
+        let url = 'http://192.241.153.104:3000/monthEntries/2/abcdefg/' + month + '/' + year;
+        const response = await fetch(url, {
+              method: 'GET',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+              }
           })
-          .catch((error)=>{
-            console.log(error)
+          .then((response) => response.json())
+          .then((responseJson) => {
+            console.log(responseJson)
+            responseJson.map((entry, i)=>{
+              this.setState({mood:(entry['entry_rating'])})
+              this.updateDate((entry["entry_date"]).substring(0,10))
+            });
+            console.log(this.state.mood)
+            console.log(this.state.markedDates)
+          })
+          .catch((error) => {
+            console.error(error);
           });
       }
 
-      componentDidUpdate(){
-        //const {authToken, userId} = await _getAuthTokenUserId();
-        //console.log('userid ' + userId + "\t authToken " + authToken);
-        console.log('updating ')
 
-        var currDate = new Date("2020-02-02T10:34:23");
-        const month = JSON.stringify(currDate.getMonth()+1);
-        const year = JSON.stringify(currDate.getFullYear());
-        console.log('month '+ month + ' year ' + year)
-
-        return await fetch('http://192.241.153.104:3000/monthEntries/2/abcdefg/' + month + '/' + year)
-          .then((response)=>response.text())
-          console.log('text')
-          console.log(response)
-          .then((responseJson) =>{
-            console.log('fetched')
-
-            console.log((responseJson))
-            dates = JSON.parse(responseJson);
-            // dates.map((date, id) =>{
-            //   this.updateDate(currDate.dateString);
-            // })
-          })
-          .catch((error)=>{
-            console.log(error)
-          });
-      }
 
 
       onDaySelect = (day) => {
@@ -129,7 +129,6 @@ export default class ArticleScreen extends Component {
           // Already in marked dates, so reverse current marked state
           marked = !this.state.markedDates[_selectedDay].marked;
         }
-        console.log('uodating')
         // Create a new object using object property spread since it should be immutable
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay);
@@ -174,11 +173,11 @@ export default class ArticleScreen extends Component {
       }
     }
     render(){
-      let moods = this.state.moodColors.map((color, i) => {
+      let moods = (this.state.moodColors.slice(1,6)).map((color, i) => {
       return (
         <TouchableOpacity
           key={i.toString()}
-          onPress={() => this.pressMood(i)}
+          onPress={() => this.setState({mood:(i + 1)})}
           style={[
             styles.moodButton,
             { backgroundColor: color },
