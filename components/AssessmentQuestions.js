@@ -52,29 +52,69 @@ export default class AssessmentQuestions extends Component {
 
     this.setState({authToken: authToken, userId: userId});
 
-    fetch('http://'+host+':3000/initial/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      jsonData = responseJson
-      //convert json string to json object
-      jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
-      this.shuffleArray(jsonData[this.qno].answers)
-      this.setState({question:jsonData[this.qno].text,
-                     description:jsonData[this.qno].suggestion,
-                     options:jsonData[this.qno].answers,
-                     behaviorId:jsonData[this.qno].behavior_id,
-                     questionId:jsonData[this.qno].question_id})
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    //get questions
+    console.log("assessmenttype " + this.props.assessmentType);
+    switch(this.props.assessmentType){
+      case "routine":
 
+        console.log("behaviorId" + this.props.behaviorId)
+        //get routine questions
+        fetch('http://'+host+':3000/learningQuestions/' + userId + '/' + authToken + '/' + this.props.behaviorId,{
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          jsonData = responseJson
+          //convert json string to json object
+          jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
+          this.shuffleArray(jsonData[this.qno].answers)
+          this.setState({question:jsonData[this.qno].text,
+                         description:jsonData[this.qno].suggestion,
+                         options:jsonData[this.qno].answers,
+                         behaviorId:jsonData[this.qno].behavior_id,
+                         questionId:jsonData[this.qno].question_id})
+          console.log("in initial");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      break;
+
+      case "initial":
+        //get initial questions
+        fetch('http://'+host+':3000/initial/' + userId + '/' + authToken,{
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          jsonData = responseJson
+          //convert json string to json object
+          jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
+          this.shuffleArray(jsonData[this.qno].answers)
+          this.setState({question:jsonData[this.qno].text,
+                         description:jsonData[this.qno].suggestion,
+                         options:jsonData[this.qno].answers,
+                         behaviorId:jsonData[this.qno].behavior_id,
+                         questionId:jsonData[this.qno].question_id})
+          console.log("in initial");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      break;
+
+    default:
+      console.log("???")
+
+    }
 
   }
   shuffleArray(arr){
@@ -112,8 +152,18 @@ export default class AssessmentQuestions extends Component {
     console.log('http://' + host +':3000/addExp/' + this.state.userId + '/' + this.state.authToken + '/' + this.state.questionId + '/' + this.state.options[this.state.selectedOption].exp)
 
     //send answer to the db
-    fetch('http://' + host +':3000/addExp/' + this.state.userId + '/' + this.state.authToken + '/' + this.state.questionId + '/' + this.state.options[this.state.selectedOption].exp,{
+    fetch('http://' + host +':3000/addExp',{
       method: 'POST',
+      headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        'userId': this.state.userId,
+        'authToken': this.state.authToken,
+        'questionId': this.state.questionId,
+        'exp': this.state.options[this.state.selectedOption].exp,
+      })
     })
     .catch((error) => {
       console.error(error);
@@ -211,7 +261,7 @@ export default class AssessmentQuestions extends Component {
                 {options[this.state.selectedOption].exp===10?"Nice!":"Correct answer:"}
               </Text>
               {options[this.state.selectedOption].exp<10?
-              <Text style ={[textStyle.paragraph,{color:theme.INCORRECT_COLOR, paddingLeft: 15, marginBottom: 10, opacity: 0.6}]}>
+              <Text style ={[textStyle.paragraph,{color:theme.INCORRECT_COLOR, paddingLeft: 15, marginBottom: 10, opacity: 0.8,}]}>
               {correctAnswer.answer}
               </Text>
               :null
@@ -219,6 +269,10 @@ export default class AssessmentQuestions extends Component {
               
               <Text style ={[textStyle.paragraph,{color:theme.TEXT_COLOR, paddingLeft: 15, opacity: 0.6}]}>
                 {options[this.state.selectedOption].research}
+              </Text>
+
+              <Text style ={[textStyle.footer,{color:theme.TEXT_COLOR, paddingLeft: 15, opacity: 0.2, marginTop: 15}]}>
+                {options[this.state.selectedOption].reference}
               </Text>
             </View>
               :

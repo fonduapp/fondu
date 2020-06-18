@@ -46,6 +46,7 @@ async function loadResourcesAsync() {
       'poppins-bold': require('./assets/fonts/Poppins/Poppins-Bold.ttf'),
       'poppins-semibold': require('./assets/fonts/Poppins/Poppins-SemiBold.ttf'),
       'poppins-medium': require('./assets/fonts/Poppins/Poppins-Medium.ttf'),
+      'poppins-regular': require('./assets/fonts/Poppins/Poppins-Regular.ttf'),
 
     }),
   ]);
