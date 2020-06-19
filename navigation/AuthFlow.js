@@ -30,7 +30,7 @@ class LandingScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={{ flex: 1, marginTop: 140 }}>
           <Text style={textStyle.title}>fondu</Text>
         </View>
         <View style={styles.contentContainer}>
@@ -339,7 +339,12 @@ class RelationshipStatusScreen extends React.Component {
           <Text style = {textStyle.header3}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
-          <Text>What is your relationship status?</Text>
+          <Text style={{...textStyle.subheader, color: 'gray'}}>
+            What is your relationship status?
+          </Text>
+          <Text style={{...textStyle.footer, color: 'gray', opacity: 0.5}}>
+            This information can be changed later
+          </Text>
           <StyledButtonGroup
             onPress={onPressRelationshipStatus}
             selectedIndex={selectedIndex}
@@ -392,7 +397,12 @@ class WeeklyGoalScreen extends React.Component {
           <Text style = {textStyle.header3}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
-          <Text>What is your weekly goal?</Text>
+          <Text style={{...textStyle.subheader, color: 'gray'}}>
+            What is your weekly goal?
+          </Text>
+          <Text style={{...textStyle.footer, color: 'gray', opacity: 0.5}}>
+            This information can be changed later
+          </Text>
           <StyledButtonGroup
             onPress={onPressWeeklyGoal}
             selectedIndex={selectedIndex}
@@ -460,7 +470,7 @@ const styles = StyleSheet.create({
   },
   header:{
     flexGrow: 1,
-    marginTop: 200,
+    marginTop: 120,
   },
   contentContainer: {
     alignSelf: 'stretch',
@@ -491,7 +501,6 @@ const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
     <View
       style={{
         alignSelf: 'center',
-        height: 50 * buttons.length,
         backgroundColor: theme.SECONDARY_COLOR,
         borderRadius: 25,
         paddingHorizontal: '15%',
@@ -502,13 +511,15 @@ const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
         shadowOpacity: 0.8,
         shadowRadius: 2,
         width: '130%',
+        marginTop: '5%',
+        marginBottom: '20%',
       }}
     >
       {buttons.map((button, i) => (
         <View
           key={i}
           style={{
-            flex: 1,
+            height: 40,
             alignItems: 'center',
             borderColor: theme.TRANSLUCENT_GRAY,
             ...(i !== buttons.length - 1 ? { borderBottomWidth: 1 } : []),

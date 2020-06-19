@@ -19,6 +19,10 @@ const textStyle = StyleSheet.create({
   	fontFamily: 'poppins-medium',
   	fontSize: 13,
   },
+  footer: {
+    fontFamily: 'poppins-bold',
+    fontSize: 10,
+  },
   subheader:{
   	fontFamily: 'poppins-bold',
   	fontSize: 15,
