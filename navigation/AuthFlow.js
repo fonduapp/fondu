@@ -42,7 +42,7 @@ class LandingScreen extends React.Component {
                 buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
         </View>
         <View style={styles.footer}>
-          <TouchableOpacity><Text style = {{color:'white'}}>Forgot password?</Text></TouchableOpacity>
+          <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
         </View>
       </View>
     );
@@ -69,7 +69,7 @@ class SignInScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style = {textStyle.header}>Welcome back!</Text>
+          <Text style = {textStyle.header3}>Welcome back!</Text>
         </View>
         <View style={styles.contentContainer}>
           <Input
@@ -97,8 +97,8 @@ class SignInScreen extends React.Component {
         <View style={styles.footer}>
           <View style={{flexDirection: 'row', width: '60%', justifyContent:'space-between'}}>
 
-       <TouchableOpacity><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Forgot password?</Text></TouchableOpacity>
-       <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={{fontWeight: '700', fontSize: 12, color: 'gray'}}>Sign Up</Text></TouchableOpacity>
+       <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
+       <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={styles.footerStyle}>Sign Up</Text></TouchableOpacity>
 
       </View>
         </View>
@@ -109,8 +109,11 @@ class SignInScreen extends React.Component {
 
   _signInAsync = async () => {
 
-    let data={"email": this.state.email,
-      "password": this.state.password};
+    const { email, password } = this.state;
+    const emailLowerCase = email.toLowerCase();
+
+    let data={"email": emailLowerCase,
+      "password": password};
 
     //replace with your ip address
     return fetch('http://' + host + ':3000/login',{
@@ -149,9 +152,6 @@ class SignUpScreen extends React.Component {
       email: '',
       password: '',
       password2:'',
-      relationshipStatus: 0,
-      interval: 3,
-      screen: 0, //first or second screen of sign up
       badName: false,
       badEmail: false,
       badPassword: false,
@@ -192,10 +192,20 @@ class SignUpScreen extends React.Component {
   }
 
   goToSettingsScreen(){
-    let validInputs = this.checkForValidRegInput(this.state.name, this.state.email, this.state.password, this.state.password2);
+    const {
+      name,
+      email,
+      password,
+      password2,
+    } = this.state;
+    const emailLowerCase = email.toLowerCase();
+    const validInputs = this.checkForValidRegInput(name, emailLowerCase, password, password2);
 
     if(validInputs){
-      this.setState({screen: 1})
+      this.props.navigation.navigate('RelationshipStatus', {
+        email: emailLowerCase,
+        password,
+      });
     }
 
   }
@@ -222,11 +232,9 @@ class SignUpScreen extends React.Component {
       }
     }
     return (
-      <>
-      { this.state.screen==0 ?
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style = {[textStyle.header, {marginBottom: '20%'}]}>Create Account</Text>
+          <Text style = {textStyle.header3}>Create Account</Text>
         </View>
         <View style={styles.contentContainer}>
           <Input
@@ -238,7 +246,6 @@ class SignUpScreen extends React.Component {
             inputStyle={{color:'white'}}
             inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
             onChangeText={text => this.setState({name: text})}
-
           />
           <Input
             containerStyle={{marginBottom: 10}}
@@ -275,55 +282,149 @@ class SignUpScreen extends React.Component {
           <NextButton title="Sign Up" onPress={this.goToSettingsScreen} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
         </View>
         <View style={styles.footer}>
-          <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={{color:'rgba(255,255,255,0.8)', }}>Sign in</Text></TouchableOpacity>
+          <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={styles.footerStyle}>Sign in</Text></TouchableOpacity>
         </View>
       </View>
-      :
+    );
+  }
+}
+
+class RelationshipStatusScreen extends React.Component {
+  static navigationOptions = {
+  	headerTransparent: true,
+  	headerTintColor:'white',
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedIndex: -1,
+    };
+    this.getRelationshipStatus = this.getRelationshipStatus.bind(this);
+  }
+
+  getRelationshipStatus() {
+    const { selectedIndex } = this.state;
+    switch (selectedIndex) {
+      case 0: return 0;
+      case 1:
+      case 2: return 1;
+      default: return -1;
+    }
+  }
+
+  render() {
+    const { navigation } = this.props;
+    const email = navigation.getParam('email', null);
+    const password = navigation.getParam('password', null);
+    const { selectedIndex } = this.state;
+    const onPressRelationshipStatus = (selectedIndex) => {
+      this.setState({ selectedIndex });
+    };
+    const onPressNext = () => {
+      const relationshipStatus = this.getRelationshipStatus();
+      if (relationshipStatus === -1) {
+        // nothing selected
+        return;
+      }
+      this.props.navigation.navigate('WeeklyGoal', {
+        email,
+        password,
+        relationshipStatus,
+      });
+    };
+    return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style = {textStyle.header}>Let's Get Started </Text>
+          <Text style = {textStyle.header3}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
           <Text>What is your relationship status?</Text>
-          <Picker
-        selectedValue={this.state.relationshipStatus}
-        style={{height: 50}}
-        onValueChange={(itemValue, itemIndex) =>
-          this.setState({relationshipStatus: itemValue})
-        }
-        mode= 'dropdown'
-        >
-        <Picker.Item label="Single" value={0} />
-        <Picker.Item label="In a relationship" value={1} />
-      </Picker>
-          <Text>What is your weekly goal?</Text>
-          <Picker
-        selectedValue={this.state.interval}
-        style={{height: 50}}
-        onValueChange={(itemValue, itemIndex) =>
-          this.setState({interval: itemValue})
-        }
-        mode= 'dropdown'
-        >
-        <Picker.Item label="Casual (Every 3 days)" value={3} />
-        <Picker.Item label="Regular (Every 2 days)" value={2}/>
-        <Picker.Item label="Serious (Every day)" value={1} />
-        </Picker>
-        <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
+          <StyledButtonGroup
+            onPress={onPressRelationshipStatus}
+            selectedIndex={selectedIndex}
+            buttons={['Single', 'In a relationship', 'Other']}
+          />
+          <NextButton
+            title="Next"
+            onPress={onPressNext}
+            buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}
+          />
         </View>
         <View style={styles.footer}/>
       </View>
+    );
+  }
+}
+
+class WeeklyGoalScreen extends React.Component {
+  static navigationOptions = {
+  	headerTransparent: true,
+  	headerTintColor:'white',
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedIndex: -1,
+    };
+    this.getInterval = this.getInterval.bind(this);
+  }
+
+  getInterval() {
+    const { selectedIndex } = this.state;
+    switch (selectedIndex) {
+      case 0: return 3;
+      case 1: return 2;
+      case 2: return 1;
+      default: return -1;
     }
-    </>
+  }
+
+  render() {
+    const { selectedIndex } = this.state;
+    const onPressWeeklyGoal = (selectedIndex) => {
+      this.setState({ selectedIndex });
+    };
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style = {textStyle.header3}>Let's Get Started </Text>
+        </View>
+        <View style={styles.contentContainer}>
+          <Text>What is your weekly goal?</Text>
+          <StyledButtonGroup
+            onPress={onPressWeeklyGoal}
+            selectedIndex={selectedIndex}
+            buttons={[
+              { left: 'casual', right: '2x/week' },
+              { left: 'regular', right: '3x/week' },
+              { left: 'serious', right: '4x/week' },
+            ]}
+          />
+          <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
+        </View>
+        <View style={styles.footer}/>
+      </View>
     );
   }
 
   _signUpAsync = async () => {
+    const { navigation } = this.props;
+    const email = navigation.getParam('email', null);
+    const password = navigation.getParam('password', null);
+    const relationshipStatus = navigation.getParam('relationshipStatus', null);
 
-    let data={"email": this.state.email,
-          "password": this.state.password,
-          "relationshipStatus": this.state.relationshipStatus,
-          "interval": this.state.interval};
+    const interval = this.getInterval();
+    if (interval === -1) {
+      // nothing selected
+      return;
+    }
+
+    let data={"email": email,
+          "password": password,
+          "relationshipStatus": relationshipStatus,
+          "interval": interval};
 
     //replace with your ip address
     return fetch('http://' + host + ':3000/signup',{
@@ -348,7 +449,6 @@ class SignUpScreen extends React.Component {
   };
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -359,9 +459,8 @@ const styles = StyleSheet.create({
     paddingRight: '20%',
   },
   header:{
-    flex: 1,
+    flexGrow: 1,
     marginTop: 200,
-    minHeight: 50,
   },
   contentContainer: {
     alignSelf: 'stretch',
@@ -370,11 +469,90 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     height: 100,
   },
+  footerStyle: {
+    fontWeight: '700',
+    fontSize: 12,
+    color: 'gray',
+  },
   labelStyle: {
     color: 'rgba(255,255,255, 0.5)',
-    fontSize: 13,
+    ...textStyle.caption,
   },
 });
+
+const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
+  const textStyle = {
+    fontSize: 14,
+    color: 'gray',
+    fontFamily: 'poppins-bold',
+    textTransform: 'uppercase',
+  };
+  return (
+    <View
+      style={{
+        alignSelf: 'center',
+        height: 50 * buttons.length,
+        backgroundColor: theme.SECONDARY_COLOR,
+        borderRadius: 25,
+        paddingHorizontal: '15%',
+        paddingVertical: '5%',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        width: '130%',
+      }}
+    >
+      {buttons.map((button, i) => (
+        <View
+          key={i}
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            borderColor: theme.TRANSLUCENT_GRAY,
+            ...(i !== buttons.length - 1 ? { borderBottomWidth: 1 } : []),
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => onPress(i)}
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              borderRadius: 20,
+              width: '115%',
+              paddingHorizontal: '7%',
+              backgroundColor: 'transparent',
+              ...(selectedIndex === i ? {
+                backgroundColor: 'white',
+                elevation: 5,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.8,
+                shadowRadius: 2,
+              } : []),
+            }}
+          >
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={textStyle}>
+                {button.left ? button.left : button}
+              </Text>
+              {button.right && (
+                <Text style={{
+                  flex: 1,
+                  textAlign: 'right',
+                  ...textStyle,
+                }}>
+                  {button.right}
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+  );
+};
 
 // const AppStack = createStackNavigator({ Home: HomeScreen, Other: OtherScreen });
 const AuthStack = createStackNavigator({
@@ -386,8 +564,8 @@ const AuthStack = createStackNavigator({
 				    },
 					SignIn: SignInScreen,
 					SignUp: SignUpScreen,
-
-
+          RelationshipStatus: RelationshipStatusScreen,
+          WeeklyGoal: WeeklyGoalScreen,
 				});
 
 export default AuthStack;

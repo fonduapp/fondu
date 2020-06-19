@@ -3,11 +3,17 @@ import { StyleSheet } from 'react-native';
 const textStyle = StyleSheet.create({
   title: {
   	fontSize: 36,
+    color: 'white',
   },
   header: {
-  	fontSize:36, 
   	fontFamily: 'poppins-bold',
   	fontSize: 24,
+    color: 'white',
+  },
+  header3: {
+  	fontSize:36, 
+  	fontFamily: 'poppins-bold',
+    color: 'white',
   },
   caption:{
   	fontFamily: 'poppins-medium',
