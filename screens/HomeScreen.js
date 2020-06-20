@@ -23,6 +23,7 @@ import ContentModule from '../components/ContentModule';
 import WeekBar from '../components/WeekBar';
 import {textStyle} from '../styles/text.style.js';
 import ProgressBar from '../components/ProgressBar';
+import ModuleProgressBar from '../components/ModuleProgressBar';
 import { SafeAreaView } from 'react-navigation';
 import host from '../constants/Server.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
@@ -124,32 +125,32 @@ export default class HomeScreen extends Component {
     let initialAssessTaken = false
 
     //Get whether user finished initial assessment
-    // fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
-    //   method: 'GET',
-    //   headers: {
-    //     Accept: 'application/json',
-    //     'Content-Type': 'application/json',
-    //   },
-    // })
-    // .then((response) => response.json())
-    // .then((responseJson) => {
-    //   this.setState({initialAssessTaken:responseJson.finished_initial});
-    //   this.props.navigation.setParams({
-    //     initialAssessTaken: responseJson.finished_initial,
-    //   });
-    //   this.setState({initialAssessReady:true});
+    fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({initialAssessTaken:responseJson.finished_initial});
+      this.props.navigation.setParams({
+        initialAssessTaken: responseJson.finished_initial,
+      });
+      this.setState({initialAssessReady:true});
 
-    //   initialAssessTaken = responseJson.finished_initial
-    // })
-    // .catch((error) => {
-    //   console.error(error)
-    // });
+      if(responseJson.finished_initial){
+        this.fetchHomeInfo()
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    });
 
     
 
-    if(initialAssessTaken){
-      this.fetchHomeInfo()
-    }
+
 
 
 
@@ -209,37 +210,79 @@ export default class HomeScreen extends Component {
 
   getHome() {
 
+    let moduleWidth = 320
+    let moduleSpace = 10 // space between modules
+
+    let moduleMargin = width/2 - moduleWidth/2
+    let snapToInterval = moduleWidth+moduleSpace;
+
+    const scrollX = new Animated.Value(0)
 
     return (
-      <View style={this.state.assessmentNotif ? styles.notificationBar : styles.noNotificationBar}>
-
-
+      <View style={styles.container}>
             <View style={styles.welcomeContainer}>
-              <Text style = {[{marginLeft: 45, color:theme.TEXT_COLOR, opacity: 0.6, marginBottom: 10 }, textStyle.subheader]}>This week's area  |  {this.state.recommendedArea.toUpperCase()}</Text>
+              <View style = {[styles.moduleBar, {marginLeft: moduleMargin, marginRight: moduleMargin}]}>
+                <ModuleProgressBar style={styles.progressBar} 
+                                   length={Object.keys(this.state.recommendedBehaviors).length + 1} 
+                                   scrollX={scrollX}
+                                   snapToInterval={snapToInterval}
+                />
+                <Text style={styles.levelContainer}>lv 1</Text>
+              </View>
               <ScrollView
                 style={styles.container}
-                contentContainerStyle={styles.contentContainer}
+                contentContainerStyle={[styles.contentContainer,{paddingLeft: (moduleMargin - moduleSpace/2), paddingRight: (moduleMargin - moduleSpace/2)}]}
                 horizontal= {true}
                 decelerationRate={0}
-                snapToInterval={width - (width - 300)*2/3}
+                snapToInterval={snapToInterval}
                 snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
+                onScroll={Animated.event([
+                    {
+                      nativeEvent: {
+                        contentOffset: {
+                          x: scrollX
+                        }
+                      }
+                    }
+                  ])}
+                  scrollEventThrottle={1}
                 >
 
                 {
-                  Object.keys(this.state.recommendedBehaviors).map((key, index) => ( 
-                    <ContentModule title = {this.state.recommendedBehaviors[key].name}
+                  Object.keys(this.state.recommendedBehaviors).map((key, index) => {
+                    const opacity = scrollX.interpolate({
+                      inputRange: [
+                        snapToInterval * (index - 1),
+                        snapToInterval * index,
+                        snapToInterval * (index + 1)
+                      ],
+                      outputRange: [0, 1, 0],
+                      extrapolate: "clamp"
+                    });
+                    return(
+                    <ContentModule 
+                               title = {this.state.recommendedBehaviors[key].name}
+                               subtitle = {this.state.recommendedArea.toUpperCase()}
                                key={index}
                                onPress={() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
+                               onPress2 = {() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
                                behaviorId={key}
                                style = {{}}
-                    />
-                  ))
+                               width = {moduleWidth}
+                               space = {moduleSpace}
+                               imageOpacity = {opacity}
+                    />)
+                  })
                 }
-                <ContentModule title = 'Review'
+                <ContentModule title = 'Check'
                                onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'review',assessmentComplete:this.initialAssessComplete.bind(this)})}
                                style = {{}}
+                               width = {moduleWidth}
+                               space = {moduleSpace}
+                               highlight= {true}
+
                 />
 
               </ScrollView>
@@ -268,7 +311,7 @@ export default class HomeScreen extends Component {
       headerTitleStyle: {textAlign:"center",
                          flex:1,
                          color: navigation.getParam('initialAssessTaken') ? theme.TEXT_COLOR : '#FFFFFF',
-                         fontWeight: 'bold'},
+                         fontFamily: 'fredokaone-regular',},
       headerLeft: (
                     <TouchableOpacity style={{marginLeft: 25, borderRadius: 50}}
                                       onPress={()=> navigation.navigate('Profile')}>
@@ -281,8 +324,8 @@ export default class HomeScreen extends Component {
       },
       headerRight: ( navigation.getParam('initialAssessTaken') ? <View style={{marginRight: 25, flexDirection: 'row'}}>
                       <Image source={require('../assets/images/streak/streak-fire.png')} style={{height: 30, width: 30}}/>
-                      <Text style={[{marginLeft:5, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.subheader]}>{navigation.getParam('streak')}</Text>
-                      <Text style={[{marginLeft:7, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.subheader]}>lv ?</Text>
+                      <Text style={[{marginLeft:5, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.label]}>{navigation.getParam('streak')}</Text>
+                      <Text style={[{marginLeft:7, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.label]}>lv ?</Text>
                       </View>: null
                     )
     }
@@ -300,41 +343,36 @@ const AppNavigator = createStackNavigator({
 });
 
 const styles = StyleSheet.create({
-  notificationBar:{
-    backgroundColor: theme.PRIMARY_COLOR_4,
-    flex: 1,
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-  },
-  noNotificationBar:{
-    flex: 1,
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-  },
-  notificationText:{
-    padding: mainPadding,
-    color: theme.TERTIARY_COLOR,
-    fontWeight: 'bold',
-    textAlign:'center',
-  },
   textContainer: {
     color: theme.PRIMARY_COLOR,
   },
   container: {
     flex: 1,
-
   },
   contentContainer: {
     paddingTop: 5,
-    paddingLeft: (width - 300)/3,
-    paddingRight: (width - 300)/3,
-
-
   },
   welcomeContainer: {
     marginTop: 10,
     flex:1,
     width: width,
+  },
+  moduleBar: {
+    marginBottom: 5,
+    flexDirection: 'row'
+  },
+  progressBar:{
+    flex:7,
+    marginRight: 40,
+  },
+  levelContainer:{
+    flex:1,
+    textAlign: 'center',
+    padding: 10,
+    backgroundColor: theme.SECONDARY_COLOR,
+    borderRadius: 20,
+    color: theme.TEXT_COLOR,
+    ...textStyle.label,
   },
   mainHeaderText:{
     fontSize: 20,

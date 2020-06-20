@@ -5,6 +5,10 @@ const textStyle = StyleSheet.create({
     fontFamily: 'fredokaone-regular',
   	fontSize: 30,
   },
+  title2: {
+    fontFamily: 'fredokaone-regular',
+    fontSize: 14,
+  },
   header: {
   	fontFamily: 'poppins-bold',
   	fontSize: 24,
@@ -16,6 +20,10 @@ const textStyle = StyleSheet.create({
   caption:{
   	fontFamily: 'poppins-medium',
   	fontSize: 13,
+  },
+  label:{
+    fontFamily: 'poppins-bold',
+    fontSize: 13,
   },
   footer:{
     fontFamily: 'poppins-bold',
