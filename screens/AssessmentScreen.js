@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { ScrollView, StyleSheet, Text, View, StatusBar, Image } from 'react-native';
+import React, { Component, useRef } from 'react';
+import { ScrollView, StyleSheet, Text, View, StatusBar, Image, Dimensions, Animated } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
 import AssessmentQuestions  from '../components/AssessmentQuestions';
 import theme from '../styles/theme.style.js';
@@ -11,20 +11,23 @@ import { _getAuthTokenUserId } from '../constants/Helper.js'
 import host from '../constants/Server.js';
 
 
-export default class AssessmentScreen extends Component{
+const { width } = Dimensions.get('window');
 
-  constructor(props){
+
+export default class AssessmentScreen extends Component{
+    constructor(props){
     super(props)
     const { navigation } = props;
     this.state = {
-      screen:'start', // start, quiz, finish
+      screen:'start', // start, quiz, finish, tutorial
       quizFinish : false,
       score: 0,
       progress:0,
-      assessmentType: JSON.stringify(navigation.getParam('assessmentType','none')),// initial, routine, relationship, none
+      assessmentType: navigation.getParam('assessmentType','none'),// initial, routine, review, relationship, none
       questionDone:false,
       questionRight: false,
       recArea:'nothing',
+      behaviorId : navigation.getParam('behaviorId','none'),
     }
     this.assessmentScreen.bind(this);
     navigation.state.params.assessmentComplete.bind(this);
@@ -54,7 +57,7 @@ export default class AssessmentScreen extends Component{
   async _seeResults(){
     const {authToken, userId} = await _getAuthTokenUserId();
 
-    //find recommended behavior
+    //find recommended area
     console.log('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken)
     fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
       method: 'GET',
@@ -66,7 +69,7 @@ export default class AssessmentScreen extends Component{
     .then((response) => response.json())
     .then((responseJson) => {
       this.setState({
-        recArea: responseJson.area_id,
+        recArea: responseJson.area_name,
       });
     })
     .catch((error) => {
@@ -82,8 +85,14 @@ export default class AssessmentScreen extends Component{
 
   }
 
+  _seeTutorial(){
+    this.setState({ screen: 'tutorial'})
+  }
+
+  
   assessmentScreen(){
-    const { navigation } = this.props;
+    const { navigation } = this.props
+    const scrollX = new Animated.Value(0)
 
     switch(this.state.screen){
       case 'start':
@@ -93,8 +102,7 @@ export default class AssessmentScreen extends Component{
 
           <ProgressNavBar navigation={navigation} color={theme.TEXT_COLOR}/>
           <View style={styles.startScreen}>
-              <View style={styles.mainImageContainer}>
-              </View>
+              <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
               <View style={{flexDirection: 'row', marginBottom: 5}}>
                 <Icon name="access-time" color={theme.TEXT_COLOR} size={17}/>
                 <Text style={[{color:theme.TEXT_COLOR, marginBottom:5, marginLeft:5,},textStyle.caption]}>
@@ -123,8 +131,7 @@ export default class AssessmentScreen extends Component{
       case 'finish':
         return (
         <View style={[styles.startScreen, styles.darkContainer]}>
-            <View style={styles.mainImageContainer}>
-            </View>
+            <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
             <Text style={[textStyle.header, {color:theme.TEXT_COLOR}]}>
               Congrats, you did it!
             </Text>
@@ -149,6 +156,7 @@ export default class AssessmentScreen extends Component{
                                  questionFinish={(result,check) => this._questionFinish(result,check)}
                                  updateProgress={(progress) => this._updateProgress(progress)}
                                  assessmentType = {this.state.assessmentType}
+                                 behaviorId = {this.state.behaviorId}
                                  />
           </View>
         );
@@ -156,7 +164,7 @@ export default class AssessmentScreen extends Component{
         setTimeout(this._seeResults.bind(this), 1000);
         return (
         <View style={[styles.startScreen, styles.darkContainer]}>
-            <Image source = {require('../assets/images/streak-fire.png')} style={{width: 120, height: 120}}/>
+            <Image source = {require('../assets/images/streak/streak-fire.png')} style={{width: 120, height: 120}}/>
             <Text style={[{marginLeft:70, marginRight:70, marginTop: 40}, textStyle.header,{color:theme.TEXT_COLOR}]}>
                 Streak +1
             </Text>
@@ -171,19 +179,90 @@ export default class AssessmentScreen extends Component{
             <Text style={[textStyle.paragraph, {color:theme.TEXT_COLOR}]}>
               Based on the results of this assessment, we have calculated areas that you should focus on a bit more on and areas that you are already excelling at.
             </Text>
-            <View style={styles.mainImageContainer}>
-            </View>
+            <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
             <Text style={[textStyle.caption, {color:theme.TEXT_COLOR}]}>
               YOUR RECOMMENDED FOCUS
             </Text>
-            <Text style={[textStyle.header, {color:theme.PRIMARY_COLOR_6}]}>
+            <Text style={[textStyle.header, {color:theme.PRIMARY_COLOR_6, marginBottom: 20}]}>
               {this.state.recArea}
             </Text>
             <NextButton 
-            onPress={() => this._exitAssessment()} 
+            onPress={() => this._seeTutorial()} 
             title="Next"/>
 
         </View> 
+        );
+      case 'tutorial':
+        const tips = [{'text':'Referencing our resources throughout the week'},{'text':'Exercise the previous behaviors during this week by'},{'text':'Exercise the previous behaviors during this week by'}]
+        return (
+        <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+          <View style={{paddingTop: '15%', paddingLeft: '15%', paddingRight: '15%'}}>
+            <Text style={[textStyle.header, {color:theme.TEXT_COLOR, alignSelf:'flex-start'}]}>
+              What's Next
+            </Text>
+            <Text style={[textStyle.paragraph, {color:theme.TEXT_COLOR}]}>
+              Exercise the previous behaviors during this week by
+            </Text>
+          </View>
+          <ScrollView
+                  contentContainerStyle={styles.contentContainer}
+                  horizontal= {true}
+                  decelerationRate={0}
+                  snapToInterval={width}
+                  snapToAlignment={"center"}
+                  decelerationRate="fast"
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={Animated.event([
+                    {
+                      nativeEvent: {
+                        contentOffset: {
+                          x: scrollX
+                        }
+                      }
+                    }
+                  ])}
+                  scrollEventThrottle={1}
+                  >
+              {tips.map((tip, index)=> (
+                <View style={[styles.scrollScreen]} key={index}>
+
+                  <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
+                  <Text style={[textStyle.header, {color:theme.PRIMARY_COLOR_6, marginBottom: 20}]}>
+                    {tip['text']}
+                  </Text>
+                  <NextButton 
+                  onPress={() => this._exitAssessment()} 
+                  title="Next"/>
+
+                </View> 
+
+              ))}
+
+          </ScrollView>
+          <View
+            style={styles.indicatorContainer}
+            >
+             {tips.map((_, index) => {
+              
+              const iwidth = scrollX.interpolate({
+                inputRange: [
+                  width * (index - 1),
+                  width * index,
+                  width * (index + 1)
+                ],
+                outputRange: [8, 16, 8],
+                extrapolate: "clamp"
+              });
+              console.log("width "+ width + " index " + index + " scrollX" + scrollX + "iwidth" + iwidth)
+              return (
+                <Animated.View
+                  key={index}
+                  style={[styles.normalDot, { width: iwidth}]}
+                />
+              );
+            })}
+          </View>
+        </View>
         );
 
     }
@@ -235,9 +314,16 @@ const styles = StyleSheet.create({
     fontSize:15, 
     lineHeight: 20,
   },
+  scrollScreen:{
+    flex:1,
+    alignItems: 'center',
+    textAlign:'center',
+    justifyContent: 'center',
+    width:width,
+    padding: '5%',
+  },
   startScreen: {
     flex:1,
-    alignSelf:'stretch',
     alignItems: 'center',
     textAlign:'center',
     justifyContent: 'center',
@@ -247,7 +333,20 @@ const styles = StyleSheet.create({
   mainImageContainer:{
     width: 150,
     height:150,
-    backgroundColor: '#F2F2F2',
     marginBottom: 30,
   },
+  normalDot: {
+    height: 8,
+    width: 8,
+    borderRadius: 4,
+    backgroundColor: "silver",
+    marginHorizontal: 4
+  },
+  indicatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position:'absolute', 
+    bottom:40, 
+  }
 });

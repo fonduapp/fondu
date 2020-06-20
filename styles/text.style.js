@@ -2,8 +2,12 @@ import { StyleSheet } from 'react-native';
 
 const textStyle = StyleSheet.create({
   title: {
-  	fontSize: 36,
-    color: 'white',
+    fontFamily: 'fredokaone-regular',
+  	fontSize: 30,
+  },
+  title2: {
+    fontFamily: 'fredokaone-regular',
+    fontSize: 14,
   },
   header: {
   	fontFamily: 'poppins-bold',
@@ -15,11 +19,19 @@ const textStyle = StyleSheet.create({
   	fontFamily: 'poppins-bold',
     color: 'white',
   },
+  header2: {
+    fontFamily: 'poppins-bold',
+    fontSize: 20,
+  },
   caption:{
   	fontFamily: 'poppins-medium',
   	fontSize: 13,
   },
-  footer: {
+  label:{
+    fontFamily: 'poppins-bold',
+    fontSize: 13,
+  },
+  footer:{
     fontFamily: 'poppins-bold',
     fontSize: 10,
   },
@@ -31,7 +43,7 @@ const textStyle = StyleSheet.create({
   	fontFamily: 'poppins-medium',
   },
   paragraph: {
-  	fontFamily: 'poppins-medium',
+  	fontFamily: 'poppins-regular',
   	fontSize: 14,
   }
 

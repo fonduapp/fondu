@@ -23,16 +23,18 @@ import ContentModule from '../components/ContentModule';
 import WeekBar from '../components/WeekBar';
 import {textStyle} from '../styles/text.style.js';
 import ProgressBar from '../components/ProgressBar';
+import ModuleProgressBar from '../components/ModuleProgressBar';
 import { SafeAreaView } from 'react-navigation';
 import host from '../constants/Server.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 
 
+
 const { width } = Dimensions.get('window');
 const mainPadding = 40;
-const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
+var originalFetch = require('isomorphic-fetch');
+var fetch = require('fetch-retry')(originalFetch);
+
 if (Platform.OS === 'android') {
   SafeAreaView.setStatusBarHeight(0);
 }
@@ -46,39 +48,17 @@ export default class HomeScreen extends Component {
       assessmentNotif: false, // toggle to determine whether assessment is ready
       initialAssessReady: true,
       initialAssessTaken: false,
+      recommendedArea:"",
+      recommendedBehaviors:[],
 
     };
   }
 
+  async fetchHomeInfo(){
 
-
-  async componentDidMount(){
-    //find initialAssessTaken
-
-    const {authToken, userId} = await _getAuthTokenUserId();
-
-
-    //Get whether user finished initial assessment
-    // fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
-    //   method: 'GET',
-    //   headers: {
-    //     Accept: 'application/json',
-    //     'Content-Type': 'application/json',
-    //   },
-    // })
-    // .then((response) => response.json())
-    // .then((responseJson) => {
-    //   this.setState({initialAssessTaken:responseJson.finished_initial});
-    //   this.props.navigation.setParams({
-    //     initialAssessTaken: responseJson.finished_initial,
-    //   });
-    //   this.setState({initialAssessReady:true});
-    // })
-    // .catch((error) => {
-    //   console.error(error);
-    // });
-
+    const {authToken, userId} = await _getAuthTokenUserId()
     //Get Streak
+    console.log("!!!!" + 'http://' + host +':3000/streak/' + userId + '/' + authToken)
 
     fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
       method: 'GET',
@@ -96,6 +76,82 @@ export default class HomeScreen extends Component {
     .catch((error) => {
       console.error(error);
     });
+
+    //Get Recommended Area and Behaviors
+    let recArea = 0;
+    console.log('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken)
+    fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({
+        recommendedArea: responseJson.area_name,
+      });
+      console.log(responseJson.area_id)
+      recArea = responseJson.area_id
+
+          console.log('http://' + host +':3000/suggestedBehaviors/' + userId + '/' + authToken + '/' + recArea)
+          fetch('http://' + host +':3000/suggestedBehaviors/' + userId + '/' + authToken + '/' + recArea,{
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((response) => response.json())
+          .then((responseJson) => {
+            this.setState({
+              recommendedBehaviors: responseJson,
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }
+
+  async componentDidMount(){
+    //find initialAssessTaken
+
+    const {authToken, userId} = await _getAuthTokenUserId()
+    let initialAssessTaken = false
+
+    //Get whether user finished initial assessment
+    fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({initialAssessTaken:responseJson.finished_initial});
+      this.props.navigation.setParams({
+        initialAssessTaken: responseJson.finished_initial,
+      });
+      this.setState({initialAssessReady:true});
+
+      if(responseJson.finished_initial){
+        this.fetchHomeInfo()
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    });
+
+    
+
+
+
 
 
   }
@@ -130,6 +186,8 @@ export default class HomeScreen extends Component {
       },
       body: JSON.stringify(data)
     })
+
+    this.fetchHomeInfo()
   }
 
   async routineAssessComplete(){
@@ -139,11 +197,11 @@ export default class HomeScreen extends Component {
   getInitialAssess() {
     return (
       <TouchableOpacity style = {styles.initialAssessContainer} onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'initial',assessmentComplete:this.initialAssessComplete.bind(this)})}>
-        <Text style= {styles.initialAssessText}>Take your first</Text>
-        <Text style = {[textStyle.header,{textAlign: 'center',}]} >Relationship Assessment</Text>
+        <Text style= {[textStyle.subheader,{color:'white', opacity: 0.8, marginBottom: 10}]}>Take your first</Text>
+        <Text style = {[textStyle.header,{textAlign: 'center', color:'white', marginBottom: 10}]} >Relationship Assessment</Text>
         <TouchableOpacity style = {{flexDirection:'row', alignItems:'center', }}>
           <Icon name='help-outline' color="white"/>
-          <Text style= {styles.initialAssessText}>What is this?</Text>
+          <Text style= {[textStyle.caption,{color:'white'}]}>What is this?</Text>
         </TouchableOpacity>
         <Icon style = {{marginTop: '20%'}} name='arrow-downward' color="white" size={48}/>
       </TouchableOpacity>
@@ -151,57 +209,81 @@ export default class HomeScreen extends Component {
   }
 
   getHome() {
-    var today = new Date();
-    let date =   monthNames[today.getMonth()] + " " + today.getDate();
 
+    let moduleWidth = 320
+    let moduleSpace = 10 // space between modules
+
+    let moduleMargin = width/2 - moduleWidth/2
+    let snapToInterval = moduleWidth+moduleSpace;
+
+    const scrollX = new Animated.Value(0)
 
     return (
-      <View style={this.state.assessmentNotif ? styles.notificationBar : styles.noNotificationBar}>
-            { this.state.assessmentNotif ?
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('Assessment')}>
-              <Text style={styles.notificationText}>
-                  Take your routine assessment now!
-              </Text>
-            </TouchableOpacity>
-            : null
-            }
-            <View style = {{ flexDirection: 'row', padding: 30, alignItems: 'center'}}>
-              <ProgressBar color = {theme.PRIMARY_COLOR}
-                           progress = {0.5}
-              />
-            </View>
-
-            <View style = {{marginLeft: 30, marginBottom: 30}}>
-              <Text>Today</Text>
-              <Text style = {{fontSize: 30}}>{date}</Text>
-
-            </View>
-
-
-
+      <View style={styles.container}>
             <View style={styles.welcomeContainer}>
-              <Text style = {{marginLeft: 30 }}>Affection and Fun</Text>
+              <View style = {[styles.moduleBar, {marginLeft: moduleMargin, marginRight: moduleMargin}]}>
+                <ModuleProgressBar style={styles.progressBar} 
+                                   length={Object.keys(this.state.recommendedBehaviors).length + 1} 
+                                   scrollX={scrollX}
+                                   snapToInterval={snapToInterval}
+                />
+                <Text style={styles.levelContainer}>lv 1</Text>
+              </View>
               <ScrollView
                 style={styles.container}
-                contentContainerStyle={styles.contentContainer}
+                contentContainerStyle={[styles.contentContainer,{paddingLeft: (moduleMargin - moduleSpace/2), paddingRight: (moduleMargin - moduleSpace/2)}]}
                 horizontal= {true}
                 decelerationRate={0}
-                snapToInterval={width - (width - 300)*2/3}
+                snapToInterval={snapToInterval}
                 snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
+                onScroll={Animated.event([
+                    {
+                      nativeEvent: {
+                        contentOffset: {
+                          x: scrollX
+                        }
+                      }
+                    }
+                  ])}
+                  scrollEventThrottle={1}
                 >
 
-                <ContentModule title = "Affectionate Touch"
-                               onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
+                {
+                  Object.keys(this.state.recommendedBehaviors).map((key, index) => {
+                    const opacity = scrollX.interpolate({
+                      inputRange: [
+                        snapToInterval * (index - 1),
+                        snapToInterval * index,
+                        snapToInterval * (index + 1)
+                      ],
+                      outputRange: [0, 1, 0],
+                      extrapolate: "clamp"
+                    });
+                    return(
+                    <ContentModule 
+                               title = {this.state.recommendedBehaviors[key].name}
+                               subtitle = {this.state.recommendedArea.toUpperCase()}
+                               key={index}
+                               onPress={() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
+                               onPress2 = {() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
+                               behaviorId={key}
                                style = {{}}
+                               width = {moduleWidth}
+                               space = {moduleSpace}
+                               imageOpacity = {opacity}
+                    />)
+                  })
+                }
+                <ContentModule title = 'Check'
+                               onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'review',assessmentComplete:this.initialAssessComplete.bind(this)})}
+                               style = {{}}
+                               width = {moduleWidth}
+                               space = {moduleSpace}
+                               highlight= {true}
+
                 />
-                <ContentModule title = "Play Behaviors" onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})} />
-                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})} />
-                <ContentModule title = "Affectionate Touch" onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})} />
-
-
-
 
               </ScrollView>
             </View>
@@ -218,7 +300,7 @@ export default class HomeScreen extends Component {
   static navigationOptions = ({ navigation }) => {
 
     return {
-      headerTitle: 'FondU',
+      headerTitle: 'fondu',
       headerStyle: {
         elevation: 0,
         shadowOpacity: 0,
@@ -228,8 +310,8 @@ export default class HomeScreen extends Component {
       headerLayoutPreset: 'center',
       headerTitleStyle: {textAlign:"center",
                          flex:1,
-                         color: navigation.getParam('initialAssessTaken') ? theme.PRIMARY_COLOR : '#FFFFFF',
-                         fontWeight: 'bold'},
+                         color: navigation.getParam('initialAssessTaken') ? theme.TEXT_COLOR : '#FFFFFF',
+                         fontFamily: 'fredokaone-regular',},
       headerLeft: (
                     <TouchableOpacity style={{marginLeft: 25, borderRadius: 50}}
                                       onPress={()=> navigation.navigate('Profile')}>
@@ -241,9 +323,9 @@ export default class HomeScreen extends Component {
         right:0,
       },
       headerRight: ( navigation.getParam('initialAssessTaken') ? <View style={{marginRight: 25, flexDirection: 'row'}}>
-                      <CustomIcon name='streak-fire' size={27} color={theme.PRIMARY_COLOR_6}/>
-                      <Text style={{marginLeft:5, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>{navigation.getParam('streak')}</Text>
-                      <Text style={{marginLeft:7, fontWeight: 'bold', color:theme.PRIMARY_COLOR, alignSelf:'center'}}>lv ?</Text>
+                      <Image source={require('../assets/images/streak/streak-fire.png')} style={{height: 30, width: 30}}/>
+                      <Text style={[{marginLeft:5, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.label]}>{navigation.getParam('streak')}</Text>
+                      <Text style={[{marginLeft:7, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.label]}>lv ?</Text>
                       </View>: null
                     )
     }
@@ -261,41 +343,36 @@ const AppNavigator = createStackNavigator({
 });
 
 const styles = StyleSheet.create({
-  notificationBar:{
-    backgroundColor: theme.PRIMARY_COLOR_4,
-    flex: 1,
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-  },
-  noNotificationBar:{
-    flex: 1,
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-  },
-  notificationText:{
-    padding: mainPadding,
-    color: theme.TERTIARY_COLOR,
-    fontWeight: 'bold',
-    textAlign:'center',
-  },
   textContainer: {
     color: theme.PRIMARY_COLOR,
   },
   container: {
     flex: 1,
-
   },
   contentContainer: {
     paddingTop: 5,
-    paddingLeft: (width - 300)/3,
-    paddingRight: (width - 300)/3,
-
-
   },
   welcomeContainer: {
     marginTop: 10,
     flex:1,
     width: width,
+  },
+  moduleBar: {
+    marginBottom: 5,
+    flexDirection: 'row'
+  },
+  progressBar:{
+    flex:7,
+    marginRight: 40,
+  },
+  levelContainer:{
+    flex:1,
+    textAlign: 'center',
+    padding: 10,
+    backgroundColor: theme.SECONDARY_COLOR,
+    borderRadius: 20,
+    color: theme.TEXT_COLOR,
+    ...textStyle.label,
   },
   mainHeaderText:{
     fontSize: 20,
@@ -317,6 +394,7 @@ const styles = StyleSheet.create({
     flex:1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 50,
   },
   initialAssessText:{
     color: 'white'
