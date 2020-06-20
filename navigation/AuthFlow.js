@@ -355,10 +355,10 @@ class RelationshipStatusScreen extends React.Component {
           <Text style = {textStyle.header3}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
-          <Text style={{ ...textStyle.subheader, color: 'gray' }}>
+          <Text style={{ ...textStyle.subheader, color: theme.TEXT_COLOR_2 }}>
             What is your relationship status?
           </Text>
-          <Text style={{ ...textStyle.footer, color: 'gray', opacity: 0.5 }}>
+          <Text style={{ ...textStyle.footer, color: theme.TEXT_COLOR_2 , opacity: 0.5 }}>
             This information can be changed later
           </Text>
           <StyledButtonGroup
@@ -422,11 +422,11 @@ class WeeklyGoalScreen extends React.Component {
         </View>
         <View style={styles.contentContainer}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ ...textStyle.subheader, color: 'gray', marginRight: 5 }}>
+            <Text style={{ ...textStyle.subheader, color: theme.TEXT_COLOR_2, marginRight: 5 }}>
               What is your weekly goal? 
             </Text>
             <TouchableOpacity onPress={onPressHelp}>
-              <Icon name="help-outline" color="gray" size={20}/>
+              <Icon name="help-outline" color={theme.TEXT_COLOR_2} size={20}/>
             </TouchableOpacity>
           </View>
           <ReferencePopUp
@@ -437,14 +437,14 @@ class WeeklyGoalScreen extends React.Component {
                 <Text style={{ ...textStyle.subheader, marginBottom: 10 }}>
                   What does the weekly goal mean?
                 </Text>
-                <Text style={{ ...textStyle.caption, color: 'gray' }}>
+                <Text style={{ ...textStyle.caption, color: theme.TEXT_COLOR_2 }}>
                   This is the number of lessons we will be giving you per week. Each of our lessons will take around 5 minutes to complete and will teach you about different aspects of a healthy relationship!
                 </Text>
               </View>
             )}
             hide={hideHelp}
           />
-          <Text style={{ ...textStyle.footer, color: 'gray', opacity: 0.5}}>
+          <Text style={{ ...textStyle.footer, color: theme.TEXT_COLOR_2, opacity: 0.5}}>
             This information can be changed later
           </Text>
           <StyledButtonGroup
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
   footerStyle: {
     fontWeight: '700',
     fontSize: 12,
-    color: 'gray',
+    color: theme.TEXT_COLOR_2,
   },
   labelStyle: {
     color: 'rgba(255,255,255, 0.5)',
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
 const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
   const textStyle = {
     fontSize: 14,
-    color: 'gray',
+    color: theme.TEXT_COLOR_2,
     fontFamily: 'poppins-bold',
     textTransform: 'uppercase',
   };
