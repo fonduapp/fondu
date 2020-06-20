@@ -100,12 +100,10 @@ class SignInScreen extends React.Component {
           />
         </View>
         <View style={styles.footer}>
-          <View style={{flexDirection: 'row', width: '60%', justifyContent:'space-between'}}>
-
-       <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
-       <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={styles.footerStyle}>Sign Up</Text></TouchableOpacity>
-
-      </View>
+            <View style={{ flexDirection: 'row', width: '100%', justifyContent:'space-between' }}>
+             <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
+             <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={styles.footerStyle}>Sign Up</Text></TouchableOpacity>
+            </View>
         </View>
 
       </View>
@@ -520,8 +518,9 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   footer: {
-    alignSelf: 'center',
+    alignItems: 'center',
     height: 100,
+    width: '100%',
   },
   footerStyle: {
     fontWeight: '700',
