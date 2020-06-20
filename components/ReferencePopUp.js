@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
     maxHeight: height*1/2,
     top: height/4,
     left: width*1/8,
-    justifyContent:'flex-start'
+    justifyContent:'flex-start',
+    marginLeft: 0,
   },
   problemText:{
     color: '#7B80FF',
