@@ -66,6 +66,8 @@ class SignInScreen extends React.Component {
 
   render() {
 
+    const { email, password } = this.state;
+
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -74,8 +76,6 @@ class SignInScreen extends React.Component {
         <View style={styles.contentContainer}>
           <Input
             containerStyle={{marginBottom: 10}}
-            errorStyle={{ color: 'red' }}
-            errorMessage={this.state.badEmail ? 'Please enter a valid email' : ''}
             label='EMAIL'
             labelStyle={styles.labelStyle}
             inputStyle={{color:'white'}}
@@ -92,7 +92,12 @@ class SignInScreen extends React.Component {
             secureTextEntry={true}
           />
           <NextButton title="Sign In" onPress={this._signInAsync}
-                buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
+                buttonStyle={{
+                  marginBottom:10,
+                  backgroundColor: theme.PRIMARY_COLOR,
+                }}
+                disabled={email === '' || password === ''}
+          />
         </View>
         <View style={styles.footer}>
           <View style={{flexDirection: 'row', width: '60%', justifyContent:'space-between'}}>
@@ -111,7 +116,6 @@ class SignInScreen extends React.Component {
 
     const { email, password } = this.state;
     const emailLowerCase = email.toLowerCase();
-
     let data={"email": emailLowerCase,
       "password": password};
 
@@ -167,7 +171,7 @@ class SignUpScreen extends React.Component {
     this.setState({ badName: !validName });
 
     //check is email is valid
-    var validator = require("email-validator");
+    const validator = require("email-validator");
     let validEmail = validator.validate(email); // true
     if(!validEmail){
       this.setState({badEmail:true});
@@ -211,21 +215,31 @@ class SignUpScreen extends React.Component {
   }
 
   render() {
+    const {
+      name,
+      email,
+      password,
+      password2,
+      badName,
+      badEmail,
+      badPassword,
+      badConfirmPass,
+    } = this.state;
     // only show the first error
     let nameError = false;
     let emailError = false;
     let passwordError = false;
     let confirmPassError = false;
-    if (this.state.badName) {
+    if (badName) {
       nameError = true;
     } else {
-      if (this.state.badEmail) {
+      if (badEmail) {
         emailError = true;
       } else {
-        if (this.state.badPassword) {
+        if (badPassword) {
           passwordError = true;
         } else {
-          if (this.state.badConfirmPass) {
+          if (badConfirmPass) {
             confirmPassError = true;
           }
         }
@@ -279,7 +293,13 @@ class SignUpScreen extends React.Component {
             onChangeText={text => this.setState({password2: text})}
             secureTextEntry={true}
           />
-          <NextButton title="Sign Up" onPress={this.goToSettingsScreen} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
+          <NextButton title="Sign Up" onPress={this.goToSettingsScreen}
+            buttonStyle={{
+              backgroundColor: theme.PRIMARY_COLOR,
+              marginBottom: 10,
+            }}
+            disabled={name === '' || email === '' || password === '' || password2 === ''}
+          />
         </View>
         <View style={styles.footer}>
           <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={styles.footerStyle}>Sign in</Text></TouchableOpacity>
@@ -323,10 +343,6 @@ class RelationshipStatusScreen extends React.Component {
     };
     const onPressNext = () => {
       const relationshipStatus = this.getRelationshipStatus();
-      if (relationshipStatus === -1) {
-        // nothing selected
-        return;
-      }
       this.props.navigation.navigate('WeeklyGoal', {
         email,
         password,
@@ -354,6 +370,7 @@ class RelationshipStatusScreen extends React.Component {
             title="Next"
             onPress={onPressNext}
             buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}
+            disabled={selectedIndex < 0}
           />
         </View>
         <View style={styles.footer}/>
@@ -439,7 +456,12 @@ class WeeklyGoalScreen extends React.Component {
               { left: 'serious', right: '4x/week' },
             ]}
           />
-          <NextButton title="Next" onPress={this._signUpAsync} buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}/>
+          <NextButton
+            title="Next"
+            onPress={this._signUpAsync}
+            buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}
+            disabled={selectedIndex < 0}
+          />
         </View>
         <View style={styles.footer}/>
       </View>
@@ -453,11 +475,6 @@ class WeeklyGoalScreen extends React.Component {
     const relationshipStatus = navigation.getParam('relationshipStatus', null);
 
     const interval = this.getInterval();
-    if (interval === -1) {
-      // nothing selected
-      return;
-    }
-
     let data={"email": email,
           "password": password,
           "relationshipStatus": relationshipStatus,
