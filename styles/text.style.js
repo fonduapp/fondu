@@ -12,12 +12,10 @@ const textStyle = StyleSheet.create({
   header: {
   	fontFamily: 'poppins-bold',
   	fontSize: 24,
-    color: 'white',
   },
   header3: {
   	fontSize:36, 
   	fontFamily: 'poppins-bold',
-    color: 'white',
   },
   header2: {
     fontFamily: 'poppins-bold',

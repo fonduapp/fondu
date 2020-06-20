@@ -31,7 +31,7 @@ class LandingScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={{ flex: 1, marginTop: 140 }}>
-          <Text style={textStyle.title}>fondu</Text>
+          <Text style={{ ...textStyle.title, color: 'white' }}>fondu</Text>
         </View>
         <View style={styles.contentContainer}>
           <NextButton title="Sign In"
@@ -71,7 +71,7 @@ class SignInScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style = {textStyle.header3}>Welcome back!</Text>
+          <Text style = {styles.headerText}>Welcome back!</Text>
         </View>
         <View style={styles.contentContainer}>
           <Input
@@ -246,7 +246,7 @@ class SignUpScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style = {textStyle.header3}>Create Account</Text>
+          <Text style = {styles.headerText}>Create Account</Text>
         </View>
         <View style={styles.contentContainer}>
           <Input
@@ -350,7 +350,7 @@ class RelationshipStatusScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style = {textStyle.header3}>Let's Get Started </Text>
+          <Text style = {styles.headerText}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
           <Text style={{ ...textStyle.subheader, color: theme.TEXT_COLOR_2 }}>
@@ -416,7 +416,7 @@ class WeeklyGoalScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style = {textStyle.header3}>Let's Get Started </Text>
+          <Text style = {styles.headerText}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -530,6 +530,10 @@ const styles = StyleSheet.create({
   labelStyle: {
     color: 'rgba(255,255,255, 0.5)',
     ...textStyle.caption,
+  },
+  headerText: {
+    ...textStyle.header3,
+    color: 'white',
   },
 });
 
