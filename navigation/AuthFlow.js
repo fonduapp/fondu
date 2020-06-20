@@ -17,7 +17,7 @@ import theme from '../styles/theme.style.js';
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {textStyle} from '../styles/text.style.js';
-
+import ReferencePopUp from '../components/ReferencePopUp.js';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import host from '../constants/Server.js';
@@ -339,10 +339,10 @@ class RelationshipStatusScreen extends React.Component {
           <Text style = {textStyle.header3}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
-          <Text style={{...textStyle.subheader, color: 'gray'}}>
+          <Text style={{ ...textStyle.subheader, color: 'gray' }}>
             What is your relationship status?
           </Text>
-          <Text style={{...textStyle.footer, color: 'gray', opacity: 0.5}}>
+          <Text style={{ ...textStyle.footer, color: 'gray', opacity: 0.5 }}>
             This information can be changed later
           </Text>
           <StyledButtonGroup
@@ -372,6 +372,7 @@ class WeeklyGoalScreen extends React.Component {
     super(props);
     this.state = {
       selectedIndex: -1,
+      showHelp: false,
     };
     this.getInterval = this.getInterval.bind(this);
   }
@@ -387,9 +388,15 @@ class WeeklyGoalScreen extends React.Component {
   }
 
   render() {
-    const { selectedIndex } = this.state;
+    const { selectedIndex, showHelp } = this.state;
     const onPressWeeklyGoal = (selectedIndex) => {
       this.setState({ selectedIndex });
+    };
+    const onPressHelp = () => {
+      this.setState({ showHelp: true });
+    };
+    const hideHelp = () => {
+      this.setState({ showHelp: false });
     };
     return (
       <View style={styles.container}>
@@ -397,10 +404,30 @@ class WeeklyGoalScreen extends React.Component {
           <Text style = {textStyle.header3}>Let's Get Started </Text>
         </View>
         <View style={styles.contentContainer}>
-          <Text style={{...textStyle.subheader, color: 'gray'}}>
-            What is your weekly goal?
-          </Text>
-          <Text style={{...textStyle.footer, color: 'gray', opacity: 0.5}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ ...textStyle.subheader, color: 'gray', marginRight: 5 }}>
+              What is your weekly goal? 
+            </Text>
+            <TouchableOpacity onPress={onPressHelp}>
+              <Icon name="help-outline" color="gray" size={20}/>
+            </TouchableOpacity>
+          </View>
+          <ReferencePopUp
+            showRef={showHelp}
+            refs={[]}
+            content={(
+              <View margin={20}>
+                <Text style={{ ...textStyle.subheader, marginBottom: 10 }}>
+                  What does the weekly goal mean?
+                </Text>
+                <Text style={{ ...textStyle.caption, color: 'gray' }}>
+                  This is the number of lessons we will be giving you per week. Each of our lessons will take around 5 minutes to complete and will teach you about different aspects of a healthy relationship!
+                </Text>
+              </View>
+            )}
+            hide={hideHelp}
+          />
+          <Text style={{ ...textStyle.footer, color: 'gray', opacity: 0.5}}>
             This information can be changed later
           </Text>
           <StyledButtonGroup
