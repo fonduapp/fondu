@@ -74,20 +74,13 @@ class SignInScreen extends React.Component {
           <Text style = {styles.headerText}>Welcome back!</Text>
         </View>
         <View style={styles.contentContainer}>
-          <Input
-            containerStyle={{marginBottom: 10}}
+          <StyledInput
             label='EMAIL'
-            labelStyle={styles.labelStyle}
-            inputStyle={{color:'white'}}
-            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
             onChangeText={text => this.setState({email: text})}
           />
-          <Input
+          <StyledInput
             containerStyle={{marginBottom: 20}}
             label='PASSWORD'
-            labelStyle={styles.labelStyle}
-            inputStyle={{color:'white'}}
-            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
             onChangeText={text => this.setState({password: text})}
             secureTextEntry={true}
           />
@@ -101,8 +94,8 @@ class SignInScreen extends React.Component {
         </View>
         <View style={styles.footer}>
             <View style={{ flexDirection: 'row', width: '100%', justifyContent:'space-between' }}>
-             <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
-             <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={styles.footerStyle}>Sign Up</Text></TouchableOpacity>
+             <TouchableOpacity><Text style={styles.signInFooterStyle}>Forgot password?</Text></TouchableOpacity>
+             <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignUp')}><Text style={styles.signInFooterStyle}>Sign Up</Text></TouchableOpacity>
             </View>
         </View>
 
@@ -160,56 +153,85 @@ class SignUpScreen extends React.Component {
       badConfirmPass: false,
     };
     this.goToSettingsScreen=this.goToSettingsScreen.bind(this);
-
+    this.isInputValid = this.isInputValid.bind(this);
+    this.onEndEditingName = this.onEndEditingName.bind(this);
+    this.onEndEditingEmail = this.onEndEditingEmail.bind(this);
+    this.onEndEditingPassword = this.onEndEditingPassword.bind(this);
+    this.onEndEditingConfirmPass = this.onEndEditingConfirmPass.bind(this);
   }
 
-  checkForValidRegInput(name, email, password, password2){
-    // check if name is valid
-    const validName = name.length > 0;
-    this.setState({ badName: !validName });
-
-    //check is email is valid
-    const validator = require("email-validator");
-    let validEmail = validator.validate(email); // true
-    if(!validEmail){
-      this.setState({badEmail:true});
-    }else{
-      this.setState({badEmail:false});
-    }
-    
-    // check if password is secure
-    const securePassword = /(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/.test(password);
-    this.setState({ badPassword: !securePassword });
-
-    //check is password is valid
-    let validPassword = (password === password2);
-    if(!validPassword){
-      this.setState({badConfirmPass:true});
-    }else{
-      this.setState({badConfirmPass:false});
-    }
-
-    return validName && validEmail && securePassword && validPassword;
-
+  isNameValid(name) {
+    return name.length > 0;
   }
 
-  goToSettingsScreen(){
+  isEmailValid(email) {
+    const validator = require('email-validator');
+    return validator.validate(email);
+  }
+
+  isPasswordValid(password) {
+    return /(?=.{8,})(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/.test(password);
+  }
+
+  isConfirmPassValid(password, password2) {
+    return password === password2;
+  }
+
+  isInputValid(){
     const {
-      name,
+  	  name,
       email,
       password,
       password2,
     } = this.state;
-    const emailLowerCase = email.toLowerCase();
-    const validInputs = this.checkForValidRegInput(name, emailLowerCase, password, password2);
+    return (
+      this.isNameValid(name)
+      && this.isEmailValid(email)
+      && this.isPasswordValid(password)
+      && this.isConfirmPassValid(password, password2)
+    );
+  }
 
-    if(validInputs){
-      this.props.navigation.navigate('RelationshipStatus', {
-        email: emailLowerCase,
-        password,
-      });
+  onEndEditingName(event) {
+    const { nativeEvent: { text: name }} = event;
+    this.setState({ badName: !this.isNameValid(name) });
+  }
+
+  onEndEditingEmail(event) {
+    const { nativeEvent: { text: email }} = event;
+    this.setState({ badEmail: !this.isEmailValid(email) });
+  }
+
+  onEndEditingPassword(event) {
+    const { nativeEvent: { text: password }} = event;
+    this.setState({ badPassword: !this.isPasswordValid(password) });
+    const { password2 } = this.state;
+    if (password2 !== '') {
+      this.setState({ badConfirmPass: !this.isConfirmPassValid(password, password2) });
+    }
+  }
+
+  onEndEditingConfirmPass(event) {
+    const { nativeEvent: { text: confirmPass }} = event;
+    const { password } = this.state;
+    this.setState({ badConfirmPass: !this.isConfirmPassValid(password, confirmPass) });
+  }
+
+  goToSettingsScreen(){
+    if (!this.isInputValid()) {
+      return;
     }
 
+    const {
+      email,
+      password,
+    } = this.state;
+    const emailLowerCase = email.toLowerCase();
+
+    this.props.navigation.navigate('RelationshipStatus', {
+      email: emailLowerCase,
+      password,
+    });
   }
 
   render() {
@@ -223,80 +245,45 @@ class SignUpScreen extends React.Component {
       badPassword,
       badConfirmPass,
     } = this.state;
-    // only show the first error
-    let nameError = false;
-    let emailError = false;
-    let passwordError = false;
-    let confirmPassError = false;
-    if (badName) {
-      nameError = true;
-    } else {
-      if (badEmail) {
-        emailError = true;
-      } else {
-        if (badPassword) {
-          passwordError = true;
-        } else {
-          if (badConfirmPass) {
-            confirmPassError = true;
-          }
-        }
-      }
-    }
     return (
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Create Account</Text>
         </View>
         <View style={styles.contentContainer}>
-          <Input
-            containerStyle={{marginBottom: 10}}
-            errorStyle={{ color: 'red' }}
-            errorMessage={nameError ? 'Please enter a name' : ''}
+          <StyledInput
+            errorMessage={badName ? 'Please enter a name' : ''}
             label='NAME'
-            labelStyle={styles.labelStyle}
-            inputStyle={{color:'white'}}
-            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
             onChangeText={text => this.setState({name: text})}
+            onEndEditing={this.onEndEditingName}
           />
-          <Input
-            containerStyle={{marginBottom: 10}}
-            errorStyle={{ color: 'red' }}
-            errorMessage={emailError ? 'Please enter a valid email' : ''}
+          <StyledInput
+            errorMessage={badEmail ? 'Please enter a valid email' : ''}
             label='EMAIL'
-            labelStyle={styles.labelStyle}
-            inputStyle={{color:'white'}}
-            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
             onChangeText={text => this.setState({email: text})}
+            onEndEditing={this.onEndEditingEmail}
           />
-          <Input
-            containerStyle={{marginBottom: 10}}
-            errorStyle={{ color: 'red' }}
-            errorMessage={passwordError ? 'Must contain at least 8 characters, uppercase and lowercase letters, a digit, and a symbol' : ''}
+          <StyledInput
+            errorMessage={badPassword ? 'Must contain at least 8 characters, uppercase and lowercase letters, a digit, and a symbol' : ''}
             label='PASSWORD'
-            labelStyle={styles.labelStyle}
-            inputStyle={{color:'white'}}
-            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
             onChangeText={text => this.setState({password: text})}
             secureTextEntry={true}
+            onEndEditing={this.onEndEditingPassword}
           />
-          <Input
+          <StyledInput
             containerStyle={{marginBottom: 20}}
-            errorStyle={{ color: 'red' }}
-            errorMessage={confirmPassError ? 'Passwords do not match' : ''}
+            errorMessage={badConfirmPass ? 'Passwords do not match' : ''}
             label='CONFIRM PASSWORD'
-            labelStyle={styles.labelStyle}
-            inputStyle={{color:'white'}}
-            inputContainerStyle={{borderColor:'rgba(255, 255, 255, 0.5)'}}
             onChangeText={text => this.setState({password2: text})}
             secureTextEntry={true}
+            onEndEditing={this.onEndEditingConfirmPass}
           />
           <NextButton title="Sign Up" onPress={this.goToSettingsScreen}
             buttonStyle={{
               backgroundColor: theme.PRIMARY_COLOR,
               marginBottom: 10,
             }}
-            disabled={name === '' || email === '' || password === '' || password2 === ''}
+            disabled={!this.isInputValid()}
           />
         </View>
         <View style={styles.footer}>
@@ -522,14 +509,13 @@ const styles = StyleSheet.create({
     height: 100,
     width: '100%',
   },
-  footerStyle: {
-    fontWeight: '700',
-    fontSize: 12,
+  signInFooterStyle: {
+    ...textStyle.label,
     color: theme.TEXT_COLOR_2,
   },
-  labelStyle: {
-    color: 'rgba(255,255,255, 0.5)',
-    ...textStyle.caption,
+  footerStyle: {
+    ...textStyle.label,
+    color: 'white',
   },
   headerText: {
     ...textStyle.header3,
@@ -537,13 +523,35 @@ const styles = StyleSheet.create({
   },
 });
 
+const StyledInput = (props) => (
+  <Input 
+    containerStyle={{ marginBottom: 10 }}
+    errorStyle={{
+      ...textStyle.label,
+      color: 'red',
+    }}
+    labelStyle={{
+      color: 'rgba(255,255,255, 0.5)',
+      ...textStyle.caption,
+    }}
+    inputStyle={{
+      ...textStyle.label,
+      color: 'white',
+    }}
+    inputContainerStyle={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
+    selectionColor={theme.PRIMARY_COLOR}
+    { ...props }
+  />
+);
+
 const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
-  const textStyle = {
+  const textStyle = (index) => ({
     fontSize: 14,
     color: theme.TEXT_COLOR_2,
     fontFamily: 'poppins-bold',
     textTransform: 'uppercase',
-  };
+    opacity: selectedIndex < 0 || selectedIndex === index ? 1.0 : 0.5,
+  });
   return (
     <View
       style={{
@@ -592,14 +600,14 @@ const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
             }}
           >
             <View style={{ flexDirection: 'row' }}>
-              <Text style={textStyle}>
+              <Text style={textStyle(i)}>
                 {button.left ? button.left : button}
               </Text>
               {button.right && (
                 <Text style={{
                   flex: 1,
                   textAlign: 'right',
-                  ...textStyle,
+                  ...textStyle(i),
                 }}>
                   {button.right}
                 </Text>
