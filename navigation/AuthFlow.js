@@ -61,13 +61,14 @@ class SignInScreen extends React.Component {
   	this.state = {
       email: '',
       password: '',
+      invalidLogin: false,
     };
   }
 
 
   render() {
 
-    const { email, password } = this.state;
+    const { email, password, invalidLogin } = this.state;
 
     return (
       <View style={styles.container}>
@@ -76,6 +77,8 @@ class SignInScreen extends React.Component {
         </View>
         <View style={styles.contentContainer}>
           <StyledInput
+            errorMessage={invalidLogin ? 'This email and/or password are invalid' : ''}
+            renderErrorAbove
             label='EMAIL'
             onChangeText={text => this.setState({email: text})}
           />
@@ -123,10 +126,21 @@ class SignInScreen extends React.Component {
     .then((response) => response.json())
     .then((responseJson) => {
       console.log(responseJson);
-      AsyncStorage.setItem('authToken', responseJson.authToken);
-     AsyncStorage.setItem('userId', responseJson.userId.toString());
-      this.props.navigation.navigate('Main');
-    })
+      if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
+        AsyncStorage.setItem('authToken', responseJson.authToken);
+        AsyncStorage.setItem('userId', responseJson.userId.toString());
+        this.props.navigation.navigate('Main');
+      } else {
+        // error
+        if (
+          responseJson.error === 'Email doesn\'t exist'
+          || responseJson.error === 'Incorrect password'
+        ) {
+          this.setState({ invalidLogin: true });
+        } else {
+          // unknown error
+        }
+    }})
     .catch((error) => {
       console.error(error);
     });
@@ -249,6 +263,8 @@ class SignUpScreen extends React.Component {
         // error
         if (responseJson.code === 'ER_DUP_ENTRY') {
           this.setState({ duplicateEmail: true });
+        } else {
+          // unknown error
         }
       }
     })
@@ -585,29 +601,39 @@ const styles = StyleSheet.create({
   },
 });
 
-const StyledInput = ({ errorMessage, containerStyle, ...rest }) => (
-  <View style={{ marginBottom: 10, ...containerStyle }}>
-    <Input 
-      containerStyle={{ paddingHorizontal: 0 }}
-      labelStyle={{
-        color: 'rgba(255,255,255, 0.5)',
-        ...textStyle.caption,
-      }}
-      inputStyle={{
-        ...textStyle.label,
-        color: 'white',
-      }}
-      inputContainerStyle={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-      selectionColor={theme.PRIMARY_COLOR}
-      { ...rest }
-    />
-    {!!errorMessage && (
-      <Text style={{ ...textStyle.caption, color: 'red' }}>
-        {errorMessage}
-      </Text>
-    )}
-  </View>
-);
+const StyledInput = (props) => {
+  const {
+    errorMessage,
+    containerStyle,
+    renderErrorAbove = false,
+    ...rest
+  } = props;
+  const errorComponent = !!errorMessage && (
+    <Text style={{ ...textStyle.caption, color: 'red' }}>
+      {errorMessage}
+    </Text>
+  );
+  return (
+    <View style={{ marginBottom: 10, ...containerStyle }}>
+      {!!renderErrorAbove && errorComponent}
+      <Input 
+        containerStyle={{ paddingHorizontal: 0 }}
+        labelStyle={{
+          color: 'rgba(255,255,255, 0.5)',
+          ...textStyle.caption,
+        }}
+        inputStyle={{
+          ...textStyle.label,
+          color: 'white',
+        }}
+        inputContainerStyle={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
+        selectionColor={theme.PRIMARY_COLOR}
+        { ...rest }
+      />
+      {!renderErrorAbove && errorComponent}
+    </View>
+  );
+};
 
 const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
   const textStyle = (index) => ({
