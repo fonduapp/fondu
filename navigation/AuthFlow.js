@@ -21,6 +21,7 @@ import ReferencePopUp from '../components/ReferencePopUp.js';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import host from '../constants/Server.js';
+import { _getAuthTokenUserId } from '../constants/Helper.js'
 
 
 class LandingScreen extends React.Component {
@@ -152,7 +153,6 @@ class SignUpScreen extends React.Component {
       badPassword: false,
       badConfirmPass: false,
     };
-    this.goToSettingsScreen=this.goToSettingsScreen.bind(this);
     this.isInputValid = this.isInputValid.bind(this);
     this.onEndEditingName = this.onEndEditingName.bind(this);
     this.onEndEditingEmail = this.onEndEditingEmail.bind(this);
@@ -217,22 +217,36 @@ class SignUpScreen extends React.Component {
     this.setState({ badConfirmPass: !this.isConfirmPassValid(password, confirmPass) });
   }
 
-  goToSettingsScreen(){
-    if (!this.isInputValid()) {
-      return;
-    }
-
-    const {
-      email,
-      password,
-    } = this.state;
+  _signUpAsync = async () => {
+    const { email, password } = this.state;
     const emailLowerCase = email.toLowerCase();
 
-    this.props.navigation.navigate('RelationshipStatus', {
-      email: emailLowerCase,
-      password,
+    let data = {
+      "email": emailLowerCase,
+      "password": password,
+    };
+
+    //replace with your ip address
+    return fetch('http://' + host + ':3000/signup',{
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      console.log(responseJson);
+      AsyncStorage.setItem('authToken', responseJson.authToken);
+      AsyncStorage.setItem('userId', responseJson.userId.toString());
+      this.props.navigation.navigate('RelationshipStatus');
+    })
+    .catch((error) => {
+      console.error(error);
     });
-  }
+
+  };
 
   render() {
     const {
@@ -278,7 +292,7 @@ class SignUpScreen extends React.Component {
             secureTextEntry={true}
             onEndEditing={this.onEndEditingConfirmPass}
           />
-          <NextButton title="Sign Up" onPress={this.goToSettingsScreen}
+          <NextButton title="Sign Up" onPress={this._signUpAsync}
             buttonStyle={{
               backgroundColor: theme.PRIMARY_COLOR,
               marginBottom: 10,
@@ -311,28 +325,45 @@ class RelationshipStatusScreen extends React.Component {
   getRelationshipStatus() {
     const { selectedIndex } = this.state;
     switch (selectedIndex) {
-      case 0: return 0;
+      case 0: return 1;
       case 1:
-      case 2: return 1;
-      default: return -1;
+      case 2: return 2;
+      default: return 0;
     }
   }
 
+  _relationshipStatusAsync = async () => {
+    const relationshipStatus = this.getRelationshipStatus();
+    const { authToken, userId } = await _getAuthTokenUserId();
+
+    let data = {
+      "userId": userId,
+      "authToken": authToken,
+      "relationshipStatus": relationshipStatus,
+    };
+
+    //replace with your ip address
+    return fetch('http://' + host + ':3000/updateRelationshipStatus',{
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  };
+
   render() {
-    const { navigation } = this.props;
-    const email = navigation.getParam('email', null);
-    const password = navigation.getParam('password', null);
     const { selectedIndex } = this.state;
     const onPressRelationshipStatus = (selectedIndex) => {
       this.setState({ selectedIndex });
     };
     const onPressNext = () => {
-      const relationshipStatus = this.getRelationshipStatus();
-      this.props.navigation.navigate('WeeklyGoal', {
-        email,
-        password,
-        relationshipStatus,
-      });
+      this._relationshipStatusAsync();
+      this.props.navigation.navigate('WeeklyGoal');
     };
     return (
       <View style={styles.container}>
@@ -382,12 +413,36 @@ class WeeklyGoalScreen extends React.Component {
   getInterval() {
     const { selectedIndex } = this.state;
     switch (selectedIndex) {
-      case 0: return 3;
+      case 0: return 1;
       case 1: return 2;
-      case 2: return 1;
-      default: return -1;
+      case 2: return 3;
+      default: return 0;
     }
   }
+
+  _intervalAsync = async () => {
+    const interval = this.getInterval();
+    const { authToken, userId } = await _getAuthTokenUserId();
+
+    let data = {
+      "userId": userId,
+      "authToken": authToken,
+      "interval": interval,
+    };
+
+    //replace with your ip address
+    return fetch('http://' + host + ':3000/updateInterval',{
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  };
 
   render() {
     const { selectedIndex, showHelp } = this.state;
@@ -399,6 +454,10 @@ class WeeklyGoalScreen extends React.Component {
     };
     const hideHelp = () => {
       this.setState({ showHelp: false });
+    };
+    const onPressNext = () => {
+      this._intervalAsync();
+      this.props.navigation.navigate('Main');
     };
     return (
       <View style={styles.container}>
@@ -436,14 +495,14 @@ class WeeklyGoalScreen extends React.Component {
             onPress={onPressWeeklyGoal}
             selectedIndex={selectedIndex}
             buttons={[
-              { left: 'casual', right: '2x/week' },
-              { left: 'regular', right: '3x/week' },
-              { left: 'serious', right: '4x/week' },
+              { left: 'casual', right: '1x/week' },
+              { left: 'regular', right: '2x/week' },
+              { left: 'serious', right: '3x/week' },
             ]}
           />
           <NextButton
             title="Next"
-            onPress={this._signUpAsync}
+            onPress={onPressNext}
             buttonStyle = {{backgroundColor: theme.PRIMARY_COLOR, marginBottom: 10}}
             disabled={selectedIndex < 0}
           />
@@ -452,40 +511,6 @@ class WeeklyGoalScreen extends React.Component {
       </View>
     );
   }
-
-  _signUpAsync = async () => {
-    const { navigation } = this.props;
-    const email = navigation.getParam('email', null);
-    const password = navigation.getParam('password', null);
-    const relationshipStatus = navigation.getParam('relationshipStatus', null);
-
-    const interval = this.getInterval();
-    let data={"email": email,
-          "password": password,
-          "relationshipStatus": relationshipStatus,
-          "interval": interval};
-
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/signup',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      console.log(responseJson);
-      AsyncStorage.setItem('authToken', responseJson.authToken);
-      AsyncStorage.setItem('userId', responseJson.userId.toString());
-      this.props.navigation.navigate('Main');
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-  };
 }
 
 const styles = StyleSheet.create({
