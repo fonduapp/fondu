@@ -152,6 +152,7 @@ class SignUpScreen extends React.Component {
       badEmail: false,
       badPassword: false,
       badConfirmPass: false,
+      duplicateEmail: false,
     };
     this.isInputValid = this.isInputValid.bind(this);
     this.onEndEditingName = this.onEndEditingName.bind(this);
@@ -183,12 +184,14 @@ class SignUpScreen extends React.Component {
       email,
       password,
       password2,
+      duplicateEmail,
     } = this.state;
     return (
       this.isNameValid(name)
       && this.isEmailValid(email)
       && this.isPasswordValid(password)
       && this.isConfirmPassValid(password, password2)
+      && !duplicateEmail
     );
   }
 
@@ -238,9 +241,16 @@ class SignUpScreen extends React.Component {
     .then((response) => response.json())
     .then((responseJson) => {
       console.log(responseJson);
-      AsyncStorage.setItem('authToken', responseJson.authToken);
-      AsyncStorage.setItem('userId', responseJson.userId.toString());
-      this.props.navigation.navigate('RelationshipStatus');
+      if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
+        AsyncStorage.setItem('authToken', responseJson.authToken);
+        AsyncStorage.setItem('userId', responseJson.userId.toString());
+        this.props.navigation.navigate('RelationshipStatus');
+      } else {
+        // error
+        if (responseJson.code === 'ER_DUP_ENTRY') {
+          this.setState({ duplicateEmail: true });
+        }
+      }
     })
     .catch((error) => {
       console.error(error);
@@ -258,7 +268,34 @@ class SignUpScreen extends React.Component {
       badEmail,
       badPassword,
       badConfirmPass,
+      duplicateEmail,
     } = this.state;
+    let emailErrorMessage = '';
+    if (duplicateEmail) {
+      const linkStyle = { fontFamily: 'poppins-black' };
+      emailErrorMessage = (
+        <>
+          <Text>
+            {'This email is already registered. Would you like to '}
+          </Text>
+          <Text
+            onPress={() => { this.props.navigation.navigate('SignIn'); }}
+            style={linkStyle}
+          >
+            sign in
+          </Text>
+          <Text>{' or '}</Text>
+          <Text
+            style={linkStyle}
+          >
+            recover your password
+          </Text>
+          <Text>?</Text>
+        </>
+      );
+    } else if (badEmail) {
+      emailErrorMessage = 'Please enter a valid email';
+    }
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -272,9 +309,9 @@ class SignUpScreen extends React.Component {
             onEndEditing={this.onEndEditingName}
           />
           <StyledInput
-            errorMessage={badEmail ? 'Please enter a valid email' : ''}
+            errorMessage={emailErrorMessage}
             label='EMAIL'
-            onChangeText={text => this.setState({email: text})}
+            onChangeText={text => this.setState({email: text, duplicateEmail: false})}
             onEndEditing={this.onEndEditingEmail}
           />
           <StyledInput
@@ -548,25 +585,28 @@ const styles = StyleSheet.create({
   },
 });
 
-const StyledInput = (props) => (
-  <Input 
-    containerStyle={{ marginBottom: 10 }}
-    errorStyle={{
-      ...textStyle.label,
-      color: 'red',
-    }}
-    labelStyle={{
-      color: 'rgba(255,255,255, 0.5)',
-      ...textStyle.caption,
-    }}
-    inputStyle={{
-      ...textStyle.label,
-      color: 'white',
-    }}
-    inputContainerStyle={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-    selectionColor={theme.PRIMARY_COLOR}
-    { ...props }
-  />
+const StyledInput = ({ errorMessage, containerStyle, ...rest }) => (
+  <View style={{ marginBottom: 10, ...containerStyle }}>
+    <Input 
+      containerStyle={{ paddingHorizontal: 0 }}
+      labelStyle={{
+        color: 'rgba(255,255,255, 0.5)',
+        ...textStyle.caption,
+      }}
+      inputStyle={{
+        ...textStyle.label,
+        color: 'white',
+      }}
+      inputContainerStyle={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
+      selectionColor={theme.PRIMARY_COLOR}
+      { ...rest }
+    />
+    {!!errorMessage && (
+      <Text style={{ ...textStyle.caption, color: 'red' }}>
+        {errorMessage}
+      </Text>
+    )}
+  </View>
 );
 
 const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
