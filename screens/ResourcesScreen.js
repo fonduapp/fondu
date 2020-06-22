@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   ScrollView,
+  AsyncStorage,
   TouchableOpacity,
   Text,
   View,
@@ -11,6 +12,8 @@ import { ListItem, SearchBar} from 'react-native-elements';
 import theme from '../styles/theme.style.js';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
+import { _getAuthTokenUserId } from '../constants/Helper.js'
+
 
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
@@ -30,9 +33,9 @@ export default class ResourcesScreen extends React.Component{
   };
 
   async componentDidMount(){
-    //const {authToken, userId} = await _getAuthTokenUserId();
+    const {authToken, userId} = await _getAuthTokenUserId()
     //console.log('userid ' + userId + "\t authToken " + authToken);
-    return fetch('http://192.241.153.104:3000/allAreas/2/abcdefg')
+    return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
       .then((response)=>response.json())
       .then((responseJson) =>{
         //console.log('resources: ' + JSON.stringify(responseJson))
@@ -60,11 +63,12 @@ export default class ResourcesScreen extends React.Component{
     } else {
       //console.log(this.state.articleList)
         let articles = this.state.articleList.map((article,i)=>{
+          console.log('article id '+ article['area_id'])
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}
                   onPress={()=> this.props.navigation.navigate('Subtopics', {
-                    areaID: article.area_id,
+                    areaId: article['area_id']
                   })
                 }>
                     <Text style = {styles.buttonText}>

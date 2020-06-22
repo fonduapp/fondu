@@ -145,7 +145,7 @@ export default class HomeScreen extends Component {
     //   console.error(error)
     // });
 
-    
+
 
     if(initialAssessTaken){
       this.fetchHomeInfo()
@@ -164,6 +164,7 @@ export default class HomeScreen extends Component {
   };
 
   async initialAssessComplete(){
+    console.log('initialAssessComplete')
     this.setState({initialAssessTaken: true});
     this.props.navigation.setParams({
       initialAssessTaken: true,
@@ -228,7 +229,7 @@ export default class HomeScreen extends Component {
                 >
 
                 {
-                  Object.keys(this.state.recommendedBehaviors).map((key, index) => ( 
+                  Object.keys(this.state.recommendedBehaviors).map((key, index) => (
                     <ContentModule title = {this.state.recommendedBehaviors[key].name}
                                key={index}
                                onPress={() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}

@@ -10,6 +10,8 @@ import {
 import { ListItem, SearchBar} from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
+import { StackNavigator } from 'react-navigation';
+
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 
 
@@ -24,6 +26,8 @@ export default class SubtopicScreen extends React.Component{
       search:'',
       isLoading: true,
       subList:[],
+
+
     }
   }
 
@@ -31,15 +35,14 @@ export default class SubtopicScreen extends React.Component{
     this.setState({search});
   };
 
-  //const {areaID} = this.props.route.params
   async componentDidMount(){
-    //const {authToken, userId} = await _getAuthTokenUserId();
-
-    //const path = 'http://10.0.0.188:3000/allBehaviors/8/abcdefg/' + JSON.stringify(areaID)
-    const path = 'http://192.241.153.104:3000/allBehaviors/2/abcdefg/2'
+    const {authToken, userId} = await _getAuthTokenUserId();
+    const areaId = this.props.navigation.state.params.areaId;
+    const path = 'http://192.241.153.104:3000/allBehaviors/'+userId+'/'+authToken+'/' + areaId
     return fetch(path)
       .then((response)=>response.json())
       .then((responseJson) =>{
+        console.log(responseJson)
         this.setState({
           isLoading: false,
           subList:responseJson
