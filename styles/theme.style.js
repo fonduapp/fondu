@@ -5,11 +5,11 @@ export default {
   PRIMARY_COLOR: '#7b7fff', //blue
   PRIMARY_COLOR_2: '#FFE356', //yello
   PRIMARY_COLOR_3: '#FF7D71', //red
-  PRIMARY_COLOR_4: '#FFC3BD', // light red
+  PRIMARY_COLOR_4: '#FFE7E4', // light red
   PRIMARY_COLOR_5: '#FF998E', // medium red
   PRIMARY_COLOR_6: '#FF7d71', // dark red
   PRIMARY_COLOR_7: '#ABA9FF', //blue
-  SECONDARY_COLOR: '#F3F4Fc', //off-white
+  SECONDARY_COLOR: '#F3F4Fc', // light blue
   SECONDARY_COLOR_2: '#BDCCFF', //beige
   TEXT_COLOR: '#475279', //dark blue
   TEXT_COLOR_2: 'gray',

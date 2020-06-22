@@ -66,12 +66,12 @@ export default class ContentModule extends Component {
 	      dots.push( 
 	      		<View key={i}>
 	      			<Animated.View style={{opacity: i == indicatorNum - 1 ? textOpacityCheck : (i == indicatorNum-2 ? textOpacityLast :textOpacity)}}>
-			      		<Text style={[styles.label]}>
+			      		<Text style={[styles.label,{color: i==indicatorNum-1? theme.PRIMARY_COLOR_5: theme.TEXT_COLOR}]}>
 			      			{i==indicatorNum-1 ? "Check" : "Learn"}
 			      		</Text>
 		      		</Animated.View>
 	                <Animated.View
-	                  style={[styles.normalDot, {opacity}]}
+	                  style={[styles.normalDot, {opacity, backgroundColor: i==indicatorNum-1? theme.PRIMARY_COLOR_5: theme.TEXT_COLOR}]}
 	                />
                 </View>
           )
