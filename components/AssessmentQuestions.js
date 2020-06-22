@@ -292,7 +292,7 @@ export default class AssessmentQuestions extends Component {
       <NextButton title="NEXT >" 
                   disabled = {this.state.selectedOption <0} 
                   onPress={() => this.state.qFeedback ? this.next() : this.check()} 
-                  buttonStyle={[styles.buttonStyle,{backgroundColor:this.state.selectedOption >=0 ? theme.PRIMARY_COLOR_6 : theme.INACTIVE_COLOR}]}/>
+                  buttonStyle={[styles.buttonStyle,{backgroundColor: theme.PRIMARY_COLOR_6}]}/>
       </>
     );
   }

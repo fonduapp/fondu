@@ -148,7 +148,7 @@ export default class HomeScreen extends Component {
       console.error(error)
     });
 
-    
+
 
 
 
@@ -165,6 +165,7 @@ export default class HomeScreen extends Component {
   };
 
   async initialAssessComplete(){
+    console.log('initialAssessComplete')
     this.setState({initialAssessTaken: true});
     this.props.navigation.setParams({
       initialAssessTaken: true,
@@ -222,8 +223,8 @@ export default class HomeScreen extends Component {
       <View style={styles.container}>
             <View style={styles.welcomeContainer}>
               <View style = {[styles.moduleBar, {marginLeft: moduleMargin, marginRight: moduleMargin}]}>
-                <ModuleProgressBar style={styles.progressBar} 
-                                   length={Object.keys(this.state.recommendedBehaviors).length + 1} 
+                <ModuleProgressBar style={styles.progressBar}
+                                   length={Object.keys(this.state.recommendedBehaviors).length + 1}
                                    scrollX={scrollX}
                                    snapToInterval={snapToInterval}
                 />
@@ -262,7 +263,7 @@ export default class HomeScreen extends Component {
                       extrapolate: "clamp"
                     });
                     return(
-                    <ContentModule 
+                    <ContentModule
                                title = {this.state.recommendedBehaviors[key].name}
                                subtitle = {this.state.recommendedArea.toUpperCase()}
                                key={index}

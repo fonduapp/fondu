@@ -11,7 +11,11 @@ export default class NextButton extends Component {
       <TouchableOpacity 
         disabled = {this.props.disabled}
         onPress={() => this.props.onPress()}
-        style={[styles.nextButton, this.props.buttonStyle]} 
+        style={{
+          ...styles.nextButton,
+          ...this.props.buttonStyle,
+          ...(this.props.disabled && { backgroundColor: theme.INACTIVE_COLOR }),
+        }} 
       >
       <Text style={[styles.nextButtonTitle, this.props.buttonTextStyle]}>{this.props.title}</Text>
       </TouchableOpacity>

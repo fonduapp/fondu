@@ -39,9 +39,12 @@ constructor(props) {
       style = {styles.modalContainer}
       isVisible = {this.props.showRef}
       onBackdropPress={()=>this.props.hide()}
+      onBackButtonPress={() => this.props.hide()}
 >
         <View>
-          <Text style={[styles.problemText,{fontSize: 18, textAlign:'center'}]}>{references}</Text>
+          {this.props.refs.length ? (
+            <Text style={[styles.problemText,{fontSize: 18, textAlign:'center'}]}>{references}</Text>
+          ) : this.props.content}
         </View>
       </Modal>
       //</View>
@@ -56,15 +59,15 @@ const styles = StyleSheet.create({
   },
   modalContainer:{
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingLeft:width/16,
-    paddingRight:width/16,
-    paddingTop: width/16,
+    borderRadius: 20,
+    padding: width/16,
     width: width*3/4,
     maxHeight: height*1/2,
     top: height/4,
     left: width*1/8,
-    justifyContent:'flex-start'
+    justifyContent:'flex-start',
+    marginLeft: 0,
+    flex: 0,
   },
   problemText:{
     color: '#7B80FF',

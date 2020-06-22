@@ -48,6 +48,7 @@ async function loadResourcesAsync() {
       'poppins-semibold': require('./assets/fonts/Poppins/Poppins-SemiBold.ttf'),
       'poppins-medium': require('./assets/fonts/Poppins/Poppins-Medium.ttf'),
       'poppins-regular': require('./assets/fonts/Poppins/Poppins-Regular.ttf'),
+      'poppins-black': require('./assets/fonts/Poppins/Poppins-Black.ttf'),
 
       //fredoka one
       'fredokaone-regular': require('./assets/fonts/FredokaOne/FredokaOne-Regular.ttf'),
