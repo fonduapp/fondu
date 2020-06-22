@@ -12,11 +12,13 @@ export default {
   SECONDARY_COLOR: '#F3F4Fc', //off-white
   SECONDARY_COLOR_2: '#BDCCFF', //beige
   TEXT_COLOR: '#475279', //dark blue
+  TEXT_COLOR_2: 'gray',
   CORRECT_COLOR_BG: 'rgba(111,207,151,0.2)',
   CORRECT_COLOR: 'rgb(111,207,151)',
   INCORRECT_COLOR: '#FF7d71',
   INCORRECT_COLOR_BG: 'rgba(255, 125, 113, 0.2)',
   INACTIVE_COLOR: 'lightgrey',
+  TRANSLUCENT_GRAY: 'rgba(189, 189, 189, 0.2)',
 
   FONT_WEIGHT_LIGHT: 200,
   FONT_WEIGHT_MEDIUM: 600,

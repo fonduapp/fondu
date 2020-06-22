@@ -11,9 +11,13 @@ export default class NextButton extends Component {
       <TouchableOpacity 
         disabled = {this.props.disabled}
         onPress={() => this.props.onPress()}
-        style={[styles.nextButton, this.props.buttonStyle]} 
+        style={{
+          ...styles.nextButton,
+          ...this.props.buttonStyle,
+          ...(this.props.disabled && { backgroundColor: theme.INACTIVE_COLOR }),
+        }} 
       >
-      <Text style={[styles.nextButtonTitle]}>{this.props.title}</Text>
+      <Text style={[styles.nextButtonTitle, this.props.buttonTextStyle]}>{this.props.title}</Text>
       </TouchableOpacity>
 		);
 	}
@@ -34,7 +38,6 @@ const styles = StyleSheet.create({
     justifyContent:'center',
     elevation: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
 
