@@ -42,7 +42,6 @@ export default class SubtopicScreen extends React.Component{
     return fetch(path)
       .then((response)=>response.json())
       .then((responseJson) =>{
-        console.log(responseJson)
         this.setState({
           isLoading: false,
           subList:responseJson
@@ -66,7 +65,9 @@ export default class SubtopicScreen extends React.Component{
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}
-                  onPress={()=> this.props.navigation.navigate('Article')}>
+                  onPress={()=> this.props.navigation.navigate('Article', {
+                    behaviorId: article['behavior_id']
+                  })}>
                     <Text style = {styles.buttonText}>
                         {article.behavior_name}
                     </Text>

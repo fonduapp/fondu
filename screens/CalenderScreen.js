@@ -7,6 +7,7 @@ import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import Moment from 'moment';
 import {
   Image,
+  Icon,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +28,9 @@ const height =  Dimensions.get('window').height;
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+const moodIcons= ['mood_bad','sentiment_disappointed','sentiment_satisfied','mood','sentiment_very_satisfied'];
+const moodColors= ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'];
+
 
 
 export default class ArticleScreen extends Component {
@@ -39,7 +43,6 @@ export default class ArticleScreen extends Component {
       screen:'closed',
       entryRating:0,
       opening:true,
-      moodColors: ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'],
       moodName: ['error','awful', 'down', 'alright', 'good', 'amazing'],
       markedDates: {},
       day: new Date(),
@@ -109,7 +112,7 @@ export default class ArticleScreen extends Component {
         ...{
           [_selectedDay]: {
             customStyles: {
-              container: { backgroundColor: this.state.moodColors[entryRating], borderRadius: 100 },
+              container: { backgroundColor: moodColors[entryRating], borderRadius: 100 },
             },
             entry: entry,
             entryRating: entryRating,
@@ -239,15 +242,15 @@ export default class ArticleScreen extends Component {
       }
     }
     render(){
-      let moods = (this.state.moodColors.slice(1,6)).map((color, i) => {
+      let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
-        <TouchableOpacity
-          key={i.toString()}
+        <Icon
+          string={moodIcons[i]}
           onPress={() => this.setState({entryRating:(i + 1)})}
           style={[
             styles.moodButton,
             { backgroundColor: color },
-          ]}></TouchableOpacity>
+          ]}></Icon>
       );
     });
       return(

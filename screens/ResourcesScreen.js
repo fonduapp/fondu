@@ -17,6 +17,8 @@ import { _getAuthTokenUserId } from '../constants/Helper.js'
 
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
+var originalFetch = require('isomorphic-fetch');
+var fetch = require('fetch-retry')(originalFetch);
 
 export default class ResourcesScreen extends React.Component{
 
@@ -38,7 +40,7 @@ export default class ResourcesScreen extends React.Component{
     return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
       .then((response)=>response.json())
       .then((responseJson) =>{
-        //console.log('resources: ' + JSON.stringify(responseJson))
+        console.log('resources: ' + JSON.stringify(responseJson))
         this.setState({
           isLoading: false,
           articleList:responseJson
