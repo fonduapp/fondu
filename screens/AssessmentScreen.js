@@ -1,5 +1,15 @@
 import React, { Component, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, View, StatusBar, Image, Dimensions, Animated } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  StatusBar,
+  Image,
+  Dimensions,
+  Animated,
+  TouchableOpacity,
+} from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
 import AssessmentQuestions  from '../components/AssessmentQuestions';
 import theme from '../styles/theme.style.js';
@@ -130,21 +140,29 @@ export default class AssessmentScreen extends Component{
 
       case 'finish':
         return (
-        <View style={[styles.startScreen, styles.darkContainer]}>
-            <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
-            <Text style={[textStyle.header, {color:theme.TEXT_COLOR}]}>
-              Congrats, you did it!
-            </Text>
-            <Text style={[textStyle.paragraph,{marginTop:30, marginBottom: 15, opacity: 0.5}]}>
-            By taking this assessment routinely, we’re able to better assess 
-            your relationship health and behaviors and inform you of healthy 
-            next steps!
-            </Text>
-            <NextButton 
-            onPress={() => this._seeStreaks()} 
-            title="Next"/>
-
-        </View> 
+          <View style={styles.darkContainer}>
+            <View style={styles.startScreen}>
+              <Image
+                source={require("../assets/images/heart.png")}
+                style={[styles.mainImageContainer, { marginBottom: 0 }]}
+              />
+              <View width={246/* fit "Congrats..." exactly */}>
+                <Text style={[textStyle.header, {color:theme.TEXT_COLOR, textAlign: 'center'}]}>
+                  Congrats, you did it!
+                </Text>
+                <Text style={[textStyle.paragraph,{marginTop: 15, marginBottom: 15, opacity: 0.5}]}>
+                  By taking this assessment routinely, we’re able to better assess 
+                  your relationship health and behaviors and inform you of healthy 
+                  next steps!
+                </Text>
+              </View>
+            </View> 
+            <View style={styles.nextButtonContainer}>
+              <NextButton 
+              onPress={() => this._seeStreaks()} 
+              title="NEXT >"/>
+            </View>
+          </View>
         );
 
       case 'quiz':
@@ -157,6 +175,7 @@ export default class AssessmentScreen extends Component{
                                  updateProgress={(progress) => this._updateProgress(progress)}
                                  assessmentType = {this.state.assessmentType}
                                  behaviorId = {this.state.behaviorId}
+                                 nextButtonContainerStyle={styles.nextButtonContainer}
                                  />
           </View>
         );
@@ -171,39 +190,90 @@ export default class AssessmentScreen extends Component{
         </View> 
         );
       case 'result':
-        return (
-        <View style={[styles.startScreen, styles.darkContainer]}>
-            <Text style={[textStyle.header, {color:theme.TEXT_COLOR, alignSelf:'flex-start'}]}>
-              Your Results
-            </Text>
-            <Text style={[textStyle.paragraph, {color:theme.TEXT_COLOR}]}>
-              Based on the results of this assessment, we have calculated areas that you should focus on a bit more on and areas that you are already excelling at.
-            </Text>
-            <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
-            <Text style={[textStyle.caption, {color:theme.TEXT_COLOR}]}>
-              YOUR RECOMMENDED FOCUS
-            </Text>
-            <Text style={[textStyle.header, {color:theme.PRIMARY_COLOR_6, marginBottom: 20}]}>
-              {this.state.recArea}
-            </Text>
-            <NextButton 
-            onPress={() => this._seeTutorial()} 
-            title="Next"/>
-
-        </View> 
-        );
-      case 'tutorial':
-        const tips = [{'text':'Referencing our resources throughout the week'},{'text':'Exercise the previous behaviors during this week by'},{'text':'Exercise the previous behaviors during this week by'}]
-        return (
-        <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-          <View style={{paddingTop: '15%', paddingLeft: '15%', paddingRight: '15%'}}>
-            <Text style={[textStyle.header, {color:theme.TEXT_COLOR, alignSelf:'flex-start'}]}>
-              What's Next
-            </Text>
-            <Text style={[textStyle.paragraph, {color:theme.TEXT_COLOR}]}>
-              Exercise the previous behaviors during this week by
-            </Text>
+        const changeBehaviorTextStyle = {
+          ...textStyle.caption,
+          color: theme.TEXT_COLOR,
+          opacity: 0.5,
+          alignSelf: 'center',
+        };
+        const Component = (slideAnim) => (
+          <View style={styles.darkContainer}>
+            <View style={styles.startScreen} flex={1}>
+              <Text style={[textStyle.header, {color:theme.TEXT_COLOR, alignSelf:'flex-start'}]}>
+                Your Results
+              </Text>
+              <Text style={[textStyle.paragraph, {color:theme.TEXT_COLOR}]}>
+                Based on the results of this assessment, we have calculated areas that you should focus a bit more on and areas that you are already excelling at.
+              </Text>
+            </View> 
+            <Animated.View
+              top={slideAnim}
+              flex={3}
+            >
+              <View
+                position="absolute"
+                backgroundColor="white"
+                borderRadius={40}
+                width={'100%'}
+                height={500}
+                top={125}
+              />
+              <View alignItems="center" flex={1}>
+                <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
+                <Text style={[textStyle.subheader, {color:theme.TEXT_COLOR, opacity: 0.5}]}>
+                  YOUR RECOMMENDED FOCUS
+                </Text>
+                <Text style={[textStyle.header3, {color:theme.PRIMARY_COLOR_6, textAlign: 'center'}]}>
+                  {this.state.recArea}
+                </Text>
+              </View>
+              <View style={styles.nextButtonContainer}>
+                <Text style={changeBehaviorTextStyle}>
+                  Don't want to focus on this?
+                </Text>
+                <TouchableOpacity>
+                  <Text
+                    style={{
+                      ...changeBehaviorTextStyle,
+                      fontFamily: 'poppins-black',
+                      marginBottom: 10,
+                    }}
+                  >
+                    Choose another behavior
+                  </Text>
+                </TouchableOpacity>
+                <NextButton 
+                onPress={() => this._seeTutorial()} 
+                title="NEXT >"/>
+              </View>
+            </Animated.View>
           </View>
+        );
+        return <SlideAnimController Component={Component}/>
+      case 'tutorial':
+        const tips = [
+          {
+            'text':'Learning',
+            'description': 'learning stuff',
+          },
+          {
+            'text':'Implementation',
+            'description': 'implementation stuff',
+          },
+          {
+            'text':'Checking in',
+            'description': 'checking in stuff',
+          },
+        ]
+        return (
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            flex: 1,
+            backgroundColor: 'white',
+          }}
+        >
           <ScrollView
                   contentContainerStyle={styles.contentContainer}
                   horizontal= {true}
@@ -226,41 +296,105 @@ export default class AssessmentScreen extends Component{
               {tips.map((tip, index)=> (
                 <View style={[styles.scrollScreen]} key={index}>
 
-                  <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
-                  <Text style={[textStyle.header, {color:theme.PRIMARY_COLOR_6, marginBottom: 20}]}>
+                  <Image
+                    source={require("../assets/images/heart.png")}
+                    style={[
+                      styles.mainImageContainer,
+                      { height: 250, width: 250 },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      textStyle.header,
+                      {
+                        color:theme.TEXT_COLOR,
+                        marginBottom: 20,
+                        alignSelf: 'flex-start',
+                      },
+                    ]}
+                  >
                     {tip['text']}
                   </Text>
-                  <NextButton 
-                  onPress={() => this._exitAssessment()} 
-                  title="Next"/>
-
+                  <Text
+                    style={[
+                      textStyle.paragraph,
+                      {
+                        color:theme.TEXT_COLOR,
+                        alignSelf: 'flex-start',
+                      },
+                    ]}
+                  >
+                    {tip['description']}
+                  </Text>
                 </View> 
 
               ))}
 
           </ScrollView>
-          <View
-            style={styles.indicatorContainer}
+          <View style={styles.nextButtonContainer}>
+            <Animated.View
+              top={scrollX.interpolate({
+                inputRange: [width, 2 * width],
+                outputRange: [100, 0],
+                extrapolate: 'clamp',
+              })}
+              opacity={scrollX.interpolate({
+                inputRange: [width, 2 * width],
+                outputRange: [0, 1],
+                extrapolate: 'clamp',
+              })}
             >
-             {tips.map((_, index) => {
-              
-              const iwidth = scrollX.interpolate({
-                inputRange: [
-                  width * (index - 1),
-                  width * index,
-                  width * (index + 1)
-                ],
-                outputRange: [8, 16, 8],
-                extrapolate: "clamp"
-              });
-              console.log("width "+ width + " index " + index + " scrollX" + scrollX + "iwidth" + iwidth)
-              return (
-                <Animated.View
-                  key={index}
-                  style={[styles.normalDot, { width: iwidth}]}
-                />
-              );
-            })}
+              <NextButton 
+                onPress={() => this._exitAssessment()} 
+                title="NEXT >"
+              />
+            </Animated.View>
+            <Animated.View
+              alignSelf="center"
+              position="absolute"
+              flexDirection="row"
+              width={width}
+              paddingHorizontal={60}
+              alignItems="center"
+              justifyContent="space-between"
+              top={scrollX.interpolate({
+                inputRange: [width, 2 * width],
+                outputRange: [13, 90],
+                extrapolate: 'clamp',
+              })}
+              opacity={scrollX.interpolate({
+                inputRange: [width, 2 * width],
+                outputRange: [1, 0],
+                extrapolate: 'clamp',
+              })}
+            >
+              <View flexDirection="row">
+                 {tips.map((_, index) => {
+                  
+                  const iwidth = scrollX.interpolate({
+                    inputRange: [
+                      width * (index - 1),
+                      width * index,
+                      width * (index + 1)
+                    ],
+                    outputRange: [8, 16, 8],
+                    extrapolate: "clamp"
+                  });
+                  console.log("width "+ width + " index " + index + " scrollX" + scrollX + "iwidth" + iwidth)
+                  return (
+                    <Animated.View
+                      key={index}
+                      style={[styles.normalDot, { width: iwidth}]}
+                    />
+                  );
+                })}
+              </View>
+              <TouchableOpacity onPress={() => this._exitAssessment()}>
+                <Text style={[textStyle.label, { color: theme.TEXT_COLOR }]}>
+                  SKIP
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           </View>
         </View>
         );
@@ -284,8 +418,28 @@ export default class AssessmentScreen extends Component{
   }
 }
 
+class SlideAnimController extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      slideAnim: new Animated.Value(500),
+    };
+  }
 
+  componentDidMount() {
+    const { slideAnim } = this.state;
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 500,
+    }).start();
+  }
 
+  render() {
+    const { Component } = this.props;
+    const { slideAnim } = this.state;
+    return Component(slideAnim);
+  }
+}
 
 const styles = StyleSheet.create({
 
@@ -320,33 +474,32 @@ const styles = StyleSheet.create({
     textAlign:'center',
     justifyContent: 'center',
     width:width,
-    padding: '5%',
+    paddingHorizontal: 60,
   },
   startScreen: {
     flex:1,
     alignItems: 'center',
     textAlign:'center',
     justifyContent: 'center',
-    padding: '15%',
+    paddingHorizontal: '15%',
 
   },
   mainImageContainer:{
-    width: 150,
-    height:150,
+    width: 200,
+    height: 200,
     marginBottom: 30,
   },
   normalDot: {
     height: 8,
     width: 8,
     borderRadius: 4,
-    backgroundColor: "silver",
-    marginHorizontal: 4
+    backgroundColor: theme.TEXT_COLOR,
+    marginHorizontal: 4,
+    opacity: 0.5,
   },
-  indicatorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    position:'absolute', 
-    bottom:40, 
-  }
+  nextButtonContainer: {
+    width: 275,
+    alignSelf: 'center',
+    top: -45,
+  },
 });

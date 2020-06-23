@@ -244,6 +244,7 @@ export default class AssessmentQuestions extends Component {
     let userId = this.state.userId
     let authToken = this.state.authToken
 
+    const { nextButtonContainerStyle } = this.props;
 
     let imgsrc = 'http://'+host+':3000/behaviorImage/' + userId + '/' + authToken+'/' + this.state.behaviorId
     return (
@@ -289,10 +290,12 @@ export default class AssessmentQuestions extends Component {
           </View>
       </ScrollView>
       
-      <NextButton title="NEXT >" 
-                  disabled = {this.state.selectedOption <0} 
-                  onPress={() => this.state.qFeedback ? this.next() : this.check()} 
-                  buttonStyle={[styles.buttonStyle,{backgroundColor: theme.PRIMARY_COLOR_6}]}/>
+      <View style={nextButtonContainerStyle}>
+        <NextButton title="NEXT >" 
+                    disabled = {this.state.selectedOption <0} 
+                    onPress={() => this.state.qFeedback ? this.next() : this.check()} 
+                    buttonStyle={[styles.buttonStyle,{backgroundColor: theme.PRIMARY_COLOR_6}]}/>
+      </View>
       </>
     );
   }
