@@ -17,6 +17,7 @@ export default class ContentModule extends Component {
 		super(props)
 	    this.state = {
 	    	imgsrc:null,
+	    	nextAssessDate:null,
 	    };
 	}
 
@@ -28,12 +29,35 @@ export default class ContentModule extends Component {
 		console.log(imgsrc)
 		this.setState({imgsrc:imgsrc});
 
+		//get next reassess date
+		fetch('http://' + host +':3000/nextAssessDate/' + userId + '/' + authToken,{
+		method: 'GET',
+		headers: {
+		  Accept: 'application/json',
+		  'Content-Type': 'application/json',
+		},
+		})
+		.then((response) => response.json())
+		.then((responseJson) => {
+		this.setState({
+		  nextAssessDate: new Date(responseJson.next_assess_date),
+		});
+		})
+		.catch((error) => {
+		console.error(error);
+		});
+
+	}
+
+	areAllModulesDone(behaviors){
+		return Object.keys(behaviors).every((k)=>{behaviors[k].completed})
 	}
 
 	getModuleContent(){
 
 		let moduleWidth = this.props.width
 		let marginSide = this.props.space/2
+		
 		
 
 		switch(this.props.contentType){
@@ -66,6 +90,14 @@ export default class ContentModule extends Component {
 	            )
 				break
 			case 'check':
+
+				const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+									  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+									]
+				const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+				
+				let nextAssessDate = this.state.nextAssessDate!=null ? (dayNames[this.state.nextAssessDate.getDay()] + " (" + monthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
+				let modulesDone = this.areAllModulesDone(this.props.behaviors)
 				return(
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.PRIMARY_COLOR_4}]}>
 				      <View style = {styles.textCheckContainer}>
@@ -77,22 +109,21 @@ export default class ContentModule extends Component {
 				          <View style= {{marginTop: 20}}>
 				          	{ Object.keys(this.props.behaviors).map((behaviorId, index)=>{
 				          		return(
-				          		<View style={{flexDirection: 'row', justifyContent: 'space-between', margin:5}}>
+				          		<View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
 					          		<Text style={[textStyle.subheader, { color: theme.PRIMARY_COLOR_5, marginRight: 30}]}>{this.props.behaviors[behaviorId].name}</Text>
-					          		<Icon class={{position: 'absolute'}} name={this.props.behaviors[behaviorId].completed?'check-box':'check-box-outline-blank'} color={theme.PRIMARY_COLOR_5}/>
+					          		<Icon name={this.props.behaviors[behaviorId].completed?'check-box':'check-box-outline-blank'} color={theme.PRIMARY_COLOR_5}/>
 				          		</View>
 				          		)
 				          		})
 				          	}
-
 				          	
 				          </View>
 		              </View>
 		              <View style={styles.buttonContainer}>
 			              <NextButton
 			                onPress={this.props.onPress} 
-			                title="Let's start"
-			                buttonStyle = {styles.buttonStyleCheck}/>
+			                title={modulesDone ? "Let's start":"Unlocks on " + nextAssessDate}
+			                buttonStyle = {modulesDone ? styles.buttonStyleCheck : styles.buttonStyleLocked}/>
 		               </View>
 	               </View>
 	            )
@@ -153,7 +184,12 @@ const styles = StyleSheet.create({
 	buttonStyleCheck:{
 		position:'relative', 
 		alignSelf: 'center', 
-		borderColor : theme.SECONDARY_COLOR,
+		width: 200,
+	},
+	buttonStyleLocked:{
+		position:'relative', 
+		alignSelf: 'center', 
+		backgroundColor : theme.INACTIVE_COLOR,
 		width: 200,
 	},
 	welcomeSubContainer:{

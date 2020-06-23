@@ -58,8 +58,6 @@ export default class HomeScreen extends Component {
 
     const {authToken, userId} = await _getAuthTokenUserId()
     //Get Streak
-    console.log("!!!!" + 'http://' + host +':3000/streak/' + userId + '/' + authToken)
-
     fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
       method: 'GET',
       headers: {
@@ -113,10 +111,32 @@ export default class HomeScreen extends Component {
           .catch((error) => {
             console.error(error);
           });
+
+
+          //Get Area Level
+          fetch('http://' + host +':3000/areaLevel/' + userId + '/' + authToken+ '/' + recArea,{
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((response) => response.json())
+          .then((responseJson) => {
+            this.setState({
+              areaLevel: responseJson.area_level,
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
     })
     .catch((error) => {
       console.error(error);
     });
+
+
+
   }
 
   async componentDidMount(){
@@ -148,10 +168,6 @@ export default class HomeScreen extends Component {
     .catch((error) => {
       console.error(error)
     });
-
-
-
-
 
 
 
@@ -231,7 +247,7 @@ export default class HomeScreen extends Component {
                                    scrollX={scrollX}
                                    snapToInterval={snapToInterval}
                 />
-                <Text style={styles.levelContainer}>lv 1</Text>
+                <Text style={styles.levelContainer}>lv {this.state.areaLevel}</Text>
               </View>
               <ScrollView
                 style={styles.container}
@@ -287,6 +303,7 @@ export default class HomeScreen extends Component {
                 }
                 <ContentModule title = 'Checkpoint'
                                subtitle = {this.state.recommendedArea.toUpperCase()}
+                               key = {5}
                                onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'review',assessmentComplete:this.initialAssessComplete.bind(this)})}
                                width = {moduleWidth}
                                space = {moduleSpace}
