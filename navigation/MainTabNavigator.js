@@ -87,7 +87,6 @@ ResourcesStack.path = '';
 const CalendarStack = createStackNavigator(
   {
     Calendar: CalenderScreen,
-    //Settings: SettingsScreen,
   },
   config
 );
@@ -107,7 +106,14 @@ const tabNavigator = createBottomTabNavigator({
   CalendarStack},
   {
      initialRouteName: 'HomeStack',
-     tabBarOptions: { showLabel: false }
+     tabBarOptions: { showLabel: false,
+                      indicatorStyle: {
+                        width: 0, height: 0, elevation: 0,      
+                      },
+                      style: {elevation: 20,             
+                              shadowOffset: { width: 0, height: 0},
+                              borderTopWidth: 0
+                    }},
   }
 );
 

@@ -58,8 +58,6 @@ export default class HomeScreen extends Component {
 
     const {authToken, userId} = await _getAuthTokenUserId()
     //Get Streak
-    console.log("!!!!" + 'http://' + host +':3000/streak/' + userId + '/' + authToken)
-
     fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
       method: 'GET',
       headers: {
@@ -95,8 +93,8 @@ export default class HomeScreen extends Component {
       console.log(responseJson.area_id)
       recArea = responseJson.area_id
 
-          console.log('http://' + host +':3000/suggestedBehaviors/' + userId + '/' + authToken + '/' + recArea)
-          fetch('http://' + host +':3000/suggestedBehaviors/' + userId + '/' + authToken + '/' + recArea,{
+          console.log('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken)
+          fetch('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken,{
             method: 'GET',
             headers: {
               Accept: 'application/json',
@@ -106,7 +104,27 @@ export default class HomeScreen extends Component {
           .then((response) => response.json())
           .then((responseJson) => {
             this.setState({
-              recommendedBehaviors: responseJson,
+              recommendedBehaviors: JSON.parse(responseJson.behaviors_completed),
+            });
+            console.log("recommendedBehaviors" + responseJson.behaviors_completed)
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+
+
+          //Get Area Level
+          fetch('http://' + host +':3000/areaLevel/' + userId + '/' + authToken+ '/' + recArea,{
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((response) => response.json())
+          .then((responseJson) => {
+            this.setState({
+              areaLevel: responseJson.area_level,
             });
           })
           .catch((error) => {
@@ -116,6 +134,9 @@ export default class HomeScreen extends Component {
     .catch((error) => {
       console.error(error);
     });
+
+
+
   }
 
   async componentDidMount(){
@@ -147,10 +168,6 @@ export default class HomeScreen extends Component {
     .catch((error) => {
       console.error(error)
     });
-
-
-
-
 
 
 
@@ -219,6 +236,8 @@ export default class HomeScreen extends Component {
 
     const scrollX = new Animated.Value(0)
 
+    console.log("recommendedBehaviors2" + this.state.recommendedBehaviors)
+
     return (
       <View style={styles.container}>
             <View style={styles.welcomeContainer}>
@@ -228,7 +247,7 @@ export default class HomeScreen extends Component {
                                    scrollX={scrollX}
                                    snapToInterval={snapToInterval}
                 />
-                <Text style={styles.levelContainer}>lv 1</Text>
+                <Text style={styles.levelContainer}>lv {this.state.areaLevel}</Text>
               </View>
               <ScrollView
                 style={styles.container}
@@ -252,7 +271,9 @@ export default class HomeScreen extends Component {
                 >
 
                 {
+                  this.state.recommendedBehaviors!=null?
                   Object.keys(this.state.recommendedBehaviors).map((key, index) => {
+                    console.log("key" + Object.keys(this.state.recommendedBehaviors))
                     const opacity = scrollX.interpolate({
                       inputRange: [
                         snapToInterval * (index - 1),
@@ -262,6 +283,7 @@ export default class HomeScreen extends Component {
                       outputRange: [0, 1, 0],
                       extrapolate: "clamp"
                     });
+
                     return(
                     <ContentModule
                                title = {this.state.recommendedBehaviors[key].name}
@@ -274,15 +296,19 @@ export default class HomeScreen extends Component {
                                width = {moduleWidth}
                                space = {moduleSpace}
                                imageOpacity = {opacity}
+                               contentType= {'learn'}
                     />)
                   })
+                  :null
                 }
-                <ContentModule title = 'Check'
+                <ContentModule title = 'Checkpoint'
+                               subtitle = {this.state.recommendedArea.toUpperCase()}
+                               key = {5}
                                onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'review',assessmentComplete:this.initialAssessComplete.bind(this)})}
-                               style = {{}}
                                width = {moduleWidth}
                                space = {moduleSpace}
-                               highlight= {true}
+                               behaviors = {this.state.recommendedBehaviors}
+                               contentType= {'check'}
 
                 />
 
