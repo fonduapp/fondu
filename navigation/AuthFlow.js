@@ -480,11 +480,11 @@ class WeeklyGoalScreen extends React.Component {
     let data = {
       "userId": userId,
       "authToken": authToken,
-      "interval": interval,
+      "weeklyNum": interval,
     };
 
     //replace with your ip address
-    return fetch('http://' + host + ':3000/updateInterval',{
+    return fetch('http://' + host + ':3000/updateWeeklyNum',{
       method: 'POST',
       headers: {
         Accept: 'application/json',
