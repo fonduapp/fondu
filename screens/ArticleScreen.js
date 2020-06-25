@@ -93,14 +93,14 @@ export default class ArticleScreen extends Component {
         .then((responseJson) =>{
           this.setState({
             article_title:responseJson.behavior_name,
-            example: (this.renderText(responseJson.behavior_text, 'example'))[1],
-            descript: (this.renderText(responseJson.behavior_text, 'descript'))[1],
-            question: (this.renderText(responseJson.behavior_text, 'question'))[1],
-            answer: [(this.renderText(responseJson.behavior_text, 'answer'))[1]],
-            Theory: [(this.renderText(responseJson.behavior_text, 'theory'))[1]],
-            suggestion:(this.renderText(responseJson.behavior_text, 'suggestion')),
-            research:(this.renderText(responseJson.behavior_text, 'research')),
-            reference:(this.renderText(responseJson.behavior_text, 'ref')),
+            example: (this.renderText(responseJson.behavior_text, 'Example')),
+            descript: (this.renderText(responseJson.behavior_text, 'Description')),
+            question: (this.renderText(responseJson.behavior_text, 'Question')),
+            answer: [(this.renderText(responseJson.behavior_text, 'Answer'))],
+            Theory: [(this.renderText(responseJson.behavior_text, 'Theory'))],
+            suggestion:(this.renderText(responseJson.behavior_text, 'Suggestion')),
+            research:(this.renderText(responseJson.behavior_text, 'Research')),
+            reference:(this.renderText(responseJson.behavior_text, 'Reference')),
           })
         })
         .then(()=>
@@ -191,8 +191,6 @@ export default class ArticleScreen extends Component {
     let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
     let research = this.createISC(this.state.research, '<Research>', '</Research>');
     let directions = this.state.suggestion.map((dir,i) =>{
-      dir = dir.replace('<Suggestion>','');
-      dir = dir.replace('</Suggestion>','');
       var res = research[i];
       return <DropDownItem
         key = {i}

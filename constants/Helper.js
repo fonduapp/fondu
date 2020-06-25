@@ -32,29 +32,45 @@ export async function _getAuthTokenUserId(){
     pattern = /<tag>(.*?)<\/tag>/gi;*/
 
 export function renderText(content, tag) {
-        let pattern;
-    if (tag == 'descript'){
+    let pattern;
+    var isArray = false;
+    if (tag == 'Description'){
       pattern = /<Description>(.*?)<\/Description>/i;
-    }else if (tag == 'example'){
+    }else if (tag == 'Example'){
       pattern = /<Example>(.*?)<\/Example>/i;
-    }else if (tag == 'question'){
+    }else if (tag == 'Question'){
       pattern = /<Question>(.*?)<\/Question>/i;
-    }else if (tag == 'answer'){
+    }else if (tag == 'Answer'){
       pattern = /<Answer>(.*?)<\/Answer>/i;
-    }else if (tag == 'theory'){
+    }else if (tag == 'Theory'){
       pattern = /<Theory>(.*?)<\/Theory>/i;
-    }else if (tag == 'research'){
+    }else if (tag == 'Research'){
         pattern = /<Research>(.*?)<\/Research>/i;
-    }else if (tag == 'suggestion'){
-        pattern = /<Suggestion>(.*?)<\/Suggestion>/i;
-    }else if (tag == 'ref'){
+        isArray = true;
+    }else if (tag == 'Suggestion'){
+        pattern = /<Suggestion>(.*?)<\/Suggestion>/gi;
+        isArray = true;
+    }else if (tag == 'Reference'){
         pattern = /<Reference>(.*?)<\/Reference>/gi;
     }else if (tag == 'isc'){
         pattern = /<isc>(.*?)<\/isc>/gi;
     }
     console.log(tag)
-    console.log(content.match(pattern))
-    return content.match(pattern);
+    var result = content.match(pattern)
+    if (isArray){
+      result = result.map((group,i)=>{
+        console.log(group)
+        group = group.replace('<'+tag+'>','');
+        group = group.replace('</'+tag+'>','');
+        return group
+      })
+      console.log(result)
+
+      return result
+    }
+    console.log(result)
+
+    return (content.match(pattern))[1];
   }
 
 //parses through text with given tags, and turns the isc into a button
