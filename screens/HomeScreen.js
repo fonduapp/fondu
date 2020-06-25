@@ -27,7 +27,7 @@ import ModuleProgressBar from '../components/ModuleProgressBar';
 import { SafeAreaView } from 'react-navigation';
 import host from '../constants/Server.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
-
+import Loader from '../components/Loader';
 
 
 const { width } = Dimensions.get('window');
@@ -50,7 +50,7 @@ export default class HomeScreen extends Component {
       initialAssessTaken: false,
       recommendedArea:"",
       recommendedBehaviors:[],
-
+      loading: true,
     };
   }
 
@@ -58,7 +58,7 @@ export default class HomeScreen extends Component {
 
     const {authToken, userId} = await _getAuthTokenUserId()
     //Get Streak
-    fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
+    const streakFetch = fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -75,10 +75,10 @@ export default class HomeScreen extends Component {
       console.error(error);
     });
 
-    //Get Recommended Area and Behaviors
+    //Get Recommended Area
     let recArea = 0;
     console.log('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken)
-    fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
+    const recAreaFetch = fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -93,28 +93,9 @@ export default class HomeScreen extends Component {
       console.log(responseJson.area_id)
       recArea = responseJson.area_id
 
-          console.log('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken)
-          fetch('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken,{
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
-          })
-          .then((response) => response.json())
-          .then((responseJson) => {
-            this.setState({
-              recommendedBehaviors: JSON.parse(responseJson.behaviors_completed),
-            });
-            console.log("recommendedBehaviors" + responseJson.behaviors_completed)
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-
 
           //Get Area Level
-          fetch('http://' + host +':3000/areaLevel/' + userId + '/' + authToken+ '/' + recArea,{
+          return fetch('http://' + host +':3000/areaLevel/' + userId + '/' + authToken+ '/' + recArea,{
             method: 'GET',
             headers: {
               Accept: 'application/json',
@@ -135,7 +116,31 @@ export default class HomeScreen extends Component {
       console.error(error);
     });
 
+    //Get Recommended Behaviors
+    console.log('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken)
+    const behaviorFetch = fetch('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({
+        recommendedBehaviors: JSON.parse(responseJson.behaviors_completed),
+      });
+      console.log("recommendedBehaviors" + responseJson.behaviors_completed)
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 
+    const allSettled = () => {
+      this.setState({ loading: false });
+    }
+    Promise.all([streakFetch, recAreaFetch, behaviorFetch])
+      .then(allSettled);
 
   }
 
@@ -162,7 +167,9 @@ export default class HomeScreen extends Component {
       this.setState({initialAssessReady:true});
 
       if(responseJson.finished_initial){
-        this.fetchHomeInfo()
+        this.fetchHomeInfo();
+      } else {
+        this.setState({ loading: false });
       }
     })
     .catch((error) => {
@@ -183,7 +190,10 @@ export default class HomeScreen extends Component {
 
   async initialAssessComplete(){
     console.log('initialAssessComplete')
-    this.setState({initialAssessTaken: true});
+    this.setState({
+      loading: true,
+      initialAssessTaken: true,
+    });
     this.props.navigation.setParams({
       initialAssessTaken: true,
     });
@@ -320,7 +330,13 @@ export default class HomeScreen extends Component {
   }
 
   render() {
-    return this.state.initialAssessReady ? (this.state.initialAssessTaken ? this.getHome() : this.getInitialAssess()):null ;
+    const { loading } = this.state;
+    return (
+      <>
+        {loading && <Loader/>}
+        {this.state.initialAssessReady ? (this.state.initialAssessTaken ? this.getHome() : this.getInitialAssess()):null}
+      </>
+    );
   }
 
 

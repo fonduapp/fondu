@@ -18,7 +18,7 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 import host from '../constants/Server.js';
 import {textStyle} from '../styles/text.style.js';
-
+import Loader from '../components/Loader';
 
 
 
@@ -43,6 +43,7 @@ export default class AssessmentQuestions extends Component {
       selectedOption:-1,
       authToken:null,
       userId:null,
+      loading: true,
     }
 
   }
@@ -78,7 +79,9 @@ export default class AssessmentQuestions extends Component {
                          description:jsonData[this.qno].suggestion,
                          options:jsonData[this.qno].answers,
                          behaviorId:jsonData[this.qno].behavior_id,
-                         questionId:jsonData[this.qno].question_id})
+                         questionId:jsonData[this.qno].question_id,
+                         loading: false,
+          });
           console.log("in initial");
         })
         .catch((error) => {
@@ -108,7 +111,9 @@ export default class AssessmentQuestions extends Component {
                          description:jsonData[this.qno].suggestion,
                          options:jsonData[this.qno].answers,
                          behaviorId:jsonData[this.qno].behavior_id,
-                         questionId:jsonData[this.qno].question_id})
+                         questionId:jsonData[this.qno].question_id,
+                         loading: false,
+          });
           console.log("in initial");
         })
         .catch((error) => {
@@ -235,6 +240,8 @@ export default class AssessmentQuestions extends Component {
   }
 
   render() {
+    const { loading } = this.state;
+
     let _this = this
 
     const options = this.state.options
@@ -249,6 +256,7 @@ export default class AssessmentQuestions extends Component {
     let imgsrc = 'http://'+host+':3000/behaviorImage/' + userId + '/' + authToken+'/' + this.state.behaviorId
     return (
       <>
+      {loading && <Loader/>}
       <Image source={{uri:imgsrc}} style = {{height: 120, width:120, margin: 5, position:'absolute',top:50, left: 30, zIndex:2}}/>
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
           <View>
