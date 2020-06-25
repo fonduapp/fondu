@@ -54,15 +54,17 @@ export default class AssessmentQuestions extends Component {
 
 
     this.setState({authToken: authToken, userId: userId});
+    const { assessmentType, behaviorId } = this.props;
 
     //get questions
-    console.log("assessmenttype " + this.props.assessmentType);
-    switch(this.props.assessmentType){
+    console.log("assessmenttype " + assessmentType);
+    switch(assessmentType){
       case "routine":
-
-        console.log("behaviorId" + this.props.behaviorId)
+      case "review":
+        console.log("behaviorId" + behaviorId)
+        const request = assessmentType === 'routine' ? 'learningQuestions' : 'usageQuestions';
         //get routine questions
-        fetch('http://'+host+':3000/learningQuestions/' + userId + '/' + authToken + '/' + this.props.behaviorId,{
+        fetch(`http://${host}:3000/${request}/${userId}/${authToken}/${behaviorId}`,{
           method: 'GET',
           headers: {
             Accept: 'application/json',
@@ -82,7 +84,6 @@ export default class AssessmentQuestions extends Component {
                          questionId:jsonData[this.qno].question_id,
                          loading: false,
           });
-          console.log("in initial");
         })
         .catch((error) => {
           console.error(error);
