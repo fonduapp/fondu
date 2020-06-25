@@ -58,9 +58,7 @@ export default class AssessmentQuestions extends Component {
     //get questions
     console.log("assessmenttype " + this.props.assessmentType);
     switch(this.props.assessmentType){
-      case "routine":
-
-        console.log("behaviorId" + this.props.behaviorId)
+      case "learning":
         //get routine questions
         fetch('http://'+host+':3000/learningQuestions/' + userId + '/' + authToken + '/' + this.props.behaviorId,{
           method: 'GET',
@@ -82,7 +80,6 @@ export default class AssessmentQuestions extends Component {
                          questionId:jsonData[this.qno].question_id,
                          loading: false,
           });
-          console.log("in initial");
         })
         .catch((error) => {
           console.error(error);
@@ -114,7 +111,6 @@ export default class AssessmentQuestions extends Component {
                          questionId:jsonData[this.qno].question_id,
                          loading: false,
           });
-          console.log("in initial");
         })
         .catch((error) => {
           console.error(error);
@@ -159,25 +155,49 @@ export default class AssessmentQuestions extends Component {
     this.setState({qFeedback: true});
     this.props.questionFinish(this.state.options[this.state.selectedOption].exp===10, true);
 
-    console.log('http://' + host +':3000/addExp/' + this.state.userId + '/' + this.state.authToken + '/' + this.state.questionId + '/' + this.state.options[this.state.selectedOption].exp)
-
-    //send answer to the db
-    fetch('http://' + host +':3000/addExp',{
-      method: 'POST',
-      headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        'userId': this.state.userId,
-        'authToken': this.state.authToken,
-        'questionId': this.state.questionId,
-        'exp': this.state.options[this.state.selectedOption].exp,
+    switch(this.props.assessmentType){
+      case 'review':
+      case 'initial':
+      //send answer to the db
+      fetch('http://' + host +':3000/addExp',{
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'userId': this.state.userId,
+          'authToken': this.state.authToken,
+          'questionId': this.state.questionId,
+          'exp': this.state.options[this.state.selectedOption].exp,
+        })
       })
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      .catch((error) => {
+        console.error(error);
+      });
+      break;
+
+      case 'learning':
+       //send answer to the db
+      fetch('http://' + host +':3000/addExpLearning',{
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'userId': this.state.userId,
+          'authToken': this.state.authToken,
+          'behaviorId': this.state.behaviorId,
+          'exp': this.state.options[this.state.selectedOption].exp,
+        })
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+      break;
+
+    }
 
   }
   next(){

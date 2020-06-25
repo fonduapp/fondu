@@ -64,7 +64,7 @@ export default class ResourcesScreen extends React.Component{
       )
     } else {
       //console.log(this.state.articleList)
-        let articles = this.state.articleList.map((article,i)=>{
+        let articles = (this.state.articleList).map((article,i)=>{
           console.log('article id '+ article['area_id'])
             return <TouchableOpacity
                   key = {i}

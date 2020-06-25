@@ -23,6 +23,10 @@ import host from '../constants/Server.js';
 
 const { width } = Dimensions.get('window');
 
+var originalFetch = require('isomorphic-fetch');
+var fetch = require('fetch-retry')(originalFetch);
+
+
 
 export default class AssessmentScreen extends Component{
     constructor(props){
@@ -33,7 +37,7 @@ export default class AssessmentScreen extends Component{
       quizFinish : false,
       score: 0,
       progress:0,
-      assessmentType: navigation.getParam('assessmentType','none'),// initial, routine, review, relationship, none
+      assessmentType: navigation.getParam('assessmentType','none'),// initial, learning, review, relationship, none
       questionDone:false,
       questionRight: false,
       recArea:'nothing',

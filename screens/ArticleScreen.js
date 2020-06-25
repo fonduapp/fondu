@@ -5,10 +5,9 @@ import DropDownItem from 'react-native-drop-down-item';
 import Modal from 'react-native-modal';
 import ReferencePopUp from '../components/ReferencePopUp';
 import ReportProbPopUp from '../components/ReportProbPopUp';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+
 import {
   Image,
-  Icon,
   Platform,
   ScrollView,
   StyleSheet,
@@ -25,7 +24,22 @@ import { createISC, renderText } from '../constants/Helper.js'
 
 
 //import theme from '../styles/theme.style.js';
-
+const content = '<Section>Support</Section><Subsection>Properly Giving Advice</Subsection><Description>Making sure the advice you give solves the issue, is delivered politely, and is asked for.</Description>'
+ + '<Example>I think doing it will work because …, you can handle it because …, and it’s not too risky because…</Example>'+
+'<Question>Does giving advice help my partner?</Question>'+
+'<Answer>Often, giving advice can actually be harmful <isc>(MacGeorge, Feng, & Burleson, 2011)</isc>. This is because it may make individuals feel less competent and independent. However, if given properly, advice can be beneficial and help the individual better understand and deal with the situation. If the advice is asked for, delivered politely, and solves the issue, it is more likely to be received well and help your partner cope.</Answer>' +
+'<Theory>Researchers have outlined some of the different factors affecting how advice is received in a theory called advice response theory <isc>(MacGeorge, Guntzviller, Hanasono, & Feng, 2016)</isc>. It takes into account the advice content, the qualities of the advice giver, how the advice is given, and more.</Theory>'+
+'<Suggestion>Make sure your advice is wanted</Suggestion>'
++ '<Research>When advice is asked for, or permitted, it is more satisfying, more likely to be used, and the individual is less likely to get defensive (Van Swol, MacGeorge, & Prahl, 2017). It is essential to listen closely and make sure your partner actually wants advice. Giving advice without being prompted is a common mistake. </Research>'
++ '<Suggestion>Deliver the advice politely</Suggestion>' +
+'<Research>When advice is given politely (i.e. with concern for the receivers feelings, modesty, does not challenge competence, or impose too much on the recipient), it is more likely to be perceived as higher quality, facilitate coping, and be utilized (MacGeorge, Feng, & Burleson, 2011). </Research>' +
+'<Suggestion>Explain how your advice will solve the issue, why it’s feasible, and that it’s not too risky</Suggestion>'
++ '<Research>\n'+
+'Research: The message content is extremely important to how it is received, maybe even more so than source characteristics or how politely it’s delivered (Feng & MacGeorge, 2010). After giving advice, discuss why it solves the issue, why your partner can handle it, and how it isn’t too risky. Your advice will be viewed more positively and your partner will be more likely to use it if it has these features.'
++ '</Research>\n'+
+'<Reference>Feng, B., & Burleson, B. R. (2008). The effects of argument explicitness on responses to advice in supportive interactions. Communication Research, 35(6), 849-874.</Reference>' +
+'<Reference>Feng, B., & MacGeorge, E. L. (2010). The influences of message and source factors on advice outcomes. Communication Research, 37(4), 553-575.</Reference>'
+;
 
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
@@ -39,6 +53,19 @@ export default class ArticleScreen extends Component {
 
     this.state = {
       screen: 'direction',
+      content: '<Section>Support</Section><Subsection>Properly Giving Advice</Subsection><Description>Making sure the advice you give solves the issue, is delivered politely, and is asked for.</Description>'
+       + '<Example>I think doing it will work because …, you can handle it because …, and it’s not too risky because…</Example>'+
+      '<Question>Does giving advice help my partner?</Question>'+
+      '<Answer>Often, giving advice can actually be harmful <isc>(MacGeorge, Feng, & Burleson, 2011)</isc>. This is because it may make individuals feel less competent and independent. However, if given properly, advice can be beneficial and help the individual better understand and deal with the situation. If the advice is asked for, delivered politely, and solves the issue, it is more likely to be received well and help your partner cope.</Answer>' +
+      '<Theory>Researchers have outlined some of the different factors affecting how advice is received in a theory called advice response theory <isc>(MacGeorge, Guntzviller, Hanasono, & Feng, 2016)</isc>. It takes into account the advice content, the qualities of the advice giver, how the advice is given, and more.</Theory>'+
+      '<Suggestion>Make sure your advice is wanted</Suggestion>'
+      + '<Research>When advice is asked for, or permitted, it is more satisfying, more likely to be used, and the individual is less likely to get defensive <isc>(Van Swol, MacGeorge, & Prahl, 2017)</isc>. It is essential to listen closely and make sure your partner actually wants advice. Giving advice without being prompted is a common mistake. </Research>'
+      + '<Suggestion>Deliver the advice politely</Suggestion>' +
+      '<Research>When advice is given politely (i.e. with concern for the receivers feelings, modesty, does not challenge competence, or impose too much on the recipient), it is more likely to be perceived as higher quality, facilitate coping, and be utilized (MacGeorge, Feng, & Burleson, 2011).</Research>' +
+      '<Suggestion>Explain how your advice will solve the issue, why it’s feasible, and that it’s not too risky</Suggestion>'
+      + '<Research>Research: The message content is extremely important to how it is received, maybe even more so than source characteristics or how politely it’s delivered (Feng & MacGeorge, 2010). After giving advice, discuss why it solves the issue, why your partner can handle it, and how it isn’t too risky. Your advice will be viewed more positively and your partner will be more likely to use it if it has these features.</Research>'+
+      '<Reference>Feng, B., & Burleson, B. R. (2008). The effects of argument explicitness on responses to advice in supportive interactions. Communication Research, 35(6), 849-874.</Reference>',
+
       article_title: '',
       contents:[],
       example: [],
@@ -46,19 +73,14 @@ export default class ArticleScreen extends Component {
       question: [],
       answer: [],
       Theory: [],
-      article1: [],
-      article2: [],
-      articleList:[],
+      article1: '',
+      article2: '',
       research:[],
       suggestion:[],
       reference:[],
       iscite:[],
       reportProb: false,
       showRef: false,
-      behaviorId:'',
-      userId:'',
-      authToken:'',
-      newPage:false,
     };
     this.switchScreens.bind(this);
     this.createISC = createISC.bind(this);
@@ -84,11 +106,12 @@ export default class ArticleScreen extends Component {
       console.log("ref state" + this.state.showRef)
     }
 
-    async getArticle(userId, authToken, behaviorId){
-      const info_path = 'http://192.241.153.104:3000/behavior/'+userId+'/'+authToken+'/' + behaviorId;
-      const rarticle_path = 'http://192.241.153.104:3000/relatedBehaviors/'+userId+'/'+authToken+'/' + behaviorId;
+    //const {behaviorId} = this.props.route.params
+    componentDidMount(){
+      const info_path = 'http://192.241.153.104:3000/behavior/2/abcdefg/1/'
+      const rarticle_path = 'http://192.241.153.104:3000/relatedBehaviors/2/abcdefg/2'
 
-      return fetch(info_path)
+      return fetch('http://192.241.153.104:3000/behavior/2/abcdefg/1/')
         .then((response)=>response.json())
         .then((responseJson) =>{
           this.setState({
@@ -102,37 +125,22 @@ export default class ArticleScreen extends Component {
             research:(this.renderText(responseJson.behavior_text, 'Research')),
             reference:(this.renderText(responseJson.behavior_text, 'Reference')),
           })
-        })
-        .then(()=>
+        }).then(()=>
         fetch(rarticle_path)
           .then((response)=>response.json())
-          .then((response)=>JSON.parse(response['related_behaviors']))
           .then((responseJson) =>{
-            this.setState({
-              isLoading:false,
-              articleList:responseJson
+            console.log("Article " + responseJson);
+
+          this.setState({
+            isLoading:false,
+            article1:responseJson.name,
+            article2:responseJson.name,
           })
-        }))
-    .catch((error)=>{
-      console.log(error)
-    });
-  }
-  async componentDidMount(){
-      const {authToken, userId} = await _getAuthTokenUserId();
-      this.setState({
-        userId:userId,
-        authToken:authToken,
-        behaviorId:this.props.navigation.state.params.behaviorId
-      });
-      this.getArticle(userId,authToken,this.state.behaviorId)
-  }
-  async componentDidUpdate(){
-    if (this.state.newPage == true){
-      console.log('updating ' + this.state.behaviorId)
-      this.getArticle(this.state.userId,this.state.authToken,this.state.behaviorId)
-      setState({newPage:false})
-    }
-  }
+    })
+    ).catch((error)=>{
+    console.log(error)
+ });
+}
 
   switchScreens=(directions, answer, theory)=>{
     switch(this.state.screen){
@@ -141,13 +149,13 @@ export default class ArticleScreen extends Component {
           <View style = {[styles.researchContainer,{marginTop:20}]}>
           <View style = {[styles.directionContainer,{paddingLeft:20, paddingRight:20, paddingBottom:40}]}>
             <Text style = {styles.headerText}>DIRECTIONS</Text>
-              <View style = {styles.container}>{directions}</View>
-              </View>
-              <TouchableOpacity
-                style ={{paddingLeft:20, marginTop:20}}
-                onPress = {() => this._showResearch()}>
-                <Text style = {styles.headerText}>THE RESEARCH BEHIND IT</Text>
-              </TouchableOpacity>
+            <View style = {styles.container}>{directions}</View>
+          </View>
+          <TouchableOpacity
+              style ={{paddingLeft:20, marginTop:20}}
+              onPress = {() => this._showResearch()}>
+              <Text style = {styles.headerText}>THE RESEARCH BEHIND IT</Text>
+          </TouchableOpacity>
           </View>
         );
         break;
@@ -207,18 +215,6 @@ export default class ArticleScreen extends Component {
         <Text style = {styles.dropDownText}>{res}</Text>
         </DropDownItem>
     });
-    let articles = this.state.articleList.map((article,i) =>{
-      console.log(article)
-      return <TouchableOpacity
-        style={styles.relatedArticleContainer}
-        onPress={()=> this.setState({
-          behaviorId:article['id'],
-          newPage:true,
-        })}
-      >
-      <Text style = {styles.relatedArticleText}>{article['name']}</Text>
-      </TouchableOpacity>
-  });
   return(
 
     <View>
@@ -261,7 +257,12 @@ export default class ArticleScreen extends Component {
         <Text style = {styles.headerLabel}>Related Articles</Text>
         <View style = {styles.welcomeContainerContainer}>
             <View style = {styles.relatedArticle}>
-                {articles}
+                <View style={styles.relatedArticleContainer}>
+                <Text style = {styles.relatedArticleText}>{this.state.article1}</Text>
+                </View>
+                <View style={styles.relatedArticleContainer}>
+                <Text style = {styles.relatedArticleText}>{this.state.article2}</Text>
+                </View>
             </View>
         </View>
       </View>
