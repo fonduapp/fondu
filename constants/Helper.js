@@ -44,16 +44,16 @@ export function renderText(content, tag) {
     }else if (tag == 'theory'){
       pattern = /<Theory>(.*?)<\/Theory>/i;
     }else if (tag == 'research'){
-        pattern = /<Research>(.*?)<\/Research>/gi;
+        pattern = /<Research>(.*?)<\/Research>/i;
     }else if (tag == 'suggestion'){
-        pattern = /<Suggestion>(.*?)<\/Suggestion>/gi;
+        pattern = /<Suggestion>(.*?)<\/Suggestion>/i;
     }else if (tag == 'ref'){
         pattern = /<Reference>(.*?)<\/Reference>/gi;
     }else if (tag == 'isc'){
         pattern = /<isc>(.*?)<\/isc>/gi;
     }
-    //console.log(tag)
-    //console.log(content.match(pattern))
+    console.log(tag)
+    console.log(content.match(pattern))
     return content.match(pattern);
   }
 

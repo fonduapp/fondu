@@ -13,6 +13,7 @@ import {
   Text,
   TextInput,
   Animated,
+  Alert,
   Arrow,
   AsyncStorage,
   TouchableOpacity,
@@ -33,6 +34,10 @@ const moodColors= ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D7
 
 
 
+
+
+
+
 export default class ArticleScreen extends Component {
   constructor(props){
     super(props);
@@ -50,26 +55,14 @@ export default class ArticleScreen extends Component {
     };
   }
 
-    open = (day) => {
-      if (!this.in_markedDates(day)) {
-        console.log('open')
-        this.setState({
+    open (day) {
+      console.log('open')
+      this.setState({
           day:day,
-          screen:'open',
+          screen:'not closed',
           opening:true
         });
       }
-      else{
-        console.log('view ' + this.state.entryRating)
-        this.setState({
-        day:day,
-        screen:'view',
-        opening:true,
-        entryRating:this.state.markedDates[day.dateString]['entryRating']
-        });
-        console.log('view end')
-      }
-    }
 
     async close(){
       if (this.state.entryRating != 0){
@@ -133,10 +126,11 @@ export default class ArticleScreen extends Component {
           authToken:authToken,
         })
         console.log(Moment(this.state.day).format('YYYY-MM-DD'))
-        console.log('getting month entry' + userId +' ' + authToken)
         var currDate = new Date();
         const month = JSON.stringify(currDate.getMonth()+1);
         const year = JSON.stringify(currDate.getFullYear());
+        console.log('getting month entry' + month +' ' + year)
+
         let url = 'http://192.241.153.104:3000/monthEntries/'+userId+'/'+authToken+'/' + month + '/' + year;
         const response = await fetch(url, {
               method: 'GET',
@@ -181,6 +175,7 @@ export default class ArticleScreen extends Component {
         if (this.state.screen != 'closed'&& this.state.opening == true) {
           if (this.in_markedDates(this.state.day)) {
             this.getEntry(this.state.day)
+            this.setState({screen:'view'})
             console.log("not empty")
            } else {
              this.setState({
@@ -237,26 +232,25 @@ export default class ArticleScreen extends Component {
               </TouchableOpacity>
               </View>
           );
-          default:
-            Alert.alert("SCREEN DNE");
+
       }
     }
     render(){
       let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
-        <Icon
-          string={moodIcons[i]}
+        <TouchableOpacity
+          key={i.toString()}
           onPress={() => this.setState({entryRating:(i + 1)})}
           style={[
             styles.moodButton,
             { backgroundColor: color },
-          ]}></Icon>
+          ]}></TouchableOpacity>
       );
     });
       return(
         <View>
         <Calendar
-  onDayPress={this.open}
+  onDayPress={(day)=>this.open(day)}
   monthFormat={'yyyy MM'}
   onMonthChange={(month) => {console.log('month changed', month)}}
   hideArrows={false}
