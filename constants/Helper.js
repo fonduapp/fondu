@@ -45,7 +45,7 @@ export function renderText(content, tag) {
     }else if (tag == 'Theory'){
       pattern = /<Theory>(.*?)<\/Theory>/i;
     }else if (tag == 'Research'){
-        pattern = /<Research>(.*?)<\/Research>/i;
+        pattern = /<Research>(.*?)<\/Research>/gi;
         isArray = true;
     }else if (tag == 'Suggestion'){
         pattern = /<Suggestion>(.*?)<\/Suggestion>/gi;
@@ -54,12 +54,14 @@ export function renderText(content, tag) {
         pattern = /<Reference>(.*?)<\/Reference>/gi;
     }else if (tag == 'isc'){
         pattern = /<isc>(.*?)<\/isc>/gi;
+        isArray = true;
     }
-    console.log(tag)
     var result = content.match(pattern)
+
+      console.log(tag)
+
     if (isArray){
       result = result.map((group,i)=>{
-        console.log(group)
         group = group.replace('<'+tag+'>','');
         group = group.replace('</'+tag+'>','');
         return group
@@ -68,7 +70,7 @@ export function renderText(content, tag) {
 
       return result
     }
-    console.log(result)
+    //console.log(result)
 
     return (content.match(pattern))[1];
   }
@@ -76,18 +78,17 @@ export function renderText(content, tag) {
 //parses through text with given tags, and turns the isc into a button
 export function createISC(text, tag, endtag){
       //console.log("tag to read\t\t\t"+tag);
+      console.log('isc: ' + text)
       let result = text.map((res,i) =>{
-        res = res.replace(tag,'');
-        res = res.replace(endtag,'');
         var citList = this.renderText(res, 'isc');
+        console.log('isc stripped: ' + citList)
+
         var start = 0;
         if (citList){
         let citations = citList.map((cit,i) =>{
           var index = res.indexOf('<isc>',start);
           var sub = res.substring(start, index);
           start = res.indexOf('</isc>') + 6;
-          cit = cit.replace('<isc>','');
-          cit = cit.replace('</isc>','');
           return <Text style = {{flexDirection: 'row'}}>
             <Text>{sub}</Text>
             <Text style = {{fontWeight:"bold"}} onPress={() => this.setState({showRef:true})}>{cit}</Text>
