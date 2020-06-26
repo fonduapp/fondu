@@ -17,6 +17,7 @@ import theme from '../styles/theme.style.js';
 import AssessmentScreen from '../screens/AssessmentScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { createStackNavigator } from 'react-navigation-stack';
+import { NavigationActions } from 'react-navigation';
 import CustomIcon from '../components/CustomIcon.js';
 import { registerRootComponent, AppLoading } from 'expo';
 import ContentModule from '../components/ContentModule';
@@ -52,6 +53,8 @@ export default class HomeScreen extends Component {
       recommendedBehaviors:[],
       loading: true,
     };
+
+    this.learningAssessComplete.bind(this)
   }
 
   async fetchHomeInfo(){
@@ -218,9 +221,36 @@ export default class HomeScreen extends Component {
     this.fetchHomeInfo()
   }
 
-  async routineAssessComplete(){
-    //TODO
+  async learningAssessComplete(behaviorId){
+
+     console.log("behaviorId " + behaviorId)
+     const {authToken, userId} = await _getAuthTokenUserId();
+     //send answer to the db
+      fetch('http://' + host +':3000/completedBehavior',{
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          'userId': userId,
+          'authToken': authToken,
+          'behaviorId': behaviorId,
+        })
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+      console.log(this.state.recommendedBehaviors)
+      //update rec behavior
+      this.setState(previousState => {
+        const recommendedBehaviors = previousState.recommendedBehaviors;
+        recommendedBehaviors[behaviorId].completed = true;
+        return { recommendedBehaviors };
+      });
   }
+
 
   getInitialAssess() {
     return (
@@ -246,14 +276,12 @@ export default class HomeScreen extends Component {
 
     const scrollX = new Animated.Value(0)
 
-    console.log("recommendedBehaviors2" + this.state.recommendedBehaviors)
-
     return (
       <View style={styles.container}>
             <View style={styles.welcomeContainer}>
               <View style = {[styles.moduleBar, {marginLeft: moduleMargin, marginRight: moduleMargin}]}>
                 <ModuleProgressBar style={styles.progressBar}
-                                   length={Object.keys(this.state.recommendedBehaviors).length + 1}
+                                   length={this.state.recommendedBehaviors!=null?Object.keys(this.state.recommendedBehaviors).length + 1:0}
                                    scrollX={scrollX}
                                    snapToInterval={snapToInterval}
                 />
@@ -283,7 +311,6 @@ export default class HomeScreen extends Component {
                 {
                   this.state.recommendedBehaviors!=null?
                   Object.keys(this.state.recommendedBehaviors).map((key, index) => {
-                    console.log("key" + Object.keys(this.state.recommendedBehaviors))
                     const opacity = scrollX.interpolate({
                       inputRange: [
                         snapToInterval * (index - 1),
@@ -293,27 +320,52 @@ export default class HomeScreen extends Component {
                       outputRange: [0, 1, 0],
                       extrapolate: "clamp"
                     });
+                    if(!this.state.recommendedBehaviors[key].completed){
+                      return(
+                        <ContentModule
+                                   title = {this.state.recommendedBehaviors[key].name}
+                                   subtitle = {this.state.recommendedArea.toUpperCase()}
+                                   key={index}
+                                   onPress={() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'learning',assessmentComplete:()=>this.learningAssessComplete(key)})}
+                                   onPress2 = {() => this.props.navigation.navigate(NavigationActions.navigate({
+                                                                                        routeName: 'ResourcesStack',
+                                                                                        action: NavigationActions.navigate({ routeName: 'Article' , params: {behaviorId: key}})
+                                                                                    }))}
+                                   behaviorId={key}
+                                   style = {{}}
+                                   width = {moduleWidth}
+                                   space = {moduleSpace}
+                                   imageOpacity = {opacity}
+                                   contentType= {'learn'}
+                        />
+                      )
+                    }
+                    else{
+                      return(
+                        <ContentModule
+                                   title = {this.state.recommendedBehaviors[key].name}
+                                   subtitle = {this.state.recommendedArea.toUpperCase()}
+                                   key={index}
+                                   onPress={() => this.props.navigation.navigate(NavigationActions.navigate({
+                                                                                        routeName: 'ResourcesStack',
+                                                                                        action: NavigationActions.navigate({ routeName: 'Article' , params: {behaviorId: key}})
+                                                                                    }))}
+                                   behaviorId={key}
+                                   style = {{}}
+                                   width = {moduleWidth}
+                                   space = {moduleSpace}
+                                   imageOpacity = {opacity}
+                                   contentType= {'suggest'}
+                        />
+                      )
+                    }
 
-                    return(
-                    <ContentModule
-                               title = {this.state.recommendedBehaviors[key].name}
-                               subtitle = {this.state.recommendedArea.toUpperCase()}
-                               key={index}
-                               onPress={() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
-                               onPress2 = {() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'routine',assessmentComplete:this.initialAssessComplete.bind(this)})}
-                               behaviorId={key}
-                               style = {{}}
-                               width = {moduleWidth}
-                               space = {moduleSpace}
-                               imageOpacity = {opacity}
-                               contentType= {'learn'}
-                    />)
                   })
                   :null
                 }
                 <ContentModule title = 'Checkpoint'
                                subtitle = {this.state.recommendedArea.toUpperCase()}
-                               key = {5}
+                               key = {99}
                                onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'review',assessmentComplete:this.initialAssessComplete.bind(this)})}
                                width = {moduleWidth}
                                space = {moduleSpace}

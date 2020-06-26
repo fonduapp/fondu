@@ -1,6 +1,6 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import { createStackNavigator } from 'react-navigation-stack';
+import { createStackNavigator, HeaderBackButton } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import TabBarIcon from '../components/TabBarIcon';
@@ -8,7 +8,6 @@ import HomeScreen from '../screens/HomeScreen';
 import AssessmentScreen from '../screens/AssessmentScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
 import SubtopicScreen from '../screens/SubtopicScreen';
-import SettingsScreen from '../screens/SettingsScreen';
 import ArticleScreen from '../screens/ArticleScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import CalenderScreen from '../screens/CalenderScreen';
@@ -74,13 +73,16 @@ const ResourcesStack = createStackNavigator(
   config
 );
 
-ResourcesStack.navigationOptions = {
-  tabBarLabel: 'Resources',
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-book' : 'md-book'} />
-  ),
 
-};
+ResourcesStack.navigationOptions = ({navigation}) => {
+  return{
+    tabBarIcon: ({ focused }) => (
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-book' : 'md-book'} />
+    ),
+    headerLeft:{}
+ }
+}
+
 
 ResourcesStack.path = '';
 
