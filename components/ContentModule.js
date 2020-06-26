@@ -19,7 +19,11 @@ export default class ContentModule extends Component {
 	    this.state = {
 	    	imgsrc:null,
 	    	nextAssessDate:null,
+	    	suggestions:[],
+	    	contentType:"",
 	    };
+
+	    this.getSuggestions = this.getSuggestions.bind(this);
 	}
 
 	async componentDidMount(){
@@ -48,34 +52,45 @@ export default class ContentModule extends Component {
 		console.error(error);
 		});
 
+		if(this.props.contentType==="suggest"){
+			this.getSuggestions()
+		}
+
+	}
+
+	async componentDidUpdate(prevProps){
+		if(this.props.contentType !== prevProps.contentType && this.props.contentType === 'suggest'){
+			this.getSuggestions()
+		}
 	}
 
 	areAllModulesDone(behaviors){
 		return Object.keys(behaviors).every((k)=>{behaviors[k].completed})
 	}
 
-	getSuggestions(){
-		let content = '<Section>Support</Section><Subsection>Properly Giving Advice</Subsection><Description>Making sure the advice you give solves the issue, is delivered politely, and is asked for.</Description>'
- + '<Example>I think doing it will work because …, you can handle it because …, and it’s not too risky because…</Example>'+
-'<Question>Does giving advice help my partner?</Question>'+
-'<Answer>Often, giving advice can actually be harmful <isc>(MacGeorge, Feng, & Burleson, 2011)</isc>. This is because it may make individuals feel less competent and independent. However, if given properly, advice can be beneficial and help the individual better understand and deal with the situation. If the advice is asked for, delivered politely, and solves the issue, it is more likely to be received well and help your partner cope.</Answer>' +
-'<Theory>Researchers have outlined some of the different factors affecting how advice is received in a theory called advice response theory <isc>(MacGeorge, Guntzviller, Hanasono, & Feng, 2016)</isc>. It takes into account the advice content, the qualities of the advice giver, how the advice is given, and more.</Theory>'+
-'<Suggestion>Make sure your advice is wanted</Suggestion>'
-+ '<Research>When advice is asked for, or permitted, it is more satisfying, more likely to be used, and the individual is less likely to get defensive (Van Swol, MacGeorge, & Prahl, 2017). It is essential to listen closely and make sure your partner actually wants advice. Giving advice without being prompted is a common mistake. </Research>'
-+ '<Suggestion>Deliver the advice politely</Suggestion>' +
-'<Research>When advice is given politely (i.e. with concern for the receivers feelings, modesty, does not challenge competence, or impose too much on the recipient), it is more likely to be perceived as higher quality, facilitate coping, and be utilized (MacGeorge, Feng, & Burleson, 2011). </Research>' +
-'<Suggestion>Explain how your advice will solve the issue, why it’s feasible, and that it’s not too risky</Suggestion>'
-+ '<Research>\n'+
-'Research: The message content is extremely important to how it is received, maybe even more so than source characteristics or how politely it’s delivered (Feng & MacGeorge, 2010). After giving advice, discuss why it solves the issue, why your partner can handle it, and how it isn’t too risky. Your advice will be viewed more positively and your partner will be more likely to use it if it has these features.'
-+ '</Research>\n'+
-'<Reference>Feng, B., & Burleson, B. R. (2008). The effects of argument explicitness on responses to advice in supportive interactions. Communication Research, 35(6), 849-874.</Reference>' +
-'<Reference>Feng, B., & MacGeorge, E. L. (2010). The influences of message and source factors on advice outcomes. Communication Research, 37(4), 553-575.</Reference>'
-;
-		let suggestion = renderText(content, 'answer')
-		console.log(suggestion)
+	async getSuggestions(){
+		const {authToken, userId} = await _getAuthTokenUserId()
+
+		//fetch article content
+		console.log('http://' + host +':3000/behavior/' + userId + '/' + authToken + '/' + this.props.behaviorId)
+		fetch('http://' + host +':3000/behavior/' + userId + '/' + authToken + '/' + this.props.behaviorId,{
+		method: 'GET',
+		headers: {
+		  Accept: 'application/json',
+		  'Content-Type': 'application/json',
+		},
+		})
+		.then((response) => response.json())
+		.then((responseJson) => {
+			this.setState({suggestions: renderText(responseJson.behavior_text, 'Suggestion')})
+		})
+		.catch((error) => {
+		console.error(error);
+		});
+
+		
 	}
 	getModuleContent(){
-
 		let moduleWidth = this.props.width
 		let marginSide = this.props.space/2
 		
@@ -132,7 +147,7 @@ export default class ContentModule extends Component {
 				          <View style= {{marginTop: 20}}>
 				          	{ Object.keys(this.props.behaviors).map((behaviorId, index)=>{
 				          		return(
-				          		<View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+				          		<View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}} key={index}>
 					          		<Text style={[textStyle.subheader, { color: theme.PRIMARY_COLOR_5, marginRight: 30}]}>{this.props.behaviors[behaviorId].name}</Text>
 					          		<Icon name={this.props.behaviors[behaviorId].completed?'check-box':'check-box-outline-blank'} color={theme.PRIMARY_COLOR_5}/>
 				          		</View>
@@ -154,19 +169,27 @@ export default class ContentModule extends Component {
 	            )
 				break
 			case 'suggest':
-
-				this.getSuggestions();
 				return(
-				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.PRIMARY_COLOR}]}>
+				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginHorizontal: marginSide, backgroundColor: theme.PRIMARY_COLOR, alignItems: 'flex-start'}]}>
 					  <View style = {[styles.textContainer,{flex:1}]}>
 			              <Text style={[textStyle.subheader, { color: 'white', opacity: 0.5}]}>{this.props.subtitle}</Text>
 			              <Text style={[textStyle.header,{ color: 'white'}]}>{this.props.title}</Text>
 		              </View>
-		              <View style = {[styles.textContainer,{flex:1}]}>
-		              	<Text style={[textStyle.subheader, { color: 'white', opacity: 0.5,}]}>DIRECTIONS</Text>
-			              <Text>direction</Text>
+		              <View style = {{flex:1, justifyContent:'flex-start'}}>
+			              	<Text style={[textStyle.subheader, { color: 'white', opacity: 0.5, marginBottom: 10}]}>DIRECTIONS</Text>
+			              {
+			              	this.state.suggestions.map((suggestion,index)=>
+			              	{
+			              		return (
+			              			<View key = {index} style={{flexDirection:'row', marginBottom: 5, width:'100%'}}>
+			              				<Icon name='flag' color='white' width={20}/>
+			              				<Text style={{...textStyle.caption, color: 'white', marginLeft:15, flexShrink: 1}}>{suggestion}</Text>
+			              			</View>
+			              			)
+			              	})
+			              }
 		              </View>
-		              <View style={styles.buttonContainer}>
+		              <View style={[styles.buttonContainer,{alignSelf:'center'}]}>
 			              <NextButton
 			                onPress={this.props.onPress}
 			                title="Learn more"

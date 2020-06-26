@@ -245,7 +245,8 @@ export default class HomeScreen extends Component {
       console.log(this.state.recommendedBehaviors)
       //update rec behavior
       this.setState(previousState => {
-        previousState.recommendedBehaviors.completed = true;
+        const recommendedBehaviors = previousState.recommendedBehaviors;
+        recommendedBehaviors[behaviorId].completed = true;
         return { recommendedBehaviors };
       });
   }
@@ -280,7 +281,7 @@ export default class HomeScreen extends Component {
             <View style={styles.welcomeContainer}>
               <View style = {[styles.moduleBar, {marginLeft: moduleMargin, marginRight: moduleMargin}]}>
                 <ModuleProgressBar style={styles.progressBar}
-                                   length={Object.keys(this.state.recommendedBehaviors).length + 1}
+                                   length={this.state.recommendedBehaviors!=null?Object.keys(this.state.recommendedBehaviors).length + 1:0}
                                    scrollX={scrollX}
                                    snapToInterval={snapToInterval}
                 />
@@ -310,7 +311,6 @@ export default class HomeScreen extends Component {
                 {
                   this.state.recommendedBehaviors!=null?
                   Object.keys(this.state.recommendedBehaviors).map((key, index) => {
-                    console.log("key" + Object.keys(this.state.recommendedBehaviors))
                     const opacity = scrollX.interpolate({
                       inputRange: [
                         snapToInterval * (index - 1),
