@@ -91,6 +91,24 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen:'result' })
   }
 
+  async seeSuggestedBehaviors(){
+    const {authToken, userId} = await _getAuthTokenUserId();
+    const { recArea: areaId } = this.state;
+    fetch(`http://${host}:3000/suggestedBehaviors/${userId}/${authToken}/${areaId}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(() => {
+      this.setState({ screen: 'suggestedBehaviors' });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }
+
   _exitAssessment(){
     this.props.navigation.state.params.assessmentComplete();
     this.props.navigation.goBack();
@@ -110,7 +128,11 @@ export default class AssessmentScreen extends Component{
     }
   };
 
-  streakOnPressNext = () => {
+  resultOnPressNext = () => {
+    this.seeSuggestedBehaviors();
+  };
+
+  suggestedBehaviorsOnPressNext = () => {
     const { assessmentType } = this.state;
     if (assessmentType === 'initial') {
       this._seeTutorial();
@@ -261,17 +283,31 @@ export default class AssessmentScreen extends Component{
                       marginBottom: 10,
                     }}
                   >
-                    Choose another behavior
+                    Choose another area
                   </Text>
                 </TouchableOpacity>
                 <NextButton 
-                onPress={this.streakOnPressNext} 
+                onPress={this.resultOnPressNext} 
                 title="NEXT >"/>
               </View>
             </Animated.View>
           </View>
         );
         return <SlideAnimController Component={Component}/>
+      case 'suggestedBehaviors':
+        return (
+          <View style={styles.darkContainer}>
+            <View style={styles.startScreen}>
+              {/*TODO*/}
+            </View>
+            <View style={styles.nextButtonContainer}>
+              <NextButton 
+                onPress={this.suggestedBehaviorsOnPressNext}
+                title="NEXT >"
+              />
+            </View>
+          </View>
+        );
       case 'tutorial':
         const tips = [
           {
