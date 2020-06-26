@@ -32,6 +32,7 @@ export async function _getAuthTokenUserId(){
     pattern = /<tag>(.*?)<\/tag>/gi;*/
 
 export function renderText(content, tag) {
+  console.log(content)
     let pattern;
     var isArray = false;
     if (tag == 'Description'){
@@ -50,6 +51,8 @@ export function renderText(content, tag) {
     }else if (tag == 'Suggestion'){
         pattern = /<Suggestion>(.*?)<\/Suggestion>/gi;
         isArray = true;
+    }else if (tag == 'Icon'){
+          pattern = /<Icon>(.*?)<\/Icon>/gi;
     }else if (tag == 'Reference'){
         pattern = /<Reference>(.*?)<\/Reference>/gi;
     }else if (tag == 'isc'){
@@ -57,8 +60,7 @@ export function renderText(content, tag) {
         isArray = true;
     }
     var result = content.match(pattern)
-
-      console.log(tag)
+    console.log(tag)
 
     if (isArray){
       result = result.map((group,i)=>{
@@ -67,10 +69,9 @@ export function renderText(content, tag) {
         return group
       })
       console.log(result)
-
       return result
     }
-    //console.log(result)
+    console.log(result)
 
     return (content.match(pattern))[1];
   }
@@ -78,11 +79,8 @@ export function renderText(content, tag) {
 //parses through text with given tags, and turns the isc into a button
 export function createISC(text, tag, endtag){
       //console.log("tag to read\t\t\t"+tag);
-      console.log('isc: ' + text)
       let result = text.map((res,i) =>{
         var citList = this.renderText(res, 'isc');
-        console.log('isc stripped: ' + citList)
-
         var start = 0;
         if (citList){
         let citations = citList.map((cit,i) =>{

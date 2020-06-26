@@ -4,10 +4,10 @@ import Collapsible from 'react-native-collapsible';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 import host from '../constants/Server.js';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import {Icon} from 'react-native-elements';
 import Moment from 'moment';
 import {
   Image,
-  Icon,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,12 +29,8 @@ const height =  Dimensions.get('window').height;
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
-const moodIcons= ['mood_bad','sentiment_disappointed','sentiment_satisfied','mood','sentiment_very_satisfied'];
+const moodIcons= ['mood-bad','sentiment-dissatisfied','sentiment-satisfied','mood','sentiment-very-satisfied'];
 const moodColors= ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'];
-
-
-
-
 
 
 
@@ -50,13 +46,14 @@ export default class ArticleScreen extends Component {
       opening:true,
       moodName: ['error','awful', 'down', 'alright', 'good', 'amazing'],
       markedDates: {},
-      day: new Date(),
+      day: {dateString:Moment(new Date()).format('YYYY-MM-DD')},
       entry: '',
     };
   }
 
     open (day) {
       console.log('open')
+      console.log(day)
       this.setState({
           day:day,
           screen:'not closed',
@@ -196,7 +193,7 @@ export default class ArticleScreen extends Component {
             <View>
             <TouchableOpacity
             style = {styles.closedContainer}
-            onPress={()=>this.open()}>
+            onPress={()=>this.open(this.state.day)}>
             <View>
             <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             </View>
@@ -238,13 +235,15 @@ export default class ArticleScreen extends Component {
     render(){
       let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
-        <TouchableOpacity
-          key={i.toString()}
+        <Icon
+          //key={i.toString()}
+          name={moodIcons[i]}
+          type='material'
           onPress={() => this.setState({entryRating:(i + 1)})}
           style={[
             styles.moodButton,
             { backgroundColor: color },
-          ]}></TouchableOpacity>
+          ]}></Icon>
       );
     });
       return(
