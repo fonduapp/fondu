@@ -32,12 +32,14 @@ export default class AssessmentScreen extends Component{
     constructor(props){
     super(props)
     const { navigation } = props;
+    // initial, routine, review, relationship, none
+    const assessmentType = navigation.getParam('assessmentType','none');
     this.state = {
-      screen:'start', // start, quiz, finish, tutorial
+      screen: assessmentType === 'initial' ? 'start' : 'quiz', // start, quiz, finish, tutorial
       quizFinish : false,
       score: 0,
       progress:0,
-      assessmentType: navigation.getParam('assessmentType','none'),// initial, learning, review, relationship, none
+      assessmentType,
       questionDone:false,
       questionRight: false,
       recArea:'nothing',
@@ -93,6 +95,24 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen:'result' })
   }
 
+  async seeSuggestedBehaviors(){
+    const {authToken, userId} = await _getAuthTokenUserId();
+    const { recArea: areaId } = this.state;
+    fetch(`http://${host}:3000/suggestedBehaviors/${userId}/${authToken}/${areaId}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(() => {
+      this.setState({ screen: 'suggestedBehaviors' });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }
+
   _exitAssessment(){
     this.props.navigation.state.params.assessmentComplete();
     this.props.navigation.goBack();
@@ -103,10 +123,32 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen: 'tutorial'})
   }
 
+  finishOnPressNext = () => {
+    const { assessmentType } = this.state;
+    switch (assessmentType) {
+      case 'initial': this._seeResults(); break;
+      case 'review': this._seeStreaks(); break;
+      default: this._exitAssessment();
+    }
+  };
+
+  resultOnPressNext = () => {
+    this.seeSuggestedBehaviors();
+  };
+
+  suggestedBehaviorsOnPressNext = () => {
+    const { assessmentType } = this.state;
+    if (assessmentType === 'initial') {
+      this._seeTutorial();
+    } else {
+      this._exitAssessment();
+    }
+  };
   
   assessmentScreen(){
     const { navigation } = this.props
     const scrollX = new Animated.Value(0)
+    const { assessmentType } = this.state;
 
     switch(this.state.screen){
       case 'start':
@@ -154,16 +196,18 @@ export default class AssessmentScreen extends Component{
                 <Text style={[textStyle.header, {color:theme.TEXT_COLOR, textAlign: 'center'}]}>
                   Congrats, you did it!
                 </Text>
-                <Text style={[textStyle.paragraph,{marginTop: 15, marginBottom: 15, opacity: 0.5}]}>
-                  By taking this assessment routinely, we’re able to better assess 
-                  your relationship health and behaviors and inform you of healthy 
-                  next steps!
-                </Text>
+                {assessmentType === 'initial' && (
+                  <Text style={[textStyle.paragraph,{marginTop: 15, marginBottom: 15, opacity: 0.5}]}>
+                    By taking this assessment, we’re able to better assess 
+                    your relationship health and behaviors and inform you of healthy 
+                    next steps!
+                  </Text>
+                )}
               </View>
             </View> 
             <View style={styles.nextButtonContainer}>
               <NextButton 
-              onPress={() => this._seeStreaks()} 
+              onPress={this.finishOnPressNext}
               title="NEXT >"/>
             </View>
           </View>
@@ -243,17 +287,31 @@ export default class AssessmentScreen extends Component{
                       marginBottom: 10,
                     }}
                   >
-                    Choose another behavior
+                    Choose another area
                   </Text>
                 </TouchableOpacity>
                 <NextButton 
-                onPress={() => this._seeTutorial()} 
+                onPress={this.resultOnPressNext} 
                 title="NEXT >"/>
               </View>
             </Animated.View>
           </View>
         );
         return <SlideAnimController Component={Component}/>
+      case 'suggestedBehaviors':
+        return (
+          <View style={styles.darkContainer}>
+            <View style={styles.startScreen}>
+              {/*TODO*/}
+            </View>
+            <View style={styles.nextButtonContainer}>
+              <NextButton 
+                onPress={this.suggestedBehaviorsOnPressNext}
+                title="NEXT >"
+              />
+            </View>
+          </View>
+        );
       case 'tutorial':
         const tips = [
           {
