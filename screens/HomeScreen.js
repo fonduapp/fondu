@@ -327,10 +327,6 @@ export default class HomeScreen extends Component {
                                    subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
                                    onPress={() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'learning',assessmentComplete:()=>this.learningAssessComplete(key)})}
-                                   onPress2 = {() => this.props.navigation.navigate(NavigationActions.navigate({
-                                                                                        routeName: 'ResourcesStack',
-                                                                                        action: NavigationActions.navigate({ routeName: 'Article' , params: {behaviorId: key}})
-                                                                                    }))}
                                    behaviorId={key}
                                    style = {{}}
                                    width = {moduleWidth}
@@ -346,10 +342,6 @@ export default class HomeScreen extends Component {
                                    title = {this.state.recommendedBehaviors[key].name}
                                    subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
-                                   onPress={() => this.props.navigation.navigate(NavigationActions.navigate({
-                                                                                        routeName: 'ResourcesStack',
-                                                                                        action: NavigationActions.navigate({ routeName: 'Article' , params: {behaviorId: key}})
-                                                                                    }))}
                                    behaviorId={key}
                                    style = {{}}
                                    width = {moduleWidth}
