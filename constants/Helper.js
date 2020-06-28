@@ -32,7 +32,6 @@ export async function _getAuthTokenUserId(){
     pattern = /<tag>(.*?)<\/tag>/gi;*/
 
 export function renderText(content, tag) {
-  console.log(content)
     let pattern;
     var isArray = false;
     if (tag == 'Description'){
@@ -51,8 +50,10 @@ export function renderText(content, tag) {
     }else if (tag == 'Suggestion'){
         pattern = /<Suggestion>(.*?)<\/Suggestion>/gi;
         isArray = true;
-    }else if (tag == 'Icon'){
-          pattern = /<Icon>(.*?)<\/Icon>/gi;
+    }else if (tag == 'SuggestionIcon'){
+          pattern = /<SuggestionIcon>(.*?)<\/SuggestionIcon>/gi;
+          isArray = true;
+
     }else if (tag == 'Reference'){
         pattern = /<Reference>(.*?)<\/Reference>/gi;
     }else if (tag == 'isc'){
@@ -60,7 +61,7 @@ export function renderText(content, tag) {
         isArray = true;
     }
     var result = content.match(pattern)
-    console.log(tag)
+  //  console.log(tag)
 
     if (isArray){
       result = result.map((group,i)=>{
@@ -68,10 +69,10 @@ export function renderText(content, tag) {
         group = group.replace('</'+tag+'>','');
         return group
       })
-      console.log(result)
+      //console.log(result)
       return result
     }
-    console.log(result)
+  //  console.log(result)
 
     return (content.match(pattern))[1];
   }
