@@ -3,12 +3,13 @@ import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import theme from '../styles/theme.style.js';
 import {textStyle} from '../styles/text.style.js';
 import { Icon } from 'react-native-elements';
-
+import Color from 'color';
 
 class QuizRadioButton extends Component {
 	state = {
 		value: null,
 		icon: null,
+    extraOptionSelected: false,
 	};
 
 	constructor(props) {
@@ -19,11 +20,30 @@ class QuizRadioButton extends Component {
 
 	updateValue(key) {
 		this.props.updateValue(key);
-		this.setState({value: key,});
+		this.setState({
+      value: key,
+      extraOptionSelected: false,
+    });
 	}
+
+  selectExtraOption = () => {
+    const { selectExtraOption } = this.props;
+    selectExtraOption();
+    this.setState({
+      value: null,
+      extraOptionSelected: true,
+    });
+  }
+
 	render() {
-		const { options } = this.props;
-		const { value } = this.state;
+		const {
+      options,
+      extraOption,
+    } = this.props;
+		const {
+      value,
+      extraOptionSelected,
+    } = this.state;
 		return (
 			<View>
 				{options.map((item, key) => {
@@ -43,6 +63,27 @@ class QuizRadioButton extends Component {
 						</View>
 					);
 				})}
+        {!!extraOption && (
+          <View style={{flexDirection:"row", marginBottom: 10}} key={'extraOption'}>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={extraOptionSelected ? [
+                  styles.optionsButtonSelected,
+                  styles.extraOptionButtonSelected,
+                ] : [
+                  styles.optionsButton,
+                  styles.extraOptionButton,
+                ]}
+                onPress={() => {
+                    this.selectExtraOption();
+                  }
+                }
+              >
+              <Text style={[extraOptionSelected ? styles.optionButtonTextSelected : styles.optionButtonText, textStyle.paragraph]}>{extraOption}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 			</View>
 		);
 	}
@@ -93,18 +134,24 @@ const styles = StyleSheet.create({
 	    borderRadius: 16,
 	    width: '100%',
 	    padding: 15,
-	   	borderColor: theme.SECONDARY_COLOR,
-	    borderWidth: 1.5,
+	   	borderColor: Color(theme.TEXT_COLOR).alpha(0.2).string(),
+	    borderWidth: 1,
 	},
+  extraOptionButton: {
+    backgroundColor: Color('darkgray').alpha(0.2).string(),
+  },
 	optionsButtonSelected:{
 	    backgroundColor:theme.PRIMARY_COLOR,
 	    width: '100%',
 	    borderColor:'transparent',
-	    borderWidth: 2,
+	    borderWidth: 1,
 	    borderRadius: 16,
 	    padding: 15,
 
 	},
+  extraOptionButtonSelected: {
+    backgroundColor: 'darkgray',
+  },
 	optionButtonText:{
 		color: theme.TEXT_COLOR,
 		opacity: 0.7

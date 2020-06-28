@@ -34,6 +34,7 @@ export default class AssessmentScreen extends Component{
     const { navigation } = props;
     // initial, routine, review, relationship, none
     const assessmentType = navigation.getParam('assessmentType','none');
+    this.behaviors = navigation.getParam('behaviors', []);
     this.state = {
       screen: assessmentType === 'initial' ? 'start' : 'quiz', // start, quiz, finish, tutorial
       quizFinish : false,
@@ -43,6 +44,7 @@ export default class AssessmentScreen extends Component{
       questionDone:false,
       questionRight: false,
       recArea:'nothing',
+      areaId: -1,
       behaviorId : navigation.getParam('behaviorId','none'),
     }
     this.assessmentScreen.bind(this);
@@ -84,8 +86,13 @@ export default class AssessmentScreen extends Component{
     })
     .then((response) => response.json())
     .then((responseJson) => {
+      const {
+        area_id: areaId,
+        area_name: recArea,
+      } = responseJson;
       this.setState({
-        recArea: responseJson.area_name,
+        areaId,
+        recArea,
       });
     })
     .catch((error) => {
@@ -97,7 +104,7 @@ export default class AssessmentScreen extends Component{
 
   async seeSuggestedBehaviors(){
     const {authToken, userId} = await _getAuthTokenUserId();
-    const { recArea: areaId } = this.state;
+    const { areaId } = this.state;
     fetch(`http://${host}:3000/suggestedBehaviors/${userId}/${authToken}/${areaId}`, {
       method: 'GET',
       headers: {
@@ -223,6 +230,7 @@ export default class AssessmentScreen extends Component{
                                  updateProgress={(progress) => this._updateProgress(progress)}
                                  assessmentType = {this.state.assessmentType}
                                  behaviorId = {this.state.behaviorId}
+                                 behaviors={this.behaviors}
                                  nextButtonContainerStyle={styles.nextButtonContainer}
                                  />
           </View>
