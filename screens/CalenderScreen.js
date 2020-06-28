@@ -4,10 +4,10 @@ import Collapsible from 'react-native-collapsible';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 import host from '../constants/Server.js';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import {Icon} from 'react-native-elements';
 import Moment from 'moment';
 import {
   Image,
-  Icon,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,12 +29,8 @@ const height =  Dimensions.get('window').height;
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
-const moodIcons= ['mood_bad','sentiment_disappointed','sentiment_satisfied','mood','sentiment_very_satisfied'];
+const moodIcons= ['mood-bad','sentiment-dissatisfied','sentiment-satisfied','mood','sentiment-very-satisfied'];
 const moodColors= ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'];
-
-
-
-
 
 
 
@@ -50,13 +46,14 @@ export default class ArticleScreen extends Component {
       opening:true,
       moodName: ['error','awful', 'down', 'alright', 'good', 'amazing'],
       markedDates: {},
-      day: new Date(),
+      day: {dateString:Moment(new Date()).format('YYYY-MM-DD')},
       entry: '',
     };
   }
 
     open (day) {
       console.log('open')
+      console.log(day)
       this.setState({
           day:day,
           screen:'not closed',
@@ -76,28 +73,28 @@ export default class ArticleScreen extends Component {
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay, this.state.entry, this.state.entryRating);
         this.setState({screen:'closed'});
-        console.log("POSTED RESPONSE ")
-      //   const data ={
-      //     userId: '5',
-      //     authToken: '4ea711f7f1146c8de28612d2700ff102',
-      //     entryDate: (this.state.day).dateString,
-      //     entry:this.state.entry,
-      //     entryRating:this.state.entryRating,
-      //   };
-      //
-      //   fetch('http://'+host+':3000/writeEntry/', {
-      //         method: 'POST',
-      //         headers: {
-      //           Accept: 'application/json',
-      //                   'Content-Type': 'application/json'
-      //         },
-      //        body: JSON.stringify(data)
-      //     })
-      // }
-      // handleEntry = (text) => {
-      //   this.setState({ entry: text })
+        console.log("POSTED RESPONSE " + this.state.entry)
+        const data ={
+          userId: '5',
+          authToken: '4ea711f7f1146c8de28612d2700ff102',
+          entryDate: (this.state.day).dateString,
+          entry:this.state.entry,
+          entryRating:this.state.entryRating,
+        };
+
+        fetch('http://'+host+':3000/writeEntry/', {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                        'Content-Type': 'application/json'
+              },
+             body: JSON.stringify(data)
+          })
       }
     }
+      handleEntry = (text) => {
+        this.setState({ entry: text })
+      }
 
     updateDate = (_selectedDay, entry, entryRating) => {
         const updatedMarkedDates = {
@@ -125,13 +122,15 @@ export default class ArticleScreen extends Component {
           userId:userId,
           authToken:authToken,
         })
-        console.log(Moment(this.state.day).format('YYYY-MM-DD'))
         var currDate = new Date();
         const month = JSON.stringify(currDate.getMonth()+1);
         const year = JSON.stringify(currDate.getFullYear());
         console.log('getting month entry' + month +' ' + year)
+        this.fetchMonth(month,year)
+      }
 
-        let url = 'http://192.241.153.104:3000/monthEntries/'+userId+'/'+authToken+'/' + month + '/' + year;
+      async fetchMonth(month,year){
+        let url = 'http://192.241.153.104:3000/monthEntries/'+this.state.userId+'/'+this.state.authToken+'/' + month + '/' + year;
         const response = await fetch(url, {
               method: 'GET',
               headers: {
@@ -141,7 +140,7 @@ export default class ArticleScreen extends Component {
           })
           .then((response) => response.json())
           .then((responseJson) => {
-            console.log('updatingDate')
+            console.log('responseJson')
             responseJson.map((entry, i)=>{
               this.updateDate((entry["entry_date"]).substring(0,10),entry['entry'], entry['entry_rating'])
             });
@@ -150,6 +149,7 @@ export default class ArticleScreen extends Component {
             console.error(error);
           });
       }
+
 
 
       async getEntry(day){
@@ -196,7 +196,7 @@ export default class ArticleScreen extends Component {
             <View>
             <TouchableOpacity
             style = {styles.closedContainer}
-            onPress={()=>this.open()}>
+            onPress={()=>this.open(this.state.day)}>
             <View>
             <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             </View>
@@ -238,13 +238,15 @@ export default class ArticleScreen extends Component {
     render(){
       let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
-        <TouchableOpacity
-          key={i.toString()}
+        <Icon
+          //key={i.toString()}
+          name={moodIcons[i]}
+          type='material'
           onPress={() => this.setState({entryRating:(i + 1)})}
           style={[
             styles.moodButton,
             { backgroundColor: color },
-          ]}></TouchableOpacity>
+          ]}></Icon>
       );
     });
       return(
@@ -252,7 +254,7 @@ export default class ArticleScreen extends Component {
         <Calendar
   onDayPress={(day)=>this.open(day)}
   monthFormat={'yyyy MM'}
-  onMonthChange={(month) => {console.log('month changed', month)}}
+  onMonthChange={(month) => this.fetchMonth(month.month,month.year)}
   hideArrows={false}
   hideExtraDays={true}
   disableMonthChange={true}
