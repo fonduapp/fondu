@@ -34,6 +34,7 @@ const HomeStack = createStackNavigator(
         header: null,
       },
     },
+    Article: ArticleScreen,
   },
   config
 );
