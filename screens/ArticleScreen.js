@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { useState } from 'react';
 
+import {textStyle} from '../styles/text.style.js';
 import DropDownItem from 'react-native-drop-down-item';
 import Modal from 'react-native-modal';
 import ReferencePopUp from '../components/ReferencePopUp';
@@ -85,11 +86,6 @@ export default class ArticleScreen extends Component {
       this.setState({showRef:false});
       console.log("ref state" + this.state.showRef)
     }
-    async getImage(userId, authToken, behaviorId){
-      console.log('getting images')
-      const image_path = 'http://192.241.153.104:3000/behaviorImage/'+userId+'/'+authToken+'/' + behaviorId;
-      return await fetch(image_path)
-    }
 
     async getArticle(userId, authToken, behaviorId){
       const info_path = 'http://192.241.153.104:3000/behavior/'+userId+'/'+authToken+'/' + behaviorId;
@@ -109,9 +105,10 @@ export default class ArticleScreen extends Component {
             research:(this.renderText(responseJson.behavior_text, 'Research')),
             reference:(this.renderText(responseJson.behavior_text, 'Reference')),
             icons:(this.renderText(responseJson.behavior_text, 'SuggestionIcon')),
+            image: 'http://192.241.153.104:3000/behaviorImage/'+userId+'/'+authToken+'/' + behaviorId,
           })
           console.log('icons')
-          console.log(this.state.icons)
+          console.log(this.state.research)
 
         })
 
@@ -141,7 +138,6 @@ export default class ArticleScreen extends Component {
   }
   async componentDidUpdate(){
     if (this.state.newPage == true){
-      console.log('updating ' + this.state.behaviorId)
       this.getArticle(this.state.userId,this.state.authToken,this.state.behaviorId)
       this.setState({newPage:false})
     }
@@ -153,7 +149,7 @@ export default class ArticleScreen extends Component {
         return(
           <View style = {[styles.researchContainer,{marginTop:20}]}>
           <View style = {[styles.directionContainer,{paddingLeft:20, paddingRight:20, paddingBottom:40}]}>
-            <Text style = {styles.headerText}>DIRECTIONS</Text>
+            <Text style = {[styles.headerText, {paddingBottom:20}]}>DIRECTIONS</Text>
               <View style = {styles.container}>{directions}</View>
               </View>
               <TouchableOpacity
@@ -163,7 +159,6 @@ export default class ArticleScreen extends Component {
               </TouchableOpacity>
           </View>
         );
-        break;
       case 'research':
         return(
           <View style = {[styles.directionContainer, ,{marginTop:20}]} >
@@ -180,20 +175,10 @@ export default class ArticleScreen extends Component {
             <View style ={styles.researchSubContainer}>
               <Text style = {styles.researchTitleText}>{this.state.question}</Text>
               <Text style = {styles.researchBodyText}>{answer}{'\n\n'}<B>Theory:</B> {theory}</Text>
-              <DropDownItem
-                contentVisible = {false}
-                header = {
-                <View style = {{textAlign:'left',paddingTop:20}}>
-                    <Text style = {styles.researchTitleText}>Additional Research</Text>
-                </View>
-              }>
-              <Text style = {[styles.dropDownText, {color:'#425957'}]}>TODO</Text>
-              </DropDownItem>
             </View>
           </View>
         </View>
         );
-        break;
         default:
           Alert.alert("SCREEN DNE");
     }
@@ -211,12 +196,14 @@ export default class ArticleScreen extends Component {
         header = {
           <View style = {styles.directionContainer2}>
             <Icon
-              name={'head_heart_outline'}
-              type='material-community'
-              style = {styles.imageContainer2}>
+              name={'mood'}
+              type='material'
+              color='#FFFFFF'
+              containerStyle= {styles.iconContainer}
+              size={30}>
               </Icon>
-            <View style = {styles.instructionContainer}>
-              <Text style = {styles.instructionText}>{dir}</Text>
+            <View style = {{flex:10}}>
+              <Text style = {styles.suggestionText}>{dir}</Text>
             </View>
           </View>
         }
@@ -242,19 +229,17 @@ export default class ArticleScreen extends Component {
 
       <View style = {styles.container}>
       <Image
-      source={require("../assets/images/heart.png")}
-
+      source={{uri:this.state.image}}
       style = {styles.imageContainer}
       >
       </Image>
-        <Text style ={[styles.descriptText, {textAlign:'center'}]}>
+        <View style={{marginLeft:width*.1, marginRight:width*.1}}>
+        <Text style ={[styles.exampleText, {textAlign:'center', marginBottom:width*.1}]}>
           {this.state.example}
         </Text>
+        <Text style = {styles.questionText}>{this.state.question}</Text>
+        <Text style = {styles.exampleText}>{this.state.descript}</Text>
       </View>
-
-      <View>
-        <Text style = {styles.headerLabel}>{this.state.question}</Text>
-        <Text style = {styles.about}>{this.state.descript}</Text>
       </View>
 
       <View>
@@ -265,7 +250,9 @@ export default class ArticleScreen extends Component {
       <View>
       <TouchableOpacity
             onPress={()=>this.showProbReport()}>
-              <Text>Report a Problem</Text>
+              <Text
+              style={[styles.exampleText,{marginLeft:width*.1}]}>
+              Report a Problem</Text>
         </TouchableOpacity>
 
         <ReferencePopUp
@@ -278,7 +265,7 @@ export default class ArticleScreen extends Component {
           isVisible = {this.state.reportProb}
           hide ={this.hideProbReport}
         />
-        <Text style = {styles.headerLabel}>Related Articles</Text>
+        <Text style = {styles.titleText}>Related Articles</Text>
         <View style = {styles.welcomeContainerContainer}>
             <View style = {styles.relatedArticle}>
                 {articles}
@@ -299,19 +286,6 @@ ArticleScreen.navigationOptions = {
 
 
 const styles = StyleSheet.create({
-  textContainer: {
-    color: '#7695FF',
-    fontSize: 20,
-    fontWeight: 'bold'
-  },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#03A9F4',
-    overflow: 'hidden',
-},
   container: {
     flex: 1,
     alignItems:'center',
@@ -324,6 +298,7 @@ const styles = StyleSheet.create({
   },
   directionContainer2:{
     flexDirection:'row',
+    justifyContent:'space-around',
     width: width,
     paddingTop:10,
     paddingLeft:50,
@@ -338,22 +313,13 @@ const styles = StyleSheet.create({
     paddingTop: mainPadding,
   },
   imageContainer:{
-    width: width*.4,
-    height: width*.4,
-    marginBottom: 20,
+    width: width*.6,
+    height: width*.6,
     borderRadius: 30,
   },
 
-  imageContainer2:{
-    width: width*.1,
-    height: width*.1,
-    margin:10,
-    borderRadius: 10,
-    paddingLeft:20,
-    backgroundColor: '#03A9F4',
-  },
-  instructionContainer:{
-    flex:10,
+  iconContainer:{
+    marginRight:20,
   },
 
   relatedArticleContainer:{
@@ -392,61 +358,53 @@ const styles = StyleSheet.create({
     shadowOpacity: .2,
   },
 
-  aboutHeaderContainer:{
-    alignItems: 'center',
-    width: width/3*2,
-    paddingBottom: 20,
-    paddingTop: 20,
-  },
-
   headerText:{
     color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 16,
+    ...textStyle.subheader,
     paddingLeft:30,
+  },
+  questionText:{
+    color: '#475279',
+    ...textStyle.header4,
   },
 
   relatedArticleText:{
     color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 12,
+    ...textStyle.label,
     textAlign:'center',
   },
   researchTitleText:{
       paddingLeft:20,
-      paddingBottom:20,
-      fontSize:14,
+      marginBottom:height*.025,
       color: '#475279',
-      fontWeight:'bold',
+      ...textStyle.subheader,
       justifyContent:'flex-start',
   },
   researchBodyText:{
     paddingLeft:20,
     color:'#475279',
-    fontSize:12,
     lineHeight:18,
+    ...textStyle.paragraph2,
   },
-  instructionText:{
+
+  exampleText:{
+    color: '#475279',
+    ...textStyle.paragraph,
+  },
+  suggestionText:{
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight:'bold',
-    paddingTop:20,
+    flex:5,
+    ...textStyle.subheader2,
   },
   dropDownText:{
     color: '#FFFFFF',
-    fontSize: 15,
-    paddingLeft:100,
-  },
-  aboutText:{
-    color: '#475279',
-    fontSize: 13,
-    lineHeight:20,
-    paddingTop:10,
-    paddingLeft:50,
-    paddingRight: 50,
+    ...textStyle.paragraph,
+    marginRight:width*.1,
+    marginLeft:width*.1,
+
   },
 
-  headerLabel:{
+  titleText:{
     fontSize: 16,
     fontWeight: 'bold',
     paddingLeft: 50,

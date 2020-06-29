@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Modal from 'react-native-modal';
 import Collapsible from 'react-native-collapsible';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
+import {textStyle} from '../styles/text.style.js';
 import host from '../constants/Server.js';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import {Icon} from 'react-native-elements';
@@ -72,7 +73,6 @@ export default class ArticleScreen extends Component {
         // Create a new object using object property spread since it should be immutable
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay, this.state.entry, this.state.entryRating);
-        this.setState({screen:'closed'});
         console.log("POSTED RESPONSE " + this.state.entry)
         const data ={
           userId: '5',
@@ -82,15 +82,17 @@ export default class ArticleScreen extends Component {
           entryRating:this.state.entryRating,
         };
 
-        fetch('http://'+host+':3000/writeEntry/', {
-              method: 'POST',
-              headers: {
-                Accept: 'application/json',
-                        'Content-Type': 'application/json'
-              },
-             body: JSON.stringify(data)
-          })
+        // fetch('http://'+host+':3000/writeEntry/', {
+        //       method: 'POST',
+        //       headers: {
+        //         Accept: 'application/json',
+        //                 'Content-Type': 'application/json'
+        //       },
+        //      body: JSON.stringify(data)
+        //   })
       }
+      this.setState({screen:'closed'});
+
     }
       handleEntry = (text) => {
         this.setState({ entry: text })
@@ -109,11 +111,8 @@ export default class ArticleScreen extends Component {
           },
         },
       };
-    //console.log(this.state.markedDates);
     // Triggers component to render again, picking up the new state
     this.setState({ markedDates: updatedMarkedDates });
-    console.log(this.state.markedDates)
-
     };
 
     async componentDidMount(){
@@ -176,14 +175,12 @@ export default class ArticleScreen extends Component {
           if (this.in_markedDates(this.state.day)) {
             this.getEntry(this.state.day)
             this.setState({screen:'view'})
-            console.log("not empty")
            } else {
              this.setState({
                entryRating:0,
                screen:'open',
                entry:'',
              });
-             console.log('empty')
          };
          this.setState({opening:false})
        }
@@ -191,45 +188,76 @@ export default class ArticleScreen extends Component {
 
     switchScreens=(moods)=>{
       switch(this.state.screen){
+
         case 'closed':
+          var date = new Date(this.state.day.dateString)
+
           return(
             <View>
             <TouchableOpacity
             style = {styles.closedContainer}
             onPress={()=>this.open(this.state.day)}>
             <View>
+            <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+
             <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             </View>
             </TouchableOpacity>
             </View>
           );
         case 'open':
+        var date = new Date(this.state.day.dateString)
+
           return(
             <View style = {styles.openContainer}>
+              <View style = {styles.headerContainer}>
+                <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                <Icon
+                  name={'keyboard-arrow-down'}
+                  type='material'
+                  color='#FFFFFF'
+                  onPress={()=>this.close()}
+                  size={30}/>
+                </View>
             <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             <View style={styles.moodButtonContainer}>
               {moods}
             </View>
             <TextInput
             style={styles.textInputContainer}
-            onChangeText={this.handleEntry}/>
-            <TouchableOpacity
+            onChangeText={this.handleEntry}
+            value={this.state.entry}
+            />
+            <Icon
+              name={'check-circle'}
+              type='material'
+              color='#FFFFFF'
               onPress={()=>this.close()}
-              style={styles.button}>
-            </TouchableOpacity>
+              size={45}/>
+
             </View>
           );
           case 'view':
             var date = new Date(this.state.day.dateString)
             return(
               <View style = {styles.openContainer}>
-              <Text style = {styles.titleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                <View style = {styles.headerContainer}>
+                  <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                  <Icon
+                    name={'keyboard-arrow-down'}
+                    type='material'
+                    color='#FFFFFF'
+                    onPress={()=>this.close()}
+                    size={30}/>
+                </View>
               <Text style = {styles.titleText}>I felt {this.state.moodName[this.state.entryRating]} about my relationship</Text>
               <Text style={styles.titleText}>{this.state.entry}</Text>
-              <TouchableOpacity
+              <Icon
+                name={'check-circle'}
+                type='material'
+                color='#FFFFFF'
                 onPress={()=>this.close()}
-                style={styles.button}>
-              </TouchableOpacity>
+                size={45}/>
               </View>
           );
 
@@ -242,8 +270,10 @@ export default class ArticleScreen extends Component {
           //key={i.toString()}
           name={moodIcons[i]}
           type='material'
+          color='#FFFFFF'
+          size={40}
           onPress={() => this.setState({entryRating:(i + 1)})}
-          style={[
+          containerStyle={[
             styles.moodButton,
             { backgroundColor: color },
           ]}></Icon>
@@ -253,7 +283,7 @@ export default class ArticleScreen extends Component {
         <View>
         <Calendar
   onDayPress={(day)=>this.open(day)}
-  monthFormat={'yyyy MM'}
+  monthFormat={'MMMM yyyy'}
   onMonthChange={(month) => this.fetchMonth(month.month,month.year)}
   hideArrows={false}
   hideExtraDays={true}
@@ -267,6 +297,25 @@ export default class ArticleScreen extends Component {
   disableArrowRight={false}
   markedDates ={this.state.markedDates}
   markingType={'custom'}
+  theme={{
+   backgroundColor: '#ffffff',
+   calendarBackground: '#ffffff',
+   textSectionTitleColor: '#d4d3ff',
+   textSectionTitleDisabledColor: '#d9e1e8',
+   selectedDayBackgroundColor: '#00adf5',
+   selectedDayTextColor: '#ffffff',
+   todayTextColor: '#00adf5',
+   dayTextColor: '#475279',
+   textDisabledColor: '#d9e1e8',
+   monthTextColor: '#7B80FF',
+   indicatorColor: 'blue',
+   textDayFontFamily: 'poppins-regular',
+   textMonthFontFamily: 'poppins-bold',
+   textDayHeaderFontFamily: 'poppins-medium',
+   textDayFontSize: 16,
+   textMonthFontSize: 24,
+   textDayHeaderFontSize: 13
+ }}
 />
   {this.switchScreens(moods)}
   </View>
@@ -277,9 +326,17 @@ export default class ArticleScreen extends Component {
 const styles = StyleSheet.create({
   titleText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 24,
+    ...textStyle.header,
     marginBottom: 20,
+  },
+  subtitleText: {
+    color: '#94ADFF',
+    ...textStyle.header4,
+  },
+
+  headerContainer:{
+    flexDirection:'row',
+    justifyContent:'space-between'
   },
   closedContainer: {
     backgroundColor: '#7B80FF',
@@ -308,10 +365,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   moodButton: {
-    backgroundColor: '#FFFFFF',
+    justifyContent:'center',
+    alignItems:'center',
     height: width / 10,
     width: width / 10,
-    borderRadius: 50,
+    borderRadius: 100,
   },
   button: {
     backgroundColor: '#FFFFFF',
@@ -332,12 +390,14 @@ const styles = StyleSheet.create({
 
   textInputContainer: {
     marginLeft: 20,
+    paddingLeft:20,
     marginRight: 20,
     marginVertical: 30,
     height: 30,
     borderRadius: 50,
     lineHeight: 40,
     backgroundColor: '#94ADFF',
+    color:'#FFFFFF',
     justifyContent: 'space-around',
   },
 });

@@ -90,7 +90,7 @@ export function createISC(text, tag, endtag){
           start = res.indexOf('</isc>') + 6;
           return <Text style = {{flexDirection: 'row'}}>
             <Text>{sub}</Text>
-            <Text style = {{fontWeight:"bold"}} onPress={() => this.setState({showRef:true})}>{cit}</Text>
+            <Text style = {{ fontFamily: 'poppins-bold'}} onPress={() => this.setState({showRef:true})}>{cit}</Text>
             </Text>
         });
 

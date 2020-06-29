@@ -13,6 +13,8 @@ import theme from '../styles/theme.style.js';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
+import {textStyle} from '../styles/text.style.js';
+
 
 
 const width =  Dimensions.get('window').width;
@@ -36,7 +38,6 @@ export default class ResourcesScreen extends React.Component{
 
   async componentDidMount(){
     const {authToken, userId} = await _getAuthTokenUserId()
-    //console.log('userid ' + userId + "\t authToken " + authToken);
     return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
       .then((response)=>response.json())
       .then((responseJson) =>{
@@ -128,8 +129,8 @@ const styles = StyleSheet.create({
   },
   buttonText:{
     textAlign:'center',
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...textStyle.subheader,
+    fontSize:16,
     color:"#FFFFFF",
   },
 });
