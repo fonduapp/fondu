@@ -11,7 +11,7 @@ import { ListItem, SearchBar} from 'react-native-elements';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
 import { StackNavigator } from 'react-navigation';
-
+import {textStyle} from '../styles/text.style.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 
 
@@ -26,8 +26,6 @@ export default class SubtopicScreen extends React.Component{
       search:'',
       isLoading: true,
       subList:[],
-
-
     }
   }
 
@@ -127,8 +125,8 @@ const styles = StyleSheet.create({
   },
   buttonText:{
     textAlign:'center',
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...textStyle.subheader,
+    fontSize:16,
     color:"#FFFFFF",
   },
 });
