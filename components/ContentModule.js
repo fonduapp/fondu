@@ -8,7 +8,7 @@ import { _getAuthTokenUserId } from '../constants/Helper.js';
 import host from '../constants/Server.js';
 import { renderText } from '../constants/Helper.js'
 import { withNavigation } from 'react-navigation';
-
+import { longDayNames, shortMonthNames } from '../constants/Date.js';
 
 const { width } = Dimensions.get('window');
 
@@ -140,12 +140,7 @@ class ContentModule extends Component {
 				break
 			case 'check':
 
-				const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-									  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-									]
-				const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-				
-				let nextAssessDate = this.state.nextAssessDate!=null ? (dayNames[this.state.nextAssessDate.getDay()] + " (" + monthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
+				let nextAssessDate = this.state.nextAssessDate!=null ? (longDayNames[this.state.nextAssessDate.getDay()] + " (" + shortMonthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
 				let modulesDone = this.areAllModulesDone(this.props.behaviors)
 				return(
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.PRIMARY_COLOR_4}]}>

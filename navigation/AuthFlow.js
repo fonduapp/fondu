@@ -42,9 +42,7 @@ class LandingScreen extends React.Component {
                 onPress={() => this.props.navigation.navigate('SignUp')}
                 buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
         </View>
-        <View style={styles.footer}>
-          <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
-        </View>
+        <View style={styles.footer}/>
       </View>
     );
   }
@@ -379,8 +377,8 @@ class RelationshipStatusScreen extends React.Component {
     const { selectedIndex } = this.state;
     switch (selectedIndex) {
       case 0: return 1;
-      case 1:
-      case 2: return 2;
+      case 1: return 2;
+      case 2: return 3;
       default: return 0;
     }
   }
