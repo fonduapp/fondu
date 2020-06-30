@@ -27,11 +27,13 @@ const mainPadding = 30;
 
 export default class ProfileScreen extends Component {
   constructor(props) {
-    super(props)
+    super(props);
+    this.focusCheckpointDay = props.navigation.getParam('focusCheckpointDay', false);
   }
 
   state = {
     scrollBarValue: new Animated.Value(0),
+    checkpointDayOpacity: new Animated.Value(1),
     accountPairedNotif: true,
     relationshipStatusSelectedIndex: -1,
     checkpointDaySelectedIndex: -1,
@@ -189,9 +191,40 @@ export default class ProfileScreen extends Component {
     this.setState({ checkpointDaySelectedIndex: selectedIndex });
   };
 
+  onLayoutScrollView = () => {
+    if (this.focusCheckpointDay) {
+      this.scroll.scrollTo({ x: width*2 });
+    }
+  };
+
+  blinkCheckpointDay(duration) {
+    const { checkpointDayOpacity } = this.state;
+    Animated.timing(checkpointDayOpacity, {
+      toValue: 0.5,
+      duration,
+    }).start();
+    setTimeout(() => {
+      Animated.timing(checkpointDayOpacity, {
+        toValue: 1,
+        duration,
+      }).start();
+    }, duration);
+  }
+
+  onLayoutCheckpointDay = () => {
+    if (this.focusCheckpointDay) {
+      const duration = 250;
+      this.blinkCheckpointDay(duration);
+      setTimeout(() => {
+        this.blinkCheckpointDay(duration);
+      }, 2*duration);
+    }
+  };
+
   render() {
     let { scrollBarValue } = this.state;
     const {
+      checkpointDayOpacity,
       relationshipStatusSelectedIndex,
       checkpointDaySelectedIndex,
     } = this.state;
@@ -245,6 +278,7 @@ export default class ProfileScreen extends Component {
               </View>
           </Animated.View>
           <ScrollView
+                onLayout={this.onLayoutScrollView}
                 style={{flex:1}}
                 contentContainerStyle={styles.contentContainer}
                 horizontal= {true}
@@ -360,14 +394,18 @@ export default class ProfileScreen extends Component {
                       buttons={['Single', 'Relationship', 'Other']}
                     />
                   </View>
-                  <View style={styles.accountSection}>
+                  <Animated.View
+                    style={styles.accountSection}
+                    opacity={checkpointDayOpacity}
+                    onLayout={this.onLayoutCheckpointDay}
+                  >
                     <Text style={styles.accountHeaderText}>CHECKPOINT DAY</Text>
                     <StyledButtonGroup
                       onPress={this.onPressCheckpointDay}
                       selectedIndex={checkpointDaySelectedIndex}
                       buttons={shortDayNames}
                     />
-                  </View>
+                  </Animated.View>
                   <View style={styles.accountSection}>
                     <Text style={styles.accountHeaderText}>PARTNER</Text>
                     <View>
@@ -504,11 +542,6 @@ const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => (
       alignSelf: 'center',
       backgroundColor: theme.SECONDARY_COLOR,
       borderRadius: 20,
-      elevation: 5,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.8,
-      shadowRadius: 2,
       width: '100%',
       paddingVertical: 5,
       paddingHorizontal: 8,

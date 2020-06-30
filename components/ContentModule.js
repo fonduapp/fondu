@@ -104,6 +104,16 @@ class ContentModule extends Component {
     );
   };
 
+  onPressChangeAssessDay = () => {
+    const { navigation } = this.props;
+    navigation.navigate(
+      'Profile',
+      {
+        focusCheckpointDay: true,
+      },
+    );
+  };
+
 	getModuleContent(){
 		let moduleWidth = this.props.width
 		let marginSide = this.props.space/2
@@ -170,6 +180,22 @@ class ContentModule extends Component {
 			                buttonStyle = {styles.buttonStyleCheck}
 			                disabled = {!modulesDone}
 			               />
+                     <View
+                       marginTop={10}
+                       alignItems="center"
+                     >
+                       <Text style={styles.changeAssessDayText}>
+                         Does this day not work for you?
+                       </Text>
+                       <TouchableOpacity onPress={this.onPressChangeAssessDay}>
+                         <Text style={[
+                           styles.changeAssessDayText,
+                           textStyle.label,
+                         ]}>
+                           Choose another day
+                         </Text>
+                       </TouchableOpacity>
+                     </View>
 		               </View>
 	               </View>
 	            )
@@ -307,7 +333,12 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		top: 0,
 
-	}
+	},
+  changeAssessDayText: {
+    ...textStyle.caption,
+    color: theme.TEXT_COLOR,
+    opacity: 0.5,
+  },
 });
 
 export default withNavigation(ContentModule);
