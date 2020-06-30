@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   TextInput,
   Picker,
+  ImageBackground,
 } from 'react-native';
 import NextButton from '../components/NextButton';
 import CustomTextInput from '../components/CustomTextInput';
@@ -30,22 +31,26 @@ class LandingScreen extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <View style={{ flex: 1, marginTop: 140 }}>
-          <Text style={{ ...textStyle.title, color: 'white' }}>fondu</Text>
-        </View>
-        <View style={styles.contentContainer}>
-          <NextButton title="Sign In"
-                onPress={() => this.props.navigation.navigate('SignIn')}
-                buttonStyle = {{marginBottom:28, backgroundColor: theme.PRIMARY_COLOR}}/>
-          <NextButton title="Sign Up"
-                onPress={() => this.props.navigation.navigate('SignUp')}
-                buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR}}/>
-        </View>
-        <View style={styles.footer}>
-          <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
-        </View>
+      <ImageBackground source={require("../assets/images/fondusignup.png")} style={styles.bgImage} >
+      <View style={[styles.container,{backgroundColor: 'none'}]}>
+        
+          <View style={{ flex: 1, marginTop: 200 }}>
+            <Text style={{ ...textStyle.title, color: 'white' }}>fondu</Text>
+          </View>
+          <View style={styles.contentContainer}>
+            <NextButton title="Sign In"
+                  onPress={() => this.props.navigation.navigate('SignIn')}
+                  buttonStyle = {{marginBottom:28, backgroundColor: theme.PRIMARY_COLOR_7}}/>
+            <NextButton title="Sign Up"
+                  onPress={() => this.props.navigation.navigate('SignUp')}
+                  buttonStyle = {{marginBottom:10, backgroundColor: theme.PRIMARY_COLOR_7}}/>
+          </View>
+          <View style={styles.footer}>
+            <TouchableOpacity><Text style={styles.footerStyle}>Forgot password?</Text></TouchableOpacity>
+          </View>
+        
       </View>
+      </ImageBackground>
     );
   }
 }
@@ -599,6 +604,11 @@ const styles = StyleSheet.create({
     ...textStyle.header3,
     color: 'white',
   },
+  bgImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center'
+  }
 });
 
 const StyledInput = (props) => {
