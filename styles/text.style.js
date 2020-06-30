@@ -13,8 +13,12 @@ const textStyle = StyleSheet.create({
   	fontFamily: 'poppins-bold',
   	fontSize: 24,
   },
+  header4: {
+  	fontSize:18,
+  	fontFamily: 'poppins-bold',
+  },
   header3: {
-  	fontSize:36, 
+  	fontSize:36,
   	fontFamily: 'poppins-bold',
   },
   header2: {
@@ -37,12 +41,20 @@ const textStyle = StyleSheet.create({
   	fontFamily: 'poppins-bold',
   	fontSize: 15,
   },
+  subheader2:{
+  	fontFamily: 'poppins-semibold',
+  	fontSize: 15,
+  },
   subtitle:{
   	fontFamily: 'poppins-medium',
   },
   paragraph: {
   	fontFamily: 'poppins-regular',
   	fontSize: 14,
+  },
+  paragraph2: {
+  	fontFamily: 'poppins-regular',
+  	fontSize: 13,
   }
 
 })

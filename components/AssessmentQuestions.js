@@ -41,12 +41,37 @@ export default class AssessmentQuestions extends Component {
       countCheck : 0,
       qFeedback: false,
       selectedOption:-1,
+      extraOptionSelected: false,
       authToken:null,
       userId:null,
+      extraOption: null,
       loading: true,
     }
 
   }
+
+  updateQuestion(shouldShuffle) {
+    const {
+      text: question,
+      suggestion: description,
+      answers: options,
+      behavior_id: behaviorId,
+      question_id: questionId,
+      extra_option: extraOption,
+    } = jsonData[this.qno];
+    if (shouldShuffle) {
+      this.shuffleArray(options);
+    }
+    this.setState({
+      question,
+      description,
+      options,
+      behaviorId,
+      questionId,
+      extraOption,
+    });
+  }
+
   async componentDidMount(){
     const {authToken, userId} = await _getAuthTokenUserId();
 
@@ -54,80 +79,64 @@ export default class AssessmentQuestions extends Component {
 
 
     this.setState({authToken: authToken, userId: userId});
-    const { assessmentType, behaviorId } = this.props;
+    const {
+      assessmentType,
+      behaviorId,
+      behaviors,
+    } = this.props;
 
     //get questions
 
     console.log("assessmenttype " + assessmentType);
-    switch(assessmentType){
-      case "learning":
-      case "review":
-        console.log("behaviorId" + behaviorId)
-        const request = assessmentType === 'routine' ? 'learningQuestions' : 'usageQuestions';
-        //get routine questions
-        fetch(`http://${host}:3000/${request}/${userId}/${authToken}/${behaviorId}`,{
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        })
-        .then((response) => response.json())
-        .then((responseJson) => {
-          jsonData = responseJson
-          //convert json string to json object
-          jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
-          this.shuffleArray(jsonData[this.qno].answers)
-          this.setState({question:jsonData[this.qno].text,
-                         description:jsonData[this.qno].suggestion,
-                         options:jsonData[this.qno].answers,
-                         behaviorId:jsonData[this.qno].behavior_id,
-                         questionId:jsonData[this.qno].question_id,
-                         loading: false,
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-      break;
-
-      case "initial":
-
-        //Get whether user finished initial assessment
-        console.log('http://'+host+':3000/initial/' + userId + '/' + authToken);
-        //get initial questions
-        fetch('http://'+host+':3000/initial/' + userId + '/' + authToken,{
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-        })
-        .then((response) => response.json())
-        .then((responseJson) => {
-          jsonData = responseJson
-          //convert json string to json object
-          jsonData = jsonData.map(row => (row.answers = JSON.parse(row.answers), row));
-          this.shuffleArray(jsonData[this.qno].answers)
-          this.setState({question:jsonData[this.qno].text,
-                         description:jsonData[this.qno].suggestion,
-                         options:jsonData[this.qno].answers,
-                         behaviorId:jsonData[this.qno].behavior_id,
-                         questionId:jsonData[this.qno].question_id,
-                         loading: false,
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-      break;
-
-    default:
-      console.log("???")
-
+    switch(assessmentType) {
+      case 'learning':
+        await this.fetchAndAddQuestions('learningQuestions', behaviorId);
+        break;
+      case 'review':
+        await Promise.all(
+          behaviors.map((behavior) => this.fetchAndAddQuestions('usageQuestions', behavior))
+        );
+        this.shuffleArray(jsonData);
+        break;
+      case 'initial':
+        await this.fetchAndAddQuestions('initial');
+        break;
+      default:
+        console.error("unknown assessment type");
     }
-
+    this.updateQuestion(true);
+    this.setState({
+      loading: false,
+    });
   }
+
+  async fetchAndAddQuestions(request, behaviorId) {
+    const {authToken, userId} = await _getAuthTokenUserId();
+    let path = `http://${host}:3000/${request}/${userId}/${authToken}`;
+    if (!!behaviorId) {
+      path += `/${behaviorId}`;
+    }
+    console.log('fetching ', path);
+    //get questions
+    return fetch(path, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      //convert json string to json object
+      jsonData = jsonData.concat(
+        responseJson.map(row => (row.answers = JSON.parse(row.answers), row))
+      );
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }
+
   shuffleArray(arr){
     var ctr = arr.length, temp, index;
 
@@ -147,11 +156,7 @@ export default class AssessmentQuestions extends Component {
   prev(){
     if(this.qno > 0){
       this.qno--
-      this.setState({ question: jsonData[this.qno].text,
-                      description: jsonData[this.qno].suggestion,
-                      options: jsonData[this.qno].answers,
-                      behaviorId:jsonData[this.qno].behavior_id,
-                      questionId:jsonData[this.qno].question_id})
+      this.updateQuestion(false);
     }
   }
 
@@ -159,69 +164,52 @@ export default class AssessmentQuestions extends Component {
 
     this.setState({qFeedback: true});
     this.props.questionFinish(this.state.options[this.state.selectedOption].exp===10, true);
-
-    switch(this.props.assessmentType){
+    let request;
+    switch(this.props.assessmentType) {
       case 'review':
       case 'initial':
-      //send answer to the db
-      fetch('http://' + host +':3000/addExp',{
-        method: 'POST',
-        headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          'userId': this.state.userId,
-          'authToken': this.state.authToken,
-          'questionId': this.state.questionId,
-          'exp': this.state.options[this.state.selectedOption].exp,
-        })
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-      break;
-
+        request = 'addExp';
+        break;
       case 'learning':
-       //send answer to the db
-      fetch('http://' + host +':3000/addExpLearning',{
-        method: 'POST',
-        headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          'userId': this.state.userId,
-          'authToken': this.state.authToken,
-          'behaviorId': this.state.behaviorId,
-          'exp': this.state.options[this.state.selectedOption].exp,
-        })
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-      break;
-
+        request = 'addExpLearning';
+        break;
+      default:
+        console.error('unknown assessment type');
     }
+    //send answer to the db
+    fetch(`http://${host}:3000/${request}`, {
+      method: 'POST',
+      headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        'userId': this.state.userId,
+        'authToken': this.state.authToken,
+        'questionId': this.state.questionId,
+        'exp': this.state.options[this.state.selectedOption].exp,
+      })
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 
   }
   next(){
     this.setState({qFeedback: false});
     this.props.questionFinish(true, false);
     this.props.updateProgress((this.qno+1)/jsonData.length);
-    this.setState({selectedOption:-1})
+    this.setState({
+      selectedOption: -1,
+      extraOptionSelected: false,
+    });
 
     if(this.qno < jsonData.length-1){
       this.qno++
-      this.shuffleArray(jsonData[this.qno].answers)
-
-      this.setState({ countCheck: 0,
-                      question: jsonData[this.qno].text,
-                      description: jsonData[this.qno].suggestion,
-                      options: jsonData[this.qno].answers,
-                      behaviorId:jsonData[this.qno].behavior_id,
-                      questionId:jsonData[this.qno].question_id,
-                    })
+      this.updateQuestion(true);
+      this.setState({
+        countCheck: 0,
+      });
 
 
       
@@ -252,8 +240,17 @@ export default class AssessmentQuestions extends Component {
   }
 
   updateValue(ans){
-    this.setState({selectedOption: ans});
+    this.setState({
+      selectedOption: ans,
+      extraOptionSelected: false,
+    });
+  }
 
+  selectExtraOption = () => {
+    this.setState({
+      selectedOption: -1,
+      extraOptionSelected: true,
+    });
   }
 
   findCorrectAnswer(options){
@@ -265,7 +262,11 @@ export default class AssessmentQuestions extends Component {
   }
 
   render() {
-    const { loading } = this.state;
+    const {
+      loading,
+      extraOption,
+      extraOptionSelected,
+    } = this.state;
 
     let _this = this
 
@@ -318,6 +319,8 @@ export default class AssessmentQuestions extends Component {
             <QuizRadioButton  options={options}
                           color = {theme.PRIMARY_COLOR}
                           updateValue={this.updateValue.bind(this)} 
+                          extraOption={extraOption}
+                          selectExtraOption={this.selectExtraOption}
             />
             }
           </View>
@@ -325,8 +328,8 @@ export default class AssessmentQuestions extends Component {
       
       <View style={nextButtonContainerStyle}>
         <NextButton title="NEXT >" 
-                    disabled = {this.state.selectedOption <0} 
-                    onPress={() => this.state.qFeedback ? this.next() : this.check()} 
+                    disabled = {this.state.selectedOption < 0 && !extraOptionSelected} 
+                    onPress={() => this.state.qFeedback || extraOptionSelected ? this.next() : this.check()} 
                     buttonStyle={[styles.buttonStyle,{backgroundColor: theme.PRIMARY_COLOR_6}]}/>
       </View>
       </>

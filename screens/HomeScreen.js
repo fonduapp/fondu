@@ -191,6 +191,25 @@ export default class HomeScreen extends Component {
 
   };
 
+  async setAssessDate() {
+    const {authToken, userId} = await _getAuthTokenUserId();
+    const date = new Date();
+    const data = {
+      userId,
+      authToken,
+      dateFinished: `${date.getFullYear()}-${1+date.getMonth()}-${date.getDate()}`,
+    };
+
+    fetch('http://' + host +':3000/setAssessDate/',{
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+  }
+
   async initialAssessComplete(){
     console.log('initialAssessComplete')
     this.setState({
@@ -217,6 +236,8 @@ export default class HomeScreen extends Component {
       },
       body: JSON.stringify(data)
     })
+
+    this.setAssessDate();
 
     this.fetchHomeInfo()
   }
@@ -251,6 +272,9 @@ export default class HomeScreen extends Component {
       });
   }
 
+  reviewAssessComplete = () => {
+    this.setAssessDate();
+  };
 
   getInitialAssess() {
     return (
@@ -326,11 +350,11 @@ export default class HomeScreen extends Component {
                                    title = {this.state.recommendedBehaviors[key].name}
                                    subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
-                                   onPress={() => this.props.navigation.navigate('Assessment',{behaviorId:key, assessmentType:'learning',assessmentComplete:()=>this.learningAssessComplete(key)})}
-                                   onPress2 = {() => this.props.navigation.navigate(NavigationActions.navigate({
-                                                                                        routeName: 'ResourcesStack',
-                                                                                        action: NavigationActions.navigate({ routeName: 'Article' , params: {behaviorId: key}})
-                                                                                    }))}
+                                   onPress={() => this.props.navigation.navigate('Assessment',{
+                                     behaviorId:key,
+                                     assessmentType:'learning',
+                                     assessmentComplete:()=>this.learningAssessComplete(key),
+                                   })}
                                    behaviorId={key}
                                    style = {{}}
                                    width = {moduleWidth}
@@ -346,10 +370,6 @@ export default class HomeScreen extends Component {
                                    title = {this.state.recommendedBehaviors[key].name}
                                    subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
-                                   onPress={() => this.props.navigation.navigate(NavigationActions.navigate({
-                                                                                        routeName: 'ResourcesStack',
-                                                                                        action: NavigationActions.navigate({ routeName: 'Article' , params: {behaviorId: key}})
-                                                                                    }))}
                                    behaviorId={key}
                                    style = {{}}
                                    width = {moduleWidth}
@@ -366,7 +386,11 @@ export default class HomeScreen extends Component {
                 <ContentModule title = 'Checkpoint'
                                subtitle = {this.state.recommendedArea.toUpperCase()}
                                key = {99}
-                               onPress={() => this.props.navigation.navigate('Assessment',{assessmentType:'review',assessmentComplete:this.initialAssessComplete.bind(this)})}
+                               onPress={() => this.props.navigation.navigate('Assessment',{
+                                 behaviors: Object.keys(this.state.recommendedBehaviors),
+                                 assessmentType: 'review',
+                                 assessmentComplete: this.reviewAssessComplete,
+                               })}
                                width = {moduleWidth}
                                space = {moduleSpace}
                                behaviors = {this.state.recommendedBehaviors}

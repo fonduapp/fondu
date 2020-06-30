@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import Modal from 'react-native-modal';
 import Collapsible from 'react-native-collapsible';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
+import {textStyle} from '../styles/text.style.js';
 import host from '../constants/Server.js';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import {Icon} from 'react-native-elements';
 import Moment from 'moment';
 import {
   Image,
-  Icon,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,12 +30,8 @@ const height =  Dimensions.get('window').height;
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
-const moodIcons= ['mood_bad','sentiment_disappointed','sentiment_satisfied','mood','sentiment_very_satisfied'];
+const moodIcons= ['mood-bad','sentiment-dissatisfied','sentiment-satisfied','mood','sentiment-very-satisfied'];
 const moodColors= ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'];
-
-
-
-
 
 
 
@@ -50,13 +47,14 @@ export default class ArticleScreen extends Component {
       opening:true,
       moodName: ['error','awful', 'down', 'alright', 'good', 'amazing'],
       markedDates: {},
-      day: new Date(),
+      day: {dateString:Moment(new Date()).format('YYYY-MM-DD')},
       entry: '',
     };
   }
 
     open (day) {
       console.log('open')
+      console.log(day)
       this.setState({
           day:day,
           screen:'not closed',
@@ -75,29 +73,30 @@ export default class ArticleScreen extends Component {
         // Create a new object using object property spread since it should be immutable
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay, this.state.entry, this.state.entryRating);
-        this.setState({screen:'closed'});
-        console.log("POSTED RESPONSE ")
-      //   const data ={
-      //     userId: '5',
-      //     authToken: '4ea711f7f1146c8de28612d2700ff102',
-      //     entryDate: (this.state.day).dateString,
-      //     entry:this.state.entry,
-      //     entryRating:this.state.entryRating,
-      //   };
-      //
-      //   fetch('http://'+host+':3000/writeEntry/', {
-      //         method: 'POST',
-      //         headers: {
-      //           Accept: 'application/json',
-      //                   'Content-Type': 'application/json'
-      //         },
-      //        body: JSON.stringify(data)
-      //     })
-      // }
-      // handleEntry = (text) => {
-      //   this.setState({ entry: text })
+        console.log("POSTED RESPONSE " + this.state.entry)
+        const data ={
+          userId: '5',
+          authToken: '4ea711f7f1146c8de28612d2700ff102',
+          entryDate: (this.state.day).dateString,
+          entry:this.state.entry,
+          entryRating:this.state.entryRating,
+        };
+
+        // fetch('http://'+host+':3000/writeEntry/', {
+        //       method: 'POST',
+        //       headers: {
+        //         Accept: 'application/json',
+        //                 'Content-Type': 'application/json'
+        //       },
+        //      body: JSON.stringify(data)
+        //   })
       }
+      this.setState({screen:'closed'});
+
     }
+      handleEntry = (text) => {
+        this.setState({ entry: text })
+      }
 
     updateDate = (_selectedDay, entry, entryRating) => {
         const updatedMarkedDates = {
@@ -112,11 +111,8 @@ export default class ArticleScreen extends Component {
           },
         },
       };
-    //console.log(this.state.markedDates);
     // Triggers component to render again, picking up the new state
     this.setState({ markedDates: updatedMarkedDates });
-    console.log(this.state.markedDates)
-
     };
 
     async componentDidMount(){
@@ -125,13 +121,15 @@ export default class ArticleScreen extends Component {
           userId:userId,
           authToken:authToken,
         })
-        console.log(Moment(this.state.day).format('YYYY-MM-DD'))
         var currDate = new Date();
         const month = JSON.stringify(currDate.getMonth()+1);
         const year = JSON.stringify(currDate.getFullYear());
         console.log('getting month entry' + month +' ' + year)
+        this.fetchMonth(month,year)
+      }
 
-        let url = 'http://192.241.153.104:3000/monthEntries/'+userId+'/'+authToken+'/' + month + '/' + year;
+      async fetchMonth(month,year){
+        let url = 'http://192.241.153.104:3000/monthEntries/'+this.state.userId+'/'+this.state.authToken+'/' + month + '/' + year;
         const response = await fetch(url, {
               method: 'GET',
               headers: {
@@ -141,7 +139,7 @@ export default class ArticleScreen extends Component {
           })
           .then((response) => response.json())
           .then((responseJson) => {
-            console.log('updatingDate')
+            console.log('responseJson')
             responseJson.map((entry, i)=>{
               this.updateDate((entry["entry_date"]).substring(0,10),entry['entry'], entry['entry_rating'])
             });
@@ -150,6 +148,7 @@ export default class ArticleScreen extends Component {
             console.error(error);
           });
       }
+
 
 
       async getEntry(day){
@@ -176,14 +175,12 @@ export default class ArticleScreen extends Component {
           if (this.in_markedDates(this.state.day)) {
             this.getEntry(this.state.day)
             this.setState({screen:'view'})
-            console.log("not empty")
            } else {
              this.setState({
                entryRating:0,
                screen:'open',
                entry:'',
              });
-             console.log('empty')
          };
          this.setState({opening:false})
        }
@@ -191,45 +188,76 @@ export default class ArticleScreen extends Component {
 
     switchScreens=(moods)=>{
       switch(this.state.screen){
+
         case 'closed':
+          var date = new Date(this.state.day.dateString)
+
           return(
             <View>
             <TouchableOpacity
             style = {styles.closedContainer}
-            onPress={()=>this.open()}>
+            onPress={()=>this.open(this.state.day)}>
             <View>
+            <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+
             <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             </View>
             </TouchableOpacity>
             </View>
           );
         case 'open':
+        var date = new Date(this.state.day.dateString)
+
           return(
             <View style = {styles.openContainer}>
+              <View style = {styles.headerContainer}>
+                <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                <Icon
+                  name={'keyboard-arrow-down'}
+                  type='material'
+                  color='#FFFFFF'
+                  onPress={()=>this.close()}
+                  size={30}/>
+                </View>
             <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
             <View style={styles.moodButtonContainer}>
               {moods}
             </View>
             <TextInput
             style={styles.textInputContainer}
-            onChangeText={this.handleEntry}/>
-            <TouchableOpacity
+            onChangeText={this.handleEntry}
+            value={this.state.entry}
+            />
+            <Icon
+              name={'check-circle'}
+              type='material'
+              color='#FFFFFF'
               onPress={()=>this.close()}
-              style={styles.button}>
-            </TouchableOpacity>
+              size={45}/>
+
             </View>
           );
           case 'view':
             var date = new Date(this.state.day.dateString)
             return(
               <View style = {styles.openContainer}>
-              <Text style = {styles.titleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                <View style = {styles.headerContainer}>
+                  <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                  <Icon
+                    name={'keyboard-arrow-down'}
+                    type='material'
+                    color='#FFFFFF'
+                    onPress={()=>this.close()}
+                    size={30}/>
+                </View>
               <Text style = {styles.titleText}>I felt {this.state.moodName[this.state.entryRating]} about my relationship</Text>
               <Text style={styles.titleText}>{this.state.entry}</Text>
-              <TouchableOpacity
+              <Icon
+                name={'check-circle'}
+                type='material'
+                color='#FFFFFF'
                 onPress={()=>this.close()}
-                style={styles.button}>
-              </TouchableOpacity>
+                size={45}/>
               </View>
           );
 
@@ -238,21 +266,25 @@ export default class ArticleScreen extends Component {
     render(){
       let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
-        <TouchableOpacity
-          key={i.toString()}
+        <Icon
+          //key={i.toString()}
+          name={moodIcons[i]}
+          type='material'
+          color='#FFFFFF'
+          size={40}
           onPress={() => this.setState({entryRating:(i + 1)})}
-          style={[
+          containerStyle={[
             styles.moodButton,
             { backgroundColor: color },
-          ]}></TouchableOpacity>
+          ]}></Icon>
       );
     });
       return(
         <View>
         <Calendar
   onDayPress={(day)=>this.open(day)}
-  monthFormat={'yyyy MM'}
-  onMonthChange={(month) => {console.log('month changed', month)}}
+  monthFormat={'MMMM yyyy'}
+  onMonthChange={(month) => this.fetchMonth(month.month,month.year)}
   hideArrows={false}
   hideExtraDays={true}
   disableMonthChange={true}
@@ -265,6 +297,25 @@ export default class ArticleScreen extends Component {
   disableArrowRight={false}
   markedDates ={this.state.markedDates}
   markingType={'custom'}
+  theme={{
+   backgroundColor: '#ffffff',
+   calendarBackground: '#ffffff',
+   textSectionTitleColor: '#d4d3ff',
+   textSectionTitleDisabledColor: '#d9e1e8',
+   selectedDayBackgroundColor: '#00adf5',
+   selectedDayTextColor: '#ffffff',
+   todayTextColor: '#00adf5',
+   dayTextColor: '#475279',
+   textDisabledColor: '#d9e1e8',
+   monthTextColor: '#7B80FF',
+   indicatorColor: 'blue',
+   textDayFontFamily: 'poppins-regular',
+   textMonthFontFamily: 'poppins-bold',
+   textDayHeaderFontFamily: 'poppins-medium',
+   textDayFontSize: 16,
+   textMonthFontSize: 24,
+   textDayHeaderFontSize: 13
+ }}
 />
   {this.switchScreens(moods)}
   </View>
@@ -275,9 +326,17 @@ export default class ArticleScreen extends Component {
 const styles = StyleSheet.create({
   titleText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 24,
+    ...textStyle.header,
     marginBottom: 20,
+  },
+  subtitleText: {
+    color: '#94ADFF',
+    ...textStyle.header4,
+  },
+
+  headerContainer:{
+    flexDirection:'row',
+    justifyContent:'space-between'
   },
   closedContainer: {
     backgroundColor: '#7B80FF',
@@ -306,10 +365,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   moodButton: {
-    backgroundColor: '#FFFFFF',
+    justifyContent:'center',
+    alignItems:'center',
     height: width / 10,
     width: width / 10,
-    borderRadius: 50,
+    borderRadius: 100,
   },
   button: {
     backgroundColor: '#FFFFFF',
@@ -330,12 +390,14 @@ const styles = StyleSheet.create({
 
   textInputContainer: {
     marginLeft: 20,
+    paddingLeft:20,
     marginRight: 20,
     marginVertical: 30,
     height: 30,
     borderRadius: 50,
     lineHeight: 40,
     backgroundColor: '#94ADFF',
+    color:'#FFFFFF',
     justifyContent: 'space-around',
   },
 });

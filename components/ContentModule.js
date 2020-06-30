@@ -7,12 +7,12 @@ import NextButton from '../components/NextButton';
 import { _getAuthTokenUserId } from '../constants/Helper.js';
 import host from '../constants/Server.js';
 import { renderText } from '../constants/Helper.js'
-
-
+import { withNavigation } from 'react-navigation';
+import { longDayNames, shortMonthNames } from '../constants/Date.js';
 
 const { width } = Dimensions.get('window');
 
-export default class ContentModule extends Component {
+class ContentModule extends Component {
 
 	constructor(props){
 		super(props)
@@ -90,6 +90,20 @@ export default class ContentModule extends Component {
 
 		
 	}
+
+  onPressLearnMore = () => {
+    const {
+      behaviorId,
+      navigation,
+    } = this.props;
+    navigation.navigate(
+      'Article',
+      {
+        behaviorId,
+      },
+    );
+  };
+
 	getModuleContent(){
 		let moduleWidth = this.props.width
 		let marginSide = this.props.space/2
@@ -115,26 +129,18 @@ export default class ContentModule extends Component {
 			                onPress={this.props.onPress} 
 			                title="Let's start"
 			                buttonStyle = {styles.buttonStyle}/>
-			            {this.props.onPress2!=null?
 			              <NextButton
-			                onPress={this.props.onPress2}
+			                onPress={this.onPressLearnMore}
 			                title="Learn more"
 			                buttonStyle = {styles.buttonStyle2}
 			                buttonTextStyle = {{color:theme.PRIMARY_COLOR}}/>
-			              :null
-			            }
 		               </View>
 	               </View>
 	            )
 				break
 			case 'check':
 
-				const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-									  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-									]
-				const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-				
-				let nextAssessDate = this.state.nextAssessDate!=null ? (dayNames[this.state.nextAssessDate.getDay()] + " (" + monthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
+				let nextAssessDate = this.state.nextAssessDate!=null ? (longDayNames[this.state.nextAssessDate.getDay()] + " (" + shortMonthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
 				let modulesDone = this.areAllModulesDone(this.props.behaviors)
 				return(
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.PRIMARY_COLOR_4}]}>
@@ -191,7 +197,7 @@ export default class ContentModule extends Component {
 		              </View>
 		              <View style={[styles.buttonContainer,{alignSelf:'center'}]}>
 			              <NextButton
-			                onPress={this.props.onPress}
+			                onPress={this.onPressLearnMore}
 			                title="Learn more"
 			                buttonStyle = {{...styles.buttonStyle2, borderColor:'white'}}
 			                buttonTextStyle = {{color:'white'}}/>
@@ -303,3 +309,5 @@ const styles = StyleSheet.create({
 
 	}
 });
+
+export default withNavigation(ContentModule);
