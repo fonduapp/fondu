@@ -20,9 +20,10 @@ class ContentModule extends Component {
 	    	imgsrc:null,
 	    	suggestions:[],
 	    	contentType:"",
+        description: '',
 	    };
 
-	    this.getSuggestions = this.getSuggestions.bind(this);
+	    this.getArticleText = this.getArticleText.bind(this);
 	}
 
 	async componentDidMount(){
@@ -33,19 +34,34 @@ class ContentModule extends Component {
 		console.log(imgsrc)
 		this.setState({imgsrc:imgsrc});
 
-		if(this.props.contentType==="suggest"){
-			this.getSuggestions()
-		}
+    this.getArticleText()
 
 	}
 
 	async componentDidUpdate(prevProps){
-		if(this.props.contentType !== prevProps.contentType && this.props.contentType === 'suggest'){
-			this.getSuggestions()
+		if(this.props.contentType !== prevProps.contentType){
+			this.getArticleText()
 		}
 	}
 
-	async getSuggestions(){
+	async getArticleText(){
+    const { contentType } = this.props;
+    let property;
+    let tag;
+    switch (contentType) {
+      case 'suggest':
+        property = 'suggestions';
+        tag = 'Suggestion';
+        break;
+      case 'learn':
+        property = 'description';
+        tag = 'Description';
+        break;
+      default:
+        // do nothing
+        return;
+    }
+
 		const {authToken, userId} = await _getAuthTokenUserId()
 
 		//fetch article content
@@ -59,7 +75,7 @@ class ContentModule extends Component {
 		})
 		.then((response) => response.json())
 		.then((responseJson) => {
-			this.setState({suggestions: renderText(responseJson.behavior_text, 'Suggestion')})
+			this.setState({[property]: renderText(responseJson.behavior_text, tag)})
 		})
 		.catch((error) => {
 		console.error(error);
@@ -92,6 +108,7 @@ class ContentModule extends Component {
   };
 
 	getModuleContent(){
+    const { description } = this.state;
 		let moduleWidth = this.props.width
 		let marginSide = this.props.space/2
 		
@@ -108,7 +125,7 @@ class ContentModule extends Component {
 			              <Text style={[textStyle.header,{ color: theme.TEXT_COLOR}]}>{this.props.title}</Text>
 			            </View>
 			              <Text style={[textStyle.paragraph, {opacity: 0.5, color: theme.TEXT_COLOR, marginTop: 10, flex:1}]}>
-			              	Regularly giving your partner hugs, touches and pats, hand-holding on a daily basis.
+			              	{description}
 			              </Text>
 		              </View>
 		              <View style={styles.buttonContainer}>
