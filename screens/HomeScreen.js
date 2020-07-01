@@ -11,6 +11,7 @@ import {
   Dimensions,
   Animated,
   AsyncStorage,
+  AppState,
 } from 'react-native';
 import { Icon, Avatar } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
@@ -52,6 +53,7 @@ export default class HomeScreen extends Component {
       recommendedArea:"",
       recommendedBehaviors:[],
       loading: true,
+      unlockReview: false,
     };
 
     this.learningAssessComplete.bind(this)
@@ -139,12 +141,42 @@ export default class HomeScreen extends Component {
       console.error(error);
     });
 
-    const allSettled = () => {
-      this.setState({ loading: false });
-    }
-    Promise.all([streakFetch, recAreaFetch, behaviorFetch])
-      .then(allSettled);
+    const assessDateFetch = this.fetchAssessDate({ authToken, userId });
 
+    Promise.all([
+      streakFetch,
+      recAreaFetch,
+      behaviorFetch,
+      assessDateFetch,
+    ]).then(() => {
+      this.setState({
+        loading: false,
+      }, this.compareAssessDate);
+    });
+
+  }
+
+  fetchAssessDate(authTokenUserId) {
+    const {
+      authToken,
+      userId,
+    } = authTokenUserId;
+    return fetch(`http://${host}:3000/nextAssessDate/${userId}/${authToken}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      const {
+        next_assess_date: nextAssessDate,
+      } = responseJson;
+      // append midnight to parse as local time instead of utc
+      this.nextAssessDate = new Date(nextAssessDate + 'T00:00:00'); 
+    })
+    .catch(console.error);
   }
 
   async componentDidMount(){
@@ -179,8 +211,29 @@ export default class HomeScreen extends Component {
       console.error(error)
     });
 
+    AppState.addEventListener('change', this.handleAppStateChange);
 
+  }
 
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange);
+  }
+
+  handleAppStateChange = (nextAppState) => {
+    if (nextAppState === 'active') {
+      this.compareAssessDate();
+    }
+  };
+
+  compareAssessDate() {
+    const unlockReview = this.nextAssessDate < new Date();
+    this.setState({
+      unlockReview,
+    }, () => {
+      if (unlockReview) {
+        this.scroll.scrollTo({ x: width*2 });
+      }
+    });
   }
 
   _moveScrollBar = (event) => {
@@ -274,6 +327,8 @@ export default class HomeScreen extends Component {
 
   reviewAssessComplete = () => {
     this.setAssessDate();
+    this.setState({ loading: true });
+    this.fetchHomeInfo();
   };
 
   getInitialAssess() {
@@ -291,6 +346,9 @@ export default class HomeScreen extends Component {
   }
 
   getHome() {
+    const {
+      unlockReview,
+    } = this.state;
 
     let moduleWidth = 320
     let moduleSpace = 10 // space between modules
@@ -330,6 +388,7 @@ export default class HomeScreen extends Component {
                     }
                   ])}
                   scrollEventThrottle={1}
+                ref={(node) => this.scroll = node}
                 >
 
                 {
@@ -395,7 +454,8 @@ export default class HomeScreen extends Component {
                                space = {moduleSpace}
                                behaviors = {this.state.recommendedBehaviors}
                                contentType= {'check'}
-
+                               nextAssessDate={this.nextAssessDate}
+                               unlockReview={unlockReview}
                 />
 
               </ScrollView>

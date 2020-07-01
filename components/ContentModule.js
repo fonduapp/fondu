@@ -18,7 +18,6 @@ class ContentModule extends Component {
 		super(props)
 	    this.state = {
 	    	imgsrc:null,
-	    	nextAssessDate:null,
 	    	suggestions:[],
 	    	contentType:"",
 	    };
@@ -34,24 +33,6 @@ class ContentModule extends Component {
 		console.log(imgsrc)
 		this.setState({imgsrc:imgsrc});
 
-		//get next reassess date
-		fetch('http://' + host +':3000/nextAssessDate/' + userId + '/' + authToken,{
-		method: 'GET',
-		headers: {
-		  Accept: 'application/json',
-		  'Content-Type': 'application/json',
-		},
-		})
-		.then((response) => response.json())
-		.then((responseJson) => {
-		this.setState({
-		  nextAssessDate: new Date(responseJson.next_assess_date),
-		});
-		})
-		.catch((error) => {
-		console.error(error);
-		});
-
 		if(this.props.contentType==="suggest"){
 			this.getSuggestions()
 		}
@@ -62,10 +43,6 @@ class ContentModule extends Component {
 		if(this.props.contentType !== prevProps.contentType && this.props.contentType === 'suggest'){
 			this.getSuggestions()
 		}
-	}
-
-	areAllModulesDone(behaviors){
-		return Object.keys(behaviors).every((k)=>{behaviors[k].completed})
 	}
 
 	async getSuggestions(){
@@ -149,9 +126,9 @@ class ContentModule extends Component {
 	            )
 				break
 			case 'check':
-
-				let nextAssessDate = this.state.nextAssessDate!=null ? (longDayNames[this.state.nextAssessDate.getDay()] + " (" + shortMonthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
-				let modulesDone = this.areAllModulesDone(this.props.behaviors)
+        const { nextAssessDate } = this.props;
+				let nextAssessDateString = nextAssessDate!=null ? (longDayNames[nextAssessDate.getDay()] + " (" + shortMonthNames[nextAssessDate.getMonth()] + " " + nextAssessDate.getDate()) +")":""
+        const { unlockReview } = this.props;
 				return(
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.PRIMARY_COLOR_4}]}>
 				      <View style = {styles.textCheckContainer}>
@@ -176,9 +153,9 @@ class ContentModule extends Component {
 		              <View style={styles.buttonContainer}>
 			              <NextButton
 			                onPress={this.props.onPress} 
-			                title={modulesDone ? "Let's start":"Unlocks on " + nextAssessDate}
+			                title={unlockReview ? "Let's start":"Unlocks on " + nextAssessDateString}
 			                buttonStyle = {styles.buttonStyleCheck}
-			                disabled = {!modulesDone}
+			                disabled = {!unlockReview}
 			               />
                      <View
                        marginTop={10}
