@@ -44,10 +44,12 @@ export default class ArticleScreen extends Component {
       isCollapsed:true,
       screen:'closed',
       entryRating:0,
-      opening:true,
+      opening:false,
+      closing:true,
       moodName: ['error','awful', 'down', 'alright', 'good', 'amazing'],
       markedDates: {},
       day: {dateString:Moment(new Date()).format('YYYY-MM-DD')},
+      today:{dateString:Moment(new Date()).format('YYYY-MM-DD')},
       entry: '',
     };
   }
@@ -57,7 +59,6 @@ export default class ArticleScreen extends Component {
       console.log(day)
       this.setState({
           day:day,
-          screen:'not closed',
           opening:true
         });
       }
@@ -73,7 +74,7 @@ export default class ArticleScreen extends Component {
         // Create a new object using object property spread since it should be immutable
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay, this.state.entry, this.state.entryRating);
-        console.log("POSTED RESPONSE " + this.state.entry)
+        //console.log("POSTED RESPONSE " + this.state.entry)
         const data ={
           userId: '5',
           authToken: '4ea711f7f1146c8de28612d2700ff102',
@@ -81,17 +82,18 @@ export default class ArticleScreen extends Component {
           entry:this.state.entry,
           entryRating:this.state.entryRating,
         };
-
-        // fetch('http://'+host+':3000/writeEntry/', {
-        //       method: 'POST',
-        //       headers: {
-        //         Accept: 'application/json',
-        //                 'Content-Type': 'application/json'
-        //       },
-        //      body: JSON.stringify(data)
-        //   })
+        fetch('http://'+host+':3000/writeEntry/', {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                        'Content-Type': 'application/json'
+              },
+             body: JSON.stringify(data)
+          })
       }
-      this.setState({screen:'closed'});
+      this.setState({
+        closing:true,
+      });
 
     }
       handleEntry = (text) => {
@@ -99,7 +101,22 @@ export default class ArticleScreen extends Component {
       }
 
     updateDate = (_selectedDay, entry, entryRating) => {
-        const updatedMarkedDates = {
+      var updatedMarkedDates
+      if (_selectedDay == this.state.today.dateString){
+        updatedMarkedDates = {
+        ...this.state.markedDates,
+        ...{
+          [_selectedDay]: {
+            customStyles: {
+              container: { borderColor: moodColors[entryRating], borderWidth: 3, borderRadius: 100 },
+            },
+            entry: entry,
+            entryRating: entryRating,
+          },
+        },
+      };
+    }else{
+        updatedMarkedDates = {
         ...this.state.markedDates,
         ...{
           [_selectedDay]: {
@@ -111,7 +128,7 @@ export default class ArticleScreen extends Component {
           },
         },
       };
-    // Triggers component to render again, picking up the new state
+    }
     this.setState({ markedDates: updatedMarkedDates });
     };
 
@@ -150,9 +167,7 @@ export default class ArticleScreen extends Component {
       }
 
 
-
       async getEntry(day){
-        console.log('getEntry')
         var _markedDate = this.state.markedDates[day.dateString]
         this.setState({
           entryRating:_markedDate['entryRating'],
@@ -170,48 +185,84 @@ export default class ArticleScreen extends Component {
         return false
       }
 
+      get_containerColor(){
+        if (this.state.entryRating == 1){
+          return ['#475279', '#7881A1']
+        }else{
+          return ['#7B80FF','#94ADFF']
+        }
+      }
+
       componentDidUpdate(prevState){
-        if (this.state.screen != 'closed'&& this.state.opening == true) {
+        if (this.state.opening == true) {
           if (this.in_markedDates(this.state.day)) {
             this.getEntry(this.state.day)
-            this.setState({screen:'view'})
+            this.setState({screen:'open-selected'})
            } else {
              this.setState({
                entryRating:0,
-               screen:'open',
+               screen:'open-unselected',
                entry:'',
              });
          };
          this.setState({opening:false})
        }
+       if (this.state.closing == true) {
+         if (this.in_markedDates(this.state.day)) {
+           this.setState({screen:'closed-selected'})
+          } else {
+            this.setState({
+              screen:'closed-unselected',
+            });
+        };
+        this.setState({closing:false})
+
+       }
+
      }
 
-    switchScreens=(moods)=>{
+    switchScreens=(moods, date, color)=>{
       switch(this.state.screen){
 
-        case 'closed':
-          var date = new Date(this.state.day.dateString)
-
+        case 'closed-unselected':
+        //closed-unselected
           return(
             <View>
             <TouchableOpacity
-            style = {styles.closedContainer}
+            style = {[styles.closedContainer, {backgroundColor:color[0]}]}
             onPress={()=>this.open(this.state.day)}>
-            <View>
-            <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+            <View style = {styles.headerContainer}>
+              <Text style = {styles.subtitleText}>{date.getDate()+1} {monthNames[date.getMonth()]}</Text>
+            </View>
 
             <Text style = {styles.titleText}>How do you feel about your relationship today?</Text>
-            </View>
             </TouchableOpacity>
             </View>
           );
-        case 'open':
-        var date = new Date(this.state.day.dateString)
+          case 'closed-selected':
+          //closed-selected
+            return(
+              <View>
+                <TouchableOpacity
+                style = {[styles.closedContainer, {backgroundColor:color[0]}]}
+                onPress={()=>this.open(this.state.day)}>
+                <View style = {styles.headerContainer}>
+                  <Text style = {styles.subtitleText}>{date.getDate()+1} {monthNames[date.getMonth()]}</Text>
+                </View>
+                <View style = {styles.entryRatingContainer}>
+                <Text style = {styles.titleText}>I felt {this.state.moodName[this.state.entryRating]} about my relationship</Text>
 
+
+                </View>
+                </TouchableOpacity>
+              </View>
+            );
+        case 'open-unselected':
+        //open-unselected
           return(
-            <View style = {styles.openContainer}>
+            <View style = {[styles.openContainer, {backgroundColor:color[0]}]}>
               <View style = {styles.headerContainer}>
-                <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                <Text style = {[styles.subtitleText, {color:color[1]}]}>{date.getDate()+1} {monthNames[date.getMonth()]} </Text>
                 <Icon
                   name={'keyboard-arrow-down'}
                   type='material'
@@ -224,7 +275,7 @@ export default class ArticleScreen extends Component {
               {moods}
             </View>
             <TextInput
-            style={styles.textInputContainer}
+            style={[styles.textInputContainer, {backgroundColor:color[1]}]}
             onChangeText={this.handleEntry}
             value={this.state.entry}
             />
@@ -237,12 +288,12 @@ export default class ArticleScreen extends Component {
 
             </View>
           );
-          case 'view':
-            var date = new Date(this.state.day.dateString)
+          case 'open-selected':
+            //open-selected
             return(
-              <View style = {styles.openContainer}>
+              <View style = {[styles.openContainer2, {backgroundColor:color[0]}]}>
                 <View style = {styles.headerContainer}>
-                  <Text style = {styles.subtitleText}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
+                  <Text style = {[styles.subtitleText, {color:color[1]}]}>{monthNames[date.getMonth()]} {date.getDate()+1}</Text>
                   <Icon
                     name={'keyboard-arrow-down'}
                     type='material'
@@ -251,7 +302,9 @@ export default class ArticleScreen extends Component {
                     size={30}/>
                 </View>
               <Text style = {styles.titleText}>I felt {this.state.moodName[this.state.entryRating]} about my relationship</Text>
-              <Text style={styles.titleText}>{this.state.entry}</Text>
+              <View style = {[styles.entryContainer,{backgroundColor:color[1]}]}>
+                <Text style={styles.entryText}>{this.state.entry}</Text>
+              </View>
               <Icon
                 name={'check-circle'}
                 type='material'
@@ -317,7 +370,7 @@ export default class ArticleScreen extends Component {
    textDayHeaderFontSize: 13
  }}
 />
-  {this.switchScreens(moods)}
+  {this.switchScreens(moods, new Date(this.state.day.dateString), this.get_containerColor())}
   </View>
 
 );}
@@ -336,7 +389,27 @@ const styles = StyleSheet.create({
 
   headerContainer:{
     flexDirection:'row',
-    justifyContent:'space-between'
+    justifyContent:'space-between',
+    paddingBottom:10,
+  },
+  entryRatingContainer:{
+    flexDirection:'row',
+    lineHeight:10,
+    flexWrap:'wrap',
+    margin:0,
+
+
+  },
+
+  entryContainer:{
+    borderRadius:10,
+    backgroundColor: '#94ADFF',
+    padding:20,
+    marginBottom:20,
+  },
+  entryText:{
+    color:'#FFFFFF',
+    ...textStyle.paragraph,
   },
   closedContainer: {
     backgroundColor: '#7B80FF',
@@ -362,6 +435,18 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
     top: (height * 1) / 6,
+    position: 'absolute',
+  },
+
+  openContainer2: {
+    width: width,
+    height: height/2,
+    paddingLeft: width / 10,
+    paddingRight: width / 10,
+    paddingTop: width / 10,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    top: (height) / 3,
     position: 'absolute',
   },
   moodButton: {
