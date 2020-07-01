@@ -8,7 +8,7 @@ import { _getAuthTokenUserId } from '../constants/Helper.js';
 import host from '../constants/Server.js';
 import { renderText } from '../constants/Helper.js'
 import { withNavigation } from 'react-navigation';
-
+import { longDayNames, shortMonthNames } from '../constants/Date.js';
 
 const { width } = Dimensions.get('window');
 
@@ -104,6 +104,16 @@ class ContentModule extends Component {
     );
   };
 
+  onPressChangeAssessDay = () => {
+    const { navigation } = this.props;
+    navigation.navigate(
+      'Profile',
+      {
+        focusCheckpointDay: true,
+      },
+    );
+  };
+
 	getModuleContent(){
 		let moduleWidth = this.props.width
 		let marginSide = this.props.space/2
@@ -140,12 +150,7 @@ class ContentModule extends Component {
 				break
 			case 'check':
 
-				const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-									  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-									]
-				const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-				
-				let nextAssessDate = this.state.nextAssessDate!=null ? (dayNames[this.state.nextAssessDate.getDay()] + " (" + monthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
+				let nextAssessDate = this.state.nextAssessDate!=null ? (longDayNames[this.state.nextAssessDate.getDay()] + " (" + shortMonthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
 				let modulesDone = this.areAllModulesDone(this.props.behaviors)
 				return(
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.PRIMARY_COLOR_4}]}>
@@ -175,6 +180,22 @@ class ContentModule extends Component {
 			                buttonStyle = {styles.buttonStyleCheck}
 			                disabled = {!modulesDone}
 			               />
+                     <View
+                       marginTop={10}
+                       alignItems="center"
+                     >
+                       <Text style={styles.changeAssessDayText}>
+                         Does this day not work for you?
+                       </Text>
+                       <TouchableOpacity onPress={this.onPressChangeAssessDay}>
+                         <Text style={[
+                           styles.changeAssessDayText,
+                           textStyle.label,
+                         ]}>
+                           Choose another day
+                         </Text>
+                       </TouchableOpacity>
+                     </View>
 		               </View>
 	               </View>
 	            )
@@ -312,7 +333,12 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		top: 0,
 
-	}
+	},
+  changeAssessDayText: {
+    ...textStyle.caption,
+    color: theme.TEXT_COLOR,
+    opacity: 0.5,
+  },
 });
 
 export default withNavigation(ContentModule);

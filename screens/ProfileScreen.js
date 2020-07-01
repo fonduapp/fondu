@@ -18,20 +18,142 @@ import ProgressNavBar from '../components/NavBar';
 import ProgressRing from '../components/ProgressRing';
 import { Icon, Avatar } from 'react-native-elements';
 import {LineChart} from 'react-native-chart-kit';
-
+import host from '../constants/Server.js';
+import { _getAuthTokenUserId } from '../constants/Helper.js';
+import { shortDayNames } from '../constants/Date.js';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;
 
 export default class ProfileScreen extends Component {
   constructor(props) {
-    super(props)
+    super(props);
+    this.focusCheckpointDay = props.navigation.getParam('focusCheckpointDay', false);
   }
 
   state = {
     scrollBarValue: new Animated.Value(0),
+    checkpointDayOpacity: new Animated.Value(1),
     accountPairedNotif: true,
+    relationshipStatusSelectedIndex: -1,
+    checkpointDaySelectedIndex: -1,
   };
+
+  componentDidMount() {
+    this.fetchRelationshipStatus();
+    this.fetchAssessDay();
+  }
+
+  componentWillUnmount() {
+    this.updateInfo();
+  }
+
+  getRelationshipStatus() {
+    const { relationshipStatusSelectedIndex } = this.state;
+    switch (relationshipStatusSelectedIndex) {
+      case 0: return 1;
+      case 1: return 2;
+      case 2: return 3;
+      default: return -1;
+    }
+  }
+
+  relationshipStatusToIndex(relationshipStatus) {
+    switch (relationshipStatus) {
+      case 1: return 0;
+      case 2: return 1;
+      case 3: return 2;
+      default: return -1;
+    }
+  }
+
+  getCheckpointDay() {
+    const { checkpointDaySelectedIndex } = this.state;
+    return checkpointDaySelectedIndex;
+  }
+
+  fetchRelationshipStatus() {
+    this.fetchRequest('relationshipStatus')
+    .then((responseJson) => {
+      const {
+        relationship_status: relationshipStatus,
+      } = responseJson;
+      this.setState({
+        relationshipStatusSelectedIndex: this.relationshipStatusToIndex(relationshipStatus),
+      })
+    });
+  }
+
+  fetchAssessDay() {
+    this.fetchRequest('nextAssessDate')
+    .then((responseJson) => {
+      const {
+        next_assess_date: assessDate,
+      } = responseJson;
+      if (assessDate !== null) {
+        this.setState({
+          checkpointDaySelectedIndex: new Date(assessDate).getDay(),
+        });
+      }
+    });
+  }
+
+  async fetchRequest(request) {
+    const {
+      authToken,
+      userId,
+    } = await _getAuthTokenUserId();
+    const path = `http://${host}:3000/${request}/${userId}/${authToken}`;
+    return fetch(path, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .catch(console.error);
+  }
+
+  async updateInfo() {
+    const relationshipStatus = this.getRelationshipStatus();
+    const checkpointDay = this.getCheckpointDay();
+
+    const authTokenUserId = await _getAuthTokenUserId();
+    let promises = [];
+
+    if (relationshipStatus >= 0) {
+      promises.push(
+        this.updateRequest('updateRelationshipStatus', {
+          ...authTokenUserId,
+          relationshipStatus,
+        })
+      );
+    }
+
+    if (checkpointDay >= 0) {
+      promises.push(
+        this.updateRequest('setAssessDay', {
+          ...authTokenUserId,
+          assessDay: checkpointDay,
+        })
+      );
+    }
+
+    await Promise.all(promises);
+  }
+
+  updateRequest(request, data) {
+    return fetch(`http://${host}:3000/${request}/`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .catch(console.error);
+  }
 
   _moveScrollBar = (event) => {
     Animated.timing(this.state.scrollBarValue, {
@@ -61,8 +183,51 @@ export default class ProfileScreen extends Component {
 
   }
 
+  onPressRelationshipStatus = (selectedIndex) => {
+    this.setState({ relationshipStatusSelectedIndex: selectedIndex });
+  };
+
+  onPressCheckpointDay = (selectedIndex) => {
+    this.setState({ checkpointDaySelectedIndex: selectedIndex });
+  };
+
+  onLayoutScrollView = () => {
+    if (this.focusCheckpointDay) {
+      this.scroll.scrollTo({ x: width*2 });
+    }
+  };
+
+  blinkCheckpointDay(duration) {
+    const { checkpointDayOpacity } = this.state;
+    Animated.timing(checkpointDayOpacity, {
+      toValue: 0.5,
+      duration,
+    }).start();
+    setTimeout(() => {
+      Animated.timing(checkpointDayOpacity, {
+        toValue: 1,
+        duration,
+      }).start();
+    }, duration);
+  }
+
+  onLayoutCheckpointDay = () => {
+    if (this.focusCheckpointDay) {
+      const duration = 250;
+      this.blinkCheckpointDay(duration);
+      setTimeout(() => {
+        this.blinkCheckpointDay(duration);
+      }, 2*duration);
+    }
+  };
+
   render() {
     let { scrollBarValue } = this.state;
+    const {
+      checkpointDayOpacity,
+      relationshipStatusSelectedIndex,
+      checkpointDaySelectedIndex,
+    } = this.state;
     const line = {
       labels: ['January', 'February', 'March', 'April', 'May', 'June'],
       datasets: [
@@ -113,6 +278,7 @@ export default class ProfileScreen extends Component {
               </View>
           </Animated.View>
           <ScrollView
+                onLayout={this.onLayoutScrollView}
                 style={{flex:1}}
                 contentContainerStyle={styles.contentContainer}
                 horizontal= {true}
@@ -222,13 +388,24 @@ export default class ProfileScreen extends Component {
                   }
                   <View style={styles.accountSection}>
                     <Text style={styles.accountHeaderText}>RELATIONSHIP STATUS</Text>
-                    <View>
-                      <Text style={styles.accountText}>Dating</Text>
-                      <View style={[styles.accountText, { position: 'absolute', right: 0}]}>
-                        <Icon name = 'edit' color={theme.PRIMARY_COLOR}></Icon>
-                      </View>
-                    </View>
+                    <StyledButtonGroup
+                      onPress={this.onPressRelationshipStatus}
+                      selectedIndex={relationshipStatusSelectedIndex}
+                      buttons={['Single', 'Relationship', 'Other']}
+                    />
                   </View>
+                  <Animated.View
+                    style={styles.accountSection}
+                    opacity={checkpointDayOpacity}
+                    onLayout={this.onLayoutCheckpointDay}
+                  >
+                    <Text style={styles.accountHeaderText}>CHECKPOINT DAY</Text>
+                    <StyledButtonGroup
+                      onPress={this.onPressCheckpointDay}
+                      selectedIndex={checkpointDaySelectedIndex}
+                      buttons={shortDayNames}
+                    />
+                  </Animated.View>
                   <View style={styles.accountSection}>
                     <Text style={styles.accountHeaderText}>PARTNER</Text>
                     <View>
@@ -357,3 +534,64 @@ const styles = StyleSheet.create({
   }
 
 });
+
+const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => (
+  <View
+    style={{
+      flexDirection: 'row',
+      alignSelf: 'center',
+      backgroundColor: theme.SECONDARY_COLOR,
+      borderRadius: 20,
+      width: '100%',
+      paddingVertical: 5,
+      paddingHorizontal: 8,
+      marginVertical: 5,
+    }}
+  >
+    {buttons.map((button, i) => (
+      <View
+        key={i}
+        style={{
+          flex: 1,
+          height: 40,
+          alignItems: 'center',
+          borderColor: i === selectedIndex || i === selectedIndex - 1
+            ? 'transparent'
+            : theme.TRANSLUCENT_GRAY,
+          borderRightWidth: i === buttons.length - 1 ? 0 : 1,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => onPress(i)}
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 20,
+            backgroundColor: 'transparent',
+            ...(selectedIndex === i ? {
+              backgroundColor: 'white',
+              elevation: 5,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.8,
+              shadowRadius: 2,
+            } : []),
+            width: '110%',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              color: theme.TEXT_COLOR_2,
+              fontFamily: 'poppins-bold',
+              opacity: selectedIndex < 0 || selectedIndex === i ? 1.0 : 0.5,
+            }}
+          >
+            {button}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    ))}
+  </View>
+);
