@@ -195,13 +195,17 @@ export default class HomeScreen extends Component {
     })
     .then((response) => response.json())
     .then((responseJson) => {
-      this.setState({initialAssessTaken:responseJson.finished_initial});
+      const {
+        finished_initial: finishedInitialDate,
+      } = responseJson;
+      const finishedInitial = finishedInitialDate !== null;
+      this.setState({initialAssessTaken: finishedInitial});
       this.props.navigation.setParams({
-        initialAssessTaken: responseJson.finished_initial,
+        initialAssessTaken: finishedInitial,
       });
       this.setState({initialAssessReady:true});
 
-      if(responseJson.finished_initial){
+      if(finishedInitial){
         this.fetchHomeInfo();
       } else {
         this.setState({ loading: false });
@@ -244,13 +248,17 @@ export default class HomeScreen extends Component {
 
   };
 
+  getDate() {
+    const date = new Date();
+    return `${date.getFullYear()}-${1+date.getMonth()}-${date.getDate()}`;
+  }
+
   async setAssessDate() {
     const {authToken, userId} = await _getAuthTokenUserId();
-    const date = new Date();
     const data = {
       userId,
       authToken,
-      dateFinished: `${date.getFullYear()}-${1+date.getMonth()}-${date.getDate()}`,
+      dateFinished: this.getDate(),
     };
 
     fetch('http://' + host +':3000/setAssessDate/',{
@@ -279,6 +287,7 @@ export default class HomeScreen extends Component {
     const data = {
       userId: userId,
       authToken:authToken,
+      finishDate: this.getDate(),
     };
 
     fetch('http://' + host +':3000/finishInitial/',{
