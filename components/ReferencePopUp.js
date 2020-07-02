@@ -25,15 +25,13 @@ constructor(props) {
       refs: props.refs,
 
     };
-  }
+  };
   // componentDidMount(){
   //   console.log('mounting')
   //   console.log(this.props.refs)
   //     this.setState({
   //       refs:this.props.refs
   //     });
-
-  }
 	render() {
     let references = this.props.refs.map((ref,i) =>{
       return<Text>{ref}</Text>
@@ -69,7 +67,7 @@ const styles = StyleSheet.create({
     width: width*5/6,
     maxHeight: height*1/2,
     top: height/4,
-    left: width*1/8,
+    left: width*1/12,
     //justifyContent:'flex-start',
     textAlign:'left',
     marginLeft: 0,
