@@ -237,11 +237,16 @@ class SignUpScreen extends React.Component {
   }
 
   _signUpAsync = async () => {
-    const { email, password } = this.state;
+    const {
+      name,
+      email,
+      password,
+    } = this.state;
     const emailLowerCase = email.toLowerCase();
 
     let data = {
       "email": emailLowerCase,
+      "username": name,
       "password": password,
     };
 
