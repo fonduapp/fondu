@@ -18,12 +18,12 @@ class ContentModule extends Component {
 		super(props)
 	    this.state = {
 	    	imgsrc:null,
-	    	nextAssessDate:null,
 	    	suggestions:[],
 	    	contentType:"",
+        description: '',
 	    };
 
-	    this.getSuggestions = this.getSuggestions.bind(this);
+	    this.getArticleText = this.getArticleText.bind(this);
 	}
 
 	async componentDidMount(){
@@ -34,41 +34,34 @@ class ContentModule extends Component {
 		console.log(imgsrc)
 		this.setState({imgsrc:imgsrc});
 
-		//get next reassess date
-		fetch('http://' + host +':3000/nextAssessDate/' + userId + '/' + authToken,{
-		method: 'GET',
-		headers: {
-		  Accept: 'application/json',
-		  'Content-Type': 'application/json',
-		},
-		})
-		.then((response) => response.json())
-		.then((responseJson) => {
-		this.setState({
-		  nextAssessDate: new Date(responseJson.next_assess_date),
-		});
-		})
-		.catch((error) => {
-		console.error(error);
-		});
-
-		if(this.props.contentType==="suggest"){
-			this.getSuggestions()
-		}
+    this.getArticleText()
 
 	}
 
 	async componentDidUpdate(prevProps){
-		if(this.props.contentType !== prevProps.contentType && this.props.contentType === 'suggest'){
-			this.getSuggestions()
+		if(this.props.contentType !== prevProps.contentType){
+			this.getArticleText()
 		}
 	}
 
-	areAllModulesDone(behaviors){
-		return Object.keys(behaviors).every((k)=>{behaviors[k].completed})
-	}
+	async getArticleText(){
+    const { contentType } = this.props;
+    let property;
+    let tag;
+    switch (contentType) {
+      case 'suggest':
+        property = 'suggestions';
+        tag = 'Suggestion';
+        break;
+      case 'learn':
+        property = 'description';
+        tag = 'Description';
+        break;
+      default:
+        // do nothing
+        return;
+    }
 
-	async getSuggestions(){
 		const {authToken, userId} = await _getAuthTokenUserId()
 
 		//fetch article content
@@ -82,7 +75,7 @@ class ContentModule extends Component {
 		})
 		.then((response) => response.json())
 		.then((responseJson) => {
-			this.setState({suggestions: renderText(responseJson.behavior_text, 'Suggestion')})
+			this.setState({[property]: renderText(responseJson.behavior_text, tag)})
 		})
 		.catch((error) => {
 		console.error(error);
@@ -115,6 +108,7 @@ class ContentModule extends Component {
   };
 
 	getModuleContent(){
+    const { description } = this.state;
 		let moduleWidth = this.props.width
 		let marginSide = this.props.space/2
 		
@@ -124,14 +118,13 @@ class ContentModule extends Component {
 
 			case 'learn':
 				return(
-				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.SECONDARY_COLOR}]}>
+				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 20, backgroundColor: theme.SECONDARY_COLOR}]}>
 					  <View style = {styles.textContainer}>
 					  	<View style={{flex:1}}>
-			              <Text style={[textStyle.subheader, { color: theme.TEXT_COLOR, opacity: 0.5}]}>{this.props.subtitle}</Text>
-			              <Text style={[textStyle.header,{ color: theme.TEXT_COLOR}]}>{this.props.title}</Text>
+			              <Text style={[textStyle.header,{ color: theme.TEXT_COLOR}, styles.titleText]}>{this.props.title}</Text>
 			            </View>
 			              <Text style={[textStyle.paragraph, {opacity: 0.5, color: theme.TEXT_COLOR, marginTop: 10, flex:1}]}>
-			              	Regularly giving your partner hugs, touches and pats, hand-holding on a daily basis.
+			              	{description}
 			              </Text>
 		              </View>
 		              <View style={styles.buttonContainer}>
@@ -149,9 +142,9 @@ class ContentModule extends Component {
 	            )
 				break
 			case 'check':
-
-				let nextAssessDate = this.state.nextAssessDate!=null ? (longDayNames[this.state.nextAssessDate.getDay()] + " (" + shortMonthNames[this.state.nextAssessDate.getMonth()] + " " + this.state.nextAssessDate.getDate()) +")":""
-				let modulesDone = this.areAllModulesDone(this.props.behaviors)
+        const { nextAssessDate } = this.props;
+				let nextAssessDateString = nextAssessDate!=null ? (longDayNames[nextAssessDate.getDay()] + " (" + shortMonthNames[nextAssessDate.getMonth()] + " " + nextAssessDate.getDate()) +")":""
+        const { unlockReview } = this.props;
 				return(
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.PRIMARY_COLOR_4}]}>
 				      <View style = {styles.textCheckContainer}>
@@ -159,7 +152,6 @@ class ContentModule extends Component {
 				      	  	<Icon name='flag' color={theme.PRIMARY_COLOR_4} size = {50}/>
 				      	  </View>
 				          <Text style={[textStyle.header,{ color: theme.TEXT_COLOR, marginTop: 20}]}>{this.props.title}</Text>
-				          <Text style={[textStyle.subheader, { color: theme.PRIMARY_COLOR_5, opacity: 0.5}]}>{this.props.subtitle}</Text>
 				          <View style= {{marginTop: 20}}>
 				          	{ Object.keys(this.props.behaviors).map((behaviorId, index)=>{
 				          		return(
@@ -176,9 +168,9 @@ class ContentModule extends Component {
 		              <View style={styles.buttonContainer}>
 			              <NextButton
 			                onPress={this.props.onPress} 
-			                title={modulesDone ? "Let's start":"Unlocks on " + nextAssessDate}
+			                title={unlockReview ? "Let's start":"Unlocks on " + nextAssessDateString}
 			                buttonStyle = {styles.buttonStyleCheck}
-			                disabled = {!modulesDone}
+			                disabled = {!unlockReview}
 			               />
                      <View
                        marginTop={10}
@@ -202,10 +194,9 @@ class ContentModule extends Component {
 				break
 			case 'suggest':
 				return(
-				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginHorizontal: marginSide, backgroundColor: theme.PRIMARY_COLOR, alignItems: 'flex-start'}]}>
+				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginHorizontal: marginSide, paddingTop: 20, backgroundColor: theme.PRIMARY_COLOR, alignItems: 'flex-start'}]}>
 					  <View style = {[styles.textContainer,{flex:1}]}>
-			              <Text style={[textStyle.subheader, { color: 'white', opacity: 0.5}]}>{this.props.subtitle}</Text>
-			              <Text style={[textStyle.header,{ color: 'white'}]}>{this.props.title}</Text>
+			              <Text style={[textStyle.header,{ color: 'white'}, styles.titleText]}>{this.props.title}</Text>
 		              </View>
 		              <View style = {{flex:1, justifyContent:'flex-start'}}>
 			              	<Text style={[textStyle.subheader, { color: 'white', opacity: 0.5, marginBottom: 10}]}>DIRECTIONS</Text>
@@ -300,7 +291,8 @@ const styles = StyleSheet.create({
 	    backgroundColor: theme.SECONDARY_COLOR,
 	    borderTopLeftRadius: 20,
 	    borderTopRightRadius: 20,
-	    padding:40,
+	    paddingVertical:40,
+      paddingHorizontal: 30,
 	    flex: 1,
 	    elevation: 1,
 	    zIndex: 1,
@@ -318,7 +310,7 @@ const styles = StyleSheet.create({
 	    right: -40,
 	    elevation: 2,
 	    zIndex: 2,
-	    top:40,
+	    top:20,
 	  },
 	mainHeaderText:{
 	    fontSize: 20,
@@ -338,6 +330,9 @@ const styles = StyleSheet.create({
     ...textStyle.caption,
     color: theme.TEXT_COLOR,
     opacity: 0.5,
+  },
+  titleText: {
+    marginTop: 24,
   },
 });
 

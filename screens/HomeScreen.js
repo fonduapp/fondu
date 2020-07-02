@@ -11,6 +11,7 @@ import {
   Dimensions,
   Animated,
   AsyncStorage,
+  AppState,
 } from 'react-native';
 import { Icon, Avatar } from 'react-native-elements';
 import theme from '../styles/theme.style.js';
@@ -52,6 +53,7 @@ export default class HomeScreen extends Component {
       recommendedArea:"",
       recommendedBehaviors:[],
       loading: true,
+      unlockReview: false,
     };
 
     this.learningAssessComplete.bind(this)
@@ -139,12 +141,42 @@ export default class HomeScreen extends Component {
       console.error(error);
     });
 
-    const allSettled = () => {
-      this.setState({ loading: false });
-    }
-    Promise.all([streakFetch, recAreaFetch, behaviorFetch])
-      .then(allSettled);
+    const assessDateFetch = this.fetchAssessDate({ authToken, userId });
 
+    Promise.all([
+      streakFetch,
+      recAreaFetch,
+      behaviorFetch,
+      assessDateFetch,
+    ]).then(() => {
+      this.setState({
+        loading: false,
+      }, this.compareAssessDate);
+    });
+
+  }
+
+  fetchAssessDate(authTokenUserId) {
+    const {
+      authToken,
+      userId,
+    } = authTokenUserId;
+    return fetch(`http://${host}:3000/nextAssessDate/${userId}/${authToken}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      const {
+        next_assess_date: nextAssessDate,
+      } = responseJson;
+      // append midnight to parse as local time instead of utc
+      this.nextAssessDate = new Date(nextAssessDate + 'T00:00:00'); 
+    })
+    .catch(console.error);
   }
 
   async componentDidMount(){
@@ -163,13 +195,17 @@ export default class HomeScreen extends Component {
     })
     .then((response) => response.json())
     .then((responseJson) => {
-      this.setState({initialAssessTaken:responseJson.finished_initial});
+      const {
+        finished_initial: finishedInitialDate,
+      } = responseJson;
+      const finishedInitial = finishedInitialDate !== null;
+      this.setState({initialAssessTaken: finishedInitial});
       this.props.navigation.setParams({
-        initialAssessTaken: responseJson.finished_initial,
+        initialAssessTaken: finishedInitial,
       });
       this.setState({initialAssessReady:true});
 
-      if(responseJson.finished_initial){
+      if(finishedInitial){
         this.fetchHomeInfo();
       } else {
         this.setState({ loading: false });
@@ -179,8 +215,29 @@ export default class HomeScreen extends Component {
       console.error(error)
     });
 
+    AppState.addEventListener('change', this.handleAppStateChange);
 
+  }
 
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange);
+  }
+
+  handleAppStateChange = (nextAppState) => {
+    if (nextAppState === 'active') {
+      this.compareAssessDate();
+    }
+  };
+
+  compareAssessDate() {
+    const unlockReview = this.nextAssessDate < new Date();
+    this.setState({
+      unlockReview,
+    }, () => {
+      if (unlockReview) {
+        this.scroll.scrollTo({ x: width*2 });
+      }
+    });
   }
 
   _moveScrollBar = (event) => {
@@ -191,13 +248,17 @@ export default class HomeScreen extends Component {
 
   };
 
+  getDate() {
+    const date = new Date();
+    return `${date.getFullYear()}-${1+date.getMonth()}-${date.getDate()}`;
+  }
+
   async setAssessDate() {
     const {authToken, userId} = await _getAuthTokenUserId();
-    const date = new Date();
     const data = {
       userId,
       authToken,
-      dateFinished: `${date.getFullYear()}-${1+date.getMonth()}-${date.getDate()}`,
+      dateFinished: this.getDate(),
     };
 
     fetch('http://' + host +':3000/setAssessDate/',{
@@ -226,6 +287,7 @@ export default class HomeScreen extends Component {
     const data = {
       userId: userId,
       authToken:authToken,
+      finishDate: this.getDate(),
     };
 
     fetch('http://' + host +':3000/finishInitial/',{
@@ -274,6 +336,8 @@ export default class HomeScreen extends Component {
 
   reviewAssessComplete = () => {
     this.setAssessDate();
+    this.setState({ loading: true });
+    this.fetchHomeInfo();
   };
 
   getInitialAssess() {
@@ -291,9 +355,12 @@ export default class HomeScreen extends Component {
   }
 
   getHome() {
+    const {
+      unlockReview,
+    } = this.state;
 
     let moduleWidth = 320
-    let moduleSpace = 10 // space between modules
+    let moduleSpace = 15 // space between modules
 
     let moduleMargin = width/2 - moduleWidth/2
     let snapToInterval = moduleWidth+moduleSpace;
@@ -303,13 +370,18 @@ export default class HomeScreen extends Component {
     return (
       <View style={styles.container}>
             <View style={styles.welcomeContainer}>
-              <View style = {[styles.moduleBar, {marginLeft: moduleMargin, marginRight: moduleMargin}]}>
-                <ModuleProgressBar style={styles.progressBar}
-                                   length={this.state.recommendedBehaviors!=null?Object.keys(this.state.recommendedBehaviors).length + 1:0}
-                                   scrollX={scrollX}
-                                   snapToInterval={snapToInterval}
-                />
-                <Text style={styles.levelContainer}>lv {this.state.areaLevel}</Text>
+              <View style = {{marginLeft: moduleMargin, marginRight: moduleMargin}}>
+                <View style = {styles.moduleBar}>
+                  <ModuleProgressBar style={styles.progressBar}
+                                     length={this.state.recommendedBehaviors!=null?Object.keys(this.state.recommendedBehaviors).length + 1:0}
+                                     scrollX={scrollX}
+                                     snapToInterval={snapToInterval}
+                  />
+                  <Text style={styles.levelContainer}>lv {this.state.areaLevel}</Text>
+                </View>
+                <Text style={[textStyle.subheader, { color: theme.TEXT_COLOR, opacity: 0.5, paddingLeft: 30 }]}>
+                  {this.state.recommendedArea.toUpperCase()}
+                </Text>
               </View>
               <ScrollView
                 style={styles.container}
@@ -330,6 +402,7 @@ export default class HomeScreen extends Component {
                     }
                   ])}
                   scrollEventThrottle={1}
+                ref={(node) => this.scroll = node}
                 >
 
                 {
@@ -348,7 +421,6 @@ export default class HomeScreen extends Component {
                       return(
                         <ContentModule
                                    title = {this.state.recommendedBehaviors[key].name}
-                                   subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
                                    onPress={() => this.props.navigation.navigate('Assessment',{
                                      behaviorId:key,
@@ -368,7 +440,6 @@ export default class HomeScreen extends Component {
                       return(
                         <ContentModule
                                    title = {this.state.recommendedBehaviors[key].name}
-                                   subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
                                    behaviorId={key}
                                    style = {{}}
@@ -384,7 +455,6 @@ export default class HomeScreen extends Component {
                   :null
                 }
                 <ContentModule title = 'Checkpoint'
-                               subtitle = {this.state.recommendedArea.toUpperCase()}
                                key = {99}
                                onPress={() => this.props.navigation.navigate('Assessment',{
                                  behaviors: Object.keys(this.state.recommendedBehaviors),
@@ -395,7 +465,8 @@ export default class HomeScreen extends Component {
                                space = {moduleSpace}
                                behaviors = {this.state.recommendedBehaviors}
                                contentType= {'check'}
-
+                               nextAssessDate={this.nextAssessDate}
+                               unlockReview={unlockReview}
                 />
 
               </ScrollView>
@@ -477,7 +548,7 @@ const styles = StyleSheet.create({
     width: width,
   },
   moduleBar: {
-    marginBottom: 5,
+    marginBottom: 20,
     flexDirection: 'row'
   },
   progressBar:{
