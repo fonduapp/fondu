@@ -360,7 +360,7 @@ export default class HomeScreen extends Component {
     } = this.state;
 
     let moduleWidth = 320
-    let moduleSpace = 10 // space between modules
+    let moduleSpace = 15 // space between modules
 
     let moduleMargin = width/2 - moduleWidth/2
     let snapToInterval = moduleWidth+moduleSpace;
@@ -370,13 +370,18 @@ export default class HomeScreen extends Component {
     return (
       <View style={styles.container}>
             <View style={styles.welcomeContainer}>
-              <View style = {[styles.moduleBar, {marginLeft: moduleMargin, marginRight: moduleMargin}]}>
-                <ModuleProgressBar style={styles.progressBar}
-                                   length={this.state.recommendedBehaviors!=null?Object.keys(this.state.recommendedBehaviors).length + 1:0}
-                                   scrollX={scrollX}
-                                   snapToInterval={snapToInterval}
-                />
-                <Text style={styles.levelContainer}>lv {this.state.areaLevel}</Text>
+              <View style = {{marginLeft: moduleMargin, marginRight: moduleMargin}}>
+                <View style = {styles.moduleBar}>
+                  <ModuleProgressBar style={styles.progressBar}
+                                     length={this.state.recommendedBehaviors!=null?Object.keys(this.state.recommendedBehaviors).length + 1:0}
+                                     scrollX={scrollX}
+                                     snapToInterval={snapToInterval}
+                  />
+                  <Text style={styles.levelContainer}>lv {this.state.areaLevel}</Text>
+                </View>
+                <Text style={[textStyle.subheader, { color: theme.TEXT_COLOR, opacity: 0.5, paddingLeft: 30 }]}>
+                  {this.state.recommendedArea.toUpperCase()}
+                </Text>
               </View>
               <ScrollView
                 style={styles.container}
@@ -416,7 +421,6 @@ export default class HomeScreen extends Component {
                       return(
                         <ContentModule
                                    title = {this.state.recommendedBehaviors[key].name}
-                                   subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
                                    onPress={() => this.props.navigation.navigate('Assessment',{
                                      behaviorId:key,
@@ -436,7 +440,6 @@ export default class HomeScreen extends Component {
                       return(
                         <ContentModule
                                    title = {this.state.recommendedBehaviors[key].name}
-                                   subtitle = {this.state.recommendedArea.toUpperCase()}
                                    key={index}
                                    behaviorId={key}
                                    style = {{}}
@@ -452,7 +455,6 @@ export default class HomeScreen extends Component {
                   :null
                 }
                 <ContentModule title = 'Checkpoint'
-                               subtitle = {this.state.recommendedArea.toUpperCase()}
                                key = {99}
                                onPress={() => this.props.navigation.navigate('Assessment',{
                                  behaviors: Object.keys(this.state.recommendedBehaviors),
@@ -546,7 +548,7 @@ const styles = StyleSheet.create({
     width: width,
   },
   moduleBar: {
-    marginBottom: 5,
+    marginBottom: 20,
     flexDirection: 'row'
   },
   progressBar:{

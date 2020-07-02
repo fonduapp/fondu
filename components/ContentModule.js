@@ -121,8 +121,7 @@ class ContentModule extends Component {
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.SECONDARY_COLOR}]}>
 					  <View style = {styles.textContainer}>
 					  	<View style={{flex:1}}>
-			              <Text style={[textStyle.subheader, { color: theme.TEXT_COLOR, opacity: 0.5}]}>{this.props.subtitle}</Text>
-			              <Text style={[textStyle.header,{ color: theme.TEXT_COLOR}]}>{this.props.title}</Text>
+			              <Text style={[textStyle.header,{ color: theme.TEXT_COLOR}, styles.titleText]}>{this.props.title}</Text>
 			            </View>
 			              <Text style={[textStyle.paragraph, {opacity: 0.5, color: theme.TEXT_COLOR, marginTop: 10, flex:1}]}>
 			              	{description}
@@ -153,7 +152,6 @@ class ContentModule extends Component {
 				      	  	<Icon name='flag' color={theme.PRIMARY_COLOR_4} size = {50}/>
 				      	  </View>
 				          <Text style={[textStyle.header,{ color: theme.TEXT_COLOR, marginTop: 20}]}>{this.props.title}</Text>
-				          <Text style={[textStyle.subheader, { color: theme.PRIMARY_COLOR_5, opacity: 0.5}]}>{this.props.subtitle}</Text>
 				          <View style= {{marginTop: 20}}>
 				          	{ Object.keys(this.props.behaviors).map((behaviorId, index)=>{
 				          		return(
@@ -198,8 +196,7 @@ class ContentModule extends Component {
 				return(
 				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginHorizontal: marginSide, backgroundColor: theme.PRIMARY_COLOR, alignItems: 'flex-start'}]}>
 					  <View style = {[styles.textContainer,{flex:1}]}>
-			              <Text style={[textStyle.subheader, { color: 'white', opacity: 0.5}]}>{this.props.subtitle}</Text>
-			              <Text style={[textStyle.header,{ color: 'white'}]}>{this.props.title}</Text>
+			              <Text style={[textStyle.header,{ color: 'white'}, styles.titleText]}>{this.props.title}</Text>
 		              </View>
 		              <View style = {{flex:1, justifyContent:'flex-start'}}>
 			              	<Text style={[textStyle.subheader, { color: 'white', opacity: 0.5, marginBottom: 10}]}>DIRECTIONS</Text>
@@ -294,7 +291,8 @@ const styles = StyleSheet.create({
 	    backgroundColor: theme.SECONDARY_COLOR,
 	    borderTopLeftRadius: 20,
 	    borderTopRightRadius: 20,
-	    padding:40,
+	    paddingVertical:40,
+      paddingHorizontal: 30,
 	    flex: 1,
 	    elevation: 1,
 	    zIndex: 1,
@@ -332,6 +330,9 @@ const styles = StyleSheet.create({
     ...textStyle.caption,
     color: theme.TEXT_COLOR,
     opacity: 0.5,
+  },
+  titleText: {
+    marginTop: 24,
   },
 });
 
