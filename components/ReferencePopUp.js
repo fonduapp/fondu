@@ -17,7 +17,7 @@ import {
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
 
-export default class ReferencePopUp extends Component {
+class ReferencePopUp extends Component {
 
 constructor(props) {
     super(props);
@@ -25,17 +25,15 @@ constructor(props) {
       refs: props.refs,
 
     };
-  }
-  componentDidMount(){
-    console.log('mounting')
-    console.log(this.props.refs)
-      this.setState({
-        refs:this.props.refs
-      });
-
-  }
+  };
+  // componentDidMount(){
+  //   console.log('mounting')
+  //   console.log(this.props.refs)
+  //     this.setState({
+  //       refs:this.props.refs
+  //     });
 	render() {
-    let references = this.state.refs.map((ref,i) =>{
+    let references = this.props.refs.map((ref,i) =>{
       return<Text>{ref}</Text>
     })
     console.log('in child')
@@ -56,7 +54,7 @@ constructor(props) {
 		);
 	}
 }
-
+export default ReferencePopUp;
 const styles = StyleSheet.create({
   container:{
     width: '60%',
@@ -69,7 +67,7 @@ const styles = StyleSheet.create({
     width: width*5/6,
     maxHeight: height*1/2,
     top: height/4,
-    left: width*1/8,
+    left: width*1/12,
     //justifyContent:'flex-start',
     textAlign:'left',
     marginLeft: 0,
