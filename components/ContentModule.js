@@ -118,7 +118,7 @@ class ContentModule extends Component {
 
 			case 'learn':
 				return(
-				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 40, backgroundColor: theme.SECONDARY_COLOR}]}>
+				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginLeft: marginSide, marginRight: marginSide,  paddingTop: 20, backgroundColor: theme.SECONDARY_COLOR}]}>
 					  <View style = {styles.textContainer}>
 					  	<View style={{flex:1}}>
 			              <Text style={[textStyle.header,{ color: theme.TEXT_COLOR}, styles.titleText]}>{this.props.title}</Text>
@@ -194,7 +194,7 @@ class ContentModule extends Component {
 				break
 			case 'suggest':
 				return(
-				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginHorizontal: marginSide, backgroundColor: theme.PRIMARY_COLOR, alignItems: 'flex-start'}]}>
+				  	<View style={[styles.welcomeSubContainer,{width: moduleWidth, marginHorizontal: marginSide, paddingTop: 20, backgroundColor: theme.PRIMARY_COLOR, alignItems: 'flex-start'}]}>
 					  <View style = {[styles.textContainer,{flex:1}]}>
 			              <Text style={[textStyle.header,{ color: 'white'}, styles.titleText]}>{this.props.title}</Text>
 		              </View>
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
 	    right: -40,
 	    elevation: 2,
 	    zIndex: 2,
-	    top:40,
+	    top:20,
 	  },
 	mainHeaderText:{
 	    fontSize: 20,
