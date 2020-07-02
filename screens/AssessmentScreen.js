@@ -224,7 +224,12 @@ export default class AssessmentScreen extends Component{
         return (
           <View style={this.state.questionDone ? (this.state.questionRight? styles.correctContainer : styles.incorrectContainer) : styles.darkContainer}>
 
-            <ProgressNavBar color={theme.PRIMARY_COLOR} navigation={navigation} progress={this.state.progress}/>
+            <ProgressNavBar
+              color={theme.PRIMARY_COLOR}
+              navigation={navigation}
+              progress={this.state.progress}
+              confirmAction
+            />
             <AssessmentQuestions quizFinish={(score) => this._quizFinish(score)}
                                  questionFinish={(result,check) => this._questionFinish(result,check)}
                                  updateProgress={(progress) => this._updateProgress(progress)}
