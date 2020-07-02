@@ -108,7 +108,7 @@ export default class ArticleScreen extends Component {
             image: 'http://192.241.153.104:3000/behaviorImage/'+userId+'/'+authToken+'/' + behaviorId,
           })
           console.log('icons')
-          console.log(this.state.research)
+          console.log(this.state.reference)
 
         })
 

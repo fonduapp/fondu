@@ -53,16 +53,19 @@ export function renderText(content, tag) {
     }else if (tag == 'SuggestionIcon'){
           pattern = /<SuggestionIcon>(.*?)<\/SuggestionIcon>/gi;
           isArray = true;
-
     }else if (tag == 'Reference'){
         pattern = /<Reference>(.*?)<\/Reference>/gi;
+        isArray = true;
+
     }else if (tag == 'isc'){
         pattern = /<isc>(.*?)<\/isc>/gi;
         isArray = true;
     }
     var result = content.match(pattern)
-  //  console.log(tag)
 
+    if (tag == 'Reference'){
+      console.log(content.match(pattern))
+}
     if (isArray){
       result = result.map((group,i)=>{
         group = group.replace('<'+tag+'>','');

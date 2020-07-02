@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Modal from 'react-native-modal';
+import {textStyle} from '../styles/text.style.js';
 
 import {
   Image,
@@ -25,14 +26,20 @@ constructor(props) {
 
     };
   }
+  componentDidMount(){
+    console.log('mounting')
+    console.log(this.props.refs)
+      this.setState({
+        refs:this.props.refs
+      });
+
+  }
 	render() {
     let references = this.state.refs.map((ref,i) =>{
-      ref = ref.replace('<Reference>', '');
-      ref = ref.replace('</Reference>', '');
-      return <Text>{ref}</Text>
+      return<Text>{ref}</Text>
     })
-    console.log("in child refernces \t\t\t\t" + references);
-
+    console.log('in child')
+    //console.log(references)
 		return (
       //<View style= {styles.container}>
       <Modal
@@ -41,11 +48,9 @@ constructor(props) {
       onBackdropPress={()=>this.props.hide()}
       onBackButtonPress={() => this.props.hide()}
 >
-        <View>
-          {this.props.refs.length ? (
-            <Text style={[styles.problemText,{fontSize: 18, textAlign:'center'}]}>{references}</Text>
-          ) : this.props.content}
-        </View>
+        <ScrollView style ={{textAlign:'left'}}>
+            <Text style={[styles.problemText,{fontSize: 18, textAlign:'left'}]}>{references}</Text>
+        </ScrollView>
       </Modal>
       //</View>
 		);
@@ -61,19 +66,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: width/16,
-    width: width*3/4,
+    width: width*5/6,
     maxHeight: height*1/2,
     top: height/4,
     left: width*1/8,
-    justifyContent:'flex-start',
+    //justifyContent:'flex-start',
+    textAlign:'left',
     marginLeft: 0,
     flex: 0,
   },
   problemText:{
     color: '#7B80FF',
-    fontWeight:'bold',
-    fontSize: 16,
+    ...textStyle.paragraph,
     lineHeight:20,
+    textAlign:'left',
     marginBottom:20,
 
   },
