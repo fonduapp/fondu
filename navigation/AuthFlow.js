@@ -73,6 +73,7 @@ class SignInScreen extends React.Component {
     const { email, password, invalidLogin } = this.state;
 
     return (
+      <ImageBackground source={require("../assets/images/signupbg2.png")} style={styles.bgImage} >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Welcome back!</Text>
@@ -106,6 +107,8 @@ class SignInScreen extends React.Component {
         </View>
 
       </View>
+      </ImageBackground>
+
     );
   }
 
@@ -315,6 +318,7 @@ class SignUpScreen extends React.Component {
       emailErrorMessage = 'Please enter a valid email';
     }
     return (
+      <ImageBackground source={require("../assets/images/signupbg.png")} style={styles.bgImage} >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Create Account</Text>
@@ -359,6 +363,7 @@ class SignUpScreen extends React.Component {
           <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={styles.footerStyle}>Sign in</Text></TouchableOpacity>
         </View>
       </View>
+      </ImageBackground>
     );
   }
 }
@@ -421,6 +426,7 @@ class RelationshipStatusScreen extends React.Component {
       this.props.navigation.navigate('WeeklyGoal');
     };
     return (
+      <ImageBackground source={require("../assets/images/signupbg2.png")} style={styles.bgImage} >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Let's Get Started </Text>
@@ -446,6 +452,7 @@ class RelationshipStatusScreen extends React.Component {
         </View>
         <View style={styles.footer}/>
       </View>
+      </ImageBackground>
     );
   }
 }
@@ -515,6 +522,7 @@ class WeeklyGoalScreen extends React.Component {
       this.props.navigation.navigate('Main');
     };
     return (
+      <ImageBackground source={require("../assets/images/signupbg2.png")} style={styles.bgImage} >      
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Let's Get Started </Text>
@@ -564,6 +572,7 @@ class WeeklyGoalScreen extends React.Component {
         </View>
         <View style={styles.footer}/>
       </View>
+      </ImageBackground>
     );
   }
 }
@@ -573,7 +582,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.PRIMARY_COLOR_7,
     paddingLeft: '20%',
     paddingRight: '20%',
   },
@@ -658,6 +666,11 @@ const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
         borderRadius: 25,
         paddingHorizontal: '15%',
         paddingVertical: '5%',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
         width: '130%',
         marginTop: '5%',
         marginBottom: '20%',
@@ -722,7 +735,7 @@ const AuthStack = createStackNavigator({
 				      },
 				    },
 					SignIn: SignInScreen,
-					SignUp: SignUpScreen,
+					SignUp: RelationshipStatusScreen,//SignUpScreen,
           RelationshipStatus: RelationshipStatusScreen,
           WeeklyGoal: WeeklyGoalScreen,
 				});
