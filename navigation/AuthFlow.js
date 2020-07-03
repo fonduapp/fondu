@@ -12,6 +12,7 @@ import {
   Picker,
   ImageBackground,
 } from 'react-native';
+import Color from 'color';
 import NextButton from '../components/NextButton';
 import CustomTextInput from '../components/CustomTextInput';
 import theme from '../styles/theme.style.js';
@@ -84,12 +85,14 @@ class SignInScreen extends React.Component {
             renderErrorAbove
             label='EMAIL'
             onChangeText={text => this.setState({email: text})}
+            darkText
           />
           <StyledInput
             containerStyle={{marginBottom: 20}}
             label='PASSWORD'
             onChangeText={text => this.setState({password: text})}
-            secureTextEntry={true}
+            secureTextEntry
+            darkText
           />
           <NextButton title="Sign In" onPress={this._signInAsync}
                 buttonStyle={{
@@ -621,6 +624,7 @@ const StyledInput = (props) => {
     errorMessage,
     containerStyle,
     renderErrorAbove = false,
+    darkText = false,
     ...rest
   } = props;
   const errorComponent = !!errorMessage && (
@@ -628,20 +632,21 @@ const StyledInput = (props) => {
       {errorMessage}
     </Text>
   );
+  const darkTextColor = Color(theme.TEXT_COLOR_2).alpha(0.5).string()
   return (
     <View style={{ marginBottom: 10, ...containerStyle }}>
       {!!renderErrorAbove && errorComponent}
       <Input 
         containerStyle={{ paddingHorizontal: 0 }}
         labelStyle={{
-          color: 'rgba(255,255,255, 0.5)',
+          color: darkText?darkTextColor:'rgba(255,255,255, 0.5)',
           ...textStyle.caption,
         }}
         inputStyle={{
           ...textStyle.label,
-          color: 'white',
+          color: darkText?darkTextColor:'white',
         }}
-        inputContainerStyle={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
+        inputContainerStyle={{ borderColor: darkText?darkTextColor:'rgba(255, 255, 255, 0.5)' }}
         selectionColor={theme.PRIMARY_COLOR}
         { ...rest }
       />
@@ -735,7 +740,7 @@ const AuthStack = createStackNavigator({
 				      },
 				    },
 					SignIn: SignInScreen,
-					SignUp: RelationshipStatusScreen,//SignUpScreen,
+					SignUp: SignUpScreen,
           RelationshipStatus: RelationshipStatusScreen,
           WeeklyGoal: WeeklyGoalScreen,
 				});
