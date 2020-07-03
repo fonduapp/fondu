@@ -644,7 +644,7 @@ const StyledInput = (props) => {
         }}
         inputStyle={{
           ...textStyle.label,
-          color: darkText?darkTextColor:'white',
+          color: darkText?theme.TEXT_COLOR_2:'white',
         }}
         inputContainerStyle={{ borderColor: darkText?darkTextColor:'rgba(255, 255, 255, 0.5)' }}
         selectionColor={theme.PRIMARY_COLOR}
