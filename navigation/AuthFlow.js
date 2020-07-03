@@ -19,7 +19,7 @@ import theme from '../styles/theme.style.js';
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {textStyle} from '../styles/text.style.js';
-import ReferencePopUp from '../components/ReferencePopUp.js';
+import PopUp from '../components/PopUp.js';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import host from '../constants/Server.js';
@@ -243,11 +243,16 @@ class SignUpScreen extends React.Component {
   }
 
   _signUpAsync = async () => {
-    const { email, password } = this.state;
+    const {
+      name,
+      email,
+      password,
+    } = this.state;
     const emailLowerCase = email.toLowerCase();
 
     let data = {
       "email": emailLowerCase,
+      "username": name,
       "password": password,
     };
 
@@ -539,21 +544,16 @@ class WeeklyGoalScreen extends React.Component {
               <Icon name="help-outline" color={theme.TEXT_COLOR_2} size={20}/>
             </TouchableOpacity>
           </View>
-          <ReferencePopUp
-            showRef={showHelp}
-            refs={[]}
-            content={(
-              <View margin={20}>
-                <Text style={{ ...textStyle.subheader, marginBottom: 10 }}>
-                  What does the weekly goal mean?
-                </Text>
-                <Text style={{ ...textStyle.caption, color: theme.TEXT_COLOR_2 }}>
-                  This is the number of lessons we will be giving you per week. Each of our lessons will take around 5 minutes to complete and will teach you about different aspects of a healthy relationship!
-                </Text>
-              </View>
-            )}
-            hide={hideHelp}
-          />
+          <PopUp isVisible={showHelp} hide={hideHelp}>
+            <View margin={20}>
+              <Text style={{ ...textStyle.subheader, marginBottom: 10 }}>
+                What does the weekly goal mean?
+              </Text>
+              <Text style={{ ...textStyle.caption, color: theme.TEXT_COLOR_2 }}>
+                This is the number of lessons we will be giving you per week. Each of our lessons will take around 5 minutes to complete and will teach you about different aspects of a healthy relationship!
+              </Text>
+            </View>
+          </PopUp>
           <Text style={{ ...textStyle.footer, color: theme.TEXT_COLOR_2, opacity: 0.5}}>
             This information can be changed later
           </Text>
