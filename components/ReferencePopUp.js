@@ -26,18 +26,10 @@ constructor(props) {
 
     };
   };
-  // componentDidMount(){
-  //   console.log('mounting')
-  //   console.log(this.props.refs)
-  //     this.setState({
-  //       refs:this.props.refs
-  //     });
 	render() {
     let references = this.props.refs.map((ref,i) =>{
       return<Text>{ref}</Text>
     })
-    console.log('in child')
-    //console.log(references)
 		return (
       //<View style= {styles.container}>
       <Modal

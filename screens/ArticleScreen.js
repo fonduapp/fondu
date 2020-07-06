@@ -62,8 +62,9 @@ export default class ArticleScreen extends Component {
       userId:'',
       authToken:'',
       newPage:false,
+      buttonClosed:[true,true,true]
     };
-    this.switchScreens.bind(this);
+    this.screens.bind(this);
     this.createISC = createISC.bind(this);
     this.renderText = renderText.bind(this);
   }
@@ -85,6 +86,11 @@ export default class ArticleScreen extends Component {
     hideReferences = () => {
       this.setState({showRef:false});
       console.log("ref state" + this.state.showRef)
+    }
+    changeColor=(i)=>{
+      var temp = this.state.buttonClosed
+      temp[i] = !temp[i]
+      this.setState({buttonClosed:temp})
     }
 
     async getArticle(userId, authToken, behaviorId){
@@ -111,7 +117,6 @@ export default class ArticleScreen extends Component {
           console.log(this.state.reference)
 
         })
-
         .then(()=>
         fetch(rarticle_path)
           .then((response)=>response.json())
@@ -143,46 +148,22 @@ export default class ArticleScreen extends Component {
     }
   }
 
-  switchScreens=(directions, answer, theory)=>{
-    switch(this.state.screen){
-      case 'direction':
+  screens=(directions, answer, theory)=>{
         return(
           <View style = {[styles.researchContainer,{marginTop:20}]}>
           <View style = {[styles.directionContainer,{paddingLeft:20, paddingRight:20, paddingBottom:40}]}>
-            <Text style = {[styles.headerText, {paddingBottom:20}]}>DIRECTIONS</Text>
+            <Text style = {styles.headerText}>DIRECTIONS</Text>
               <View style = {styles.container}>{directions}</View>
               </View>
-              <TouchableOpacity
+              <View
                 style ={{paddingLeft:20, marginTop:20}}
-                onPress = {() => this._showResearch()}>
-                <Text style = {styles.headerText}>THE RESEARCH BEHIND IT</Text>
-              </TouchableOpacity>
+                >
+                <Text style = {[styles.headerText,{paddingTop:30,color:'#ABAFFE'}]}>THE RESEARCH BEHIND IT</Text>
+                <Text style = {styles.researchBodyText}>{answer}{'\n\n'}<B>Theory:</B> {theory}</Text>
+              </View>
           </View>
         );
-      case 'research':
-        return(
-          <View style = {[styles.directionContainer, ,{marginTop:20}]} >
-            <TouchableOpacity
-              style = {{paddingLeft:20, marginBottom:20}}
-              onPress = {() => this._showDirections()}>
-
-              <Text style = {styles.headerText}>DIRECTIONS</Text>
-            </TouchableOpacity>
-            <View style = {[styles.researchContainer,{paddingTop:20}]}>
-              <View style = {{paddingLeft:20}}>
-                <Text style = {styles.headerText}>THE RESEARCH BEHIND IT</Text>
-                </View>
-            <View style ={styles.researchSubContainer}>
-              <Text style = {styles.researchTitleText}>{this.state.question}</Text>
-              <Text style = {styles.researchBodyText}>{answer}{'\n\n'}<B>Theory:</B> {theory}</Text>
-            </View>
-          </View>
-        </View>
-        );
-        default:
-          Alert.alert("SCREEN DNE");
     }
-  }
 
   render(){
     let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
@@ -190,9 +171,22 @@ export default class ArticleScreen extends Component {
     let research = this.createISC(this.state.research, '<Research>', '</Research>');
     let directions = this.state.suggestion.map((dir,i) =>{
       var res = research[i];
-      return <DropDownItem
+      var color;
+      if (this.state.buttonClosed[i]){
+        color = '#94ADFF'
+      }else{
+        color = '#9394FF'
+      }
+      console.log(color)
+      return<TouchableOpacity
+              style = {[styles.directionButtonContainer,{backgroundColor:color}]}
+              key={i}
+              onPress={()=>this.changeColor(i)}
+              >
+      <DropDownItem
         key = {i}
         contentVisible = {false}
+
         header = {
           <View style = {styles.directionContainer2}>
             <Icon
@@ -203,13 +197,16 @@ export default class ArticleScreen extends Component {
               size={30}>
               </Icon>
             <View style = {{flex:10}}>
-              <Text style = {styles.suggestionText}>{dir}</Text>
+              <Text
+              style = {styles.suggestionText}
+              >{dir}</Text>
             </View>
           </View>
         }
         >
         <Text style = {styles.dropDownText}>{res}</Text>
         </DropDownItem>
+        </TouchableOpacity>
     });
     let articles = this.state.articleList.map((article,i) =>{
       return <TouchableOpacity
@@ -228,6 +225,7 @@ export default class ArticleScreen extends Component {
     <ScrollView style ={{height: Dimensions.get('window').height}}>
 
       <View style = {styles.container}>
+      <Text>{this.state.article_title}</Text>
       <Image
       source={{uri:this.state.image}}
       style = {styles.imageContainer}
@@ -243,7 +241,7 @@ export default class ArticleScreen extends Component {
       </View>
 
       <View>
-        {this.switchScreens(directions, answer, theory)}
+        {this.screens(directions, answer, theory)}
       </View>
 
 
@@ -251,7 +249,7 @@ export default class ArticleScreen extends Component {
       <TouchableOpacity
             onPress={()=>this.showProbReport()}>
               <Text
-              style={[styles.exampleText,{marginLeft:width*.1}]}>
+              style={[styles.exampleText,{paddingTop:height*1/25,marginLeft:width*.1}]}>
               Report a Problem</Text>
         </TouchableOpacity>
 
@@ -280,11 +278,6 @@ export default class ArticleScreen extends Component {
   }
 }
 
-ArticleScreen.navigationOptions = {
-  title: 'Article',
-};
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -292,18 +285,34 @@ const styles = StyleSheet.create({
     color: '#7695FF',
   },
   directionContainer:{
-    backgroundColor: '#FF7D71',
+    backgroundColor: '#7B80FF',
     borderRadius: 50,
+    justifyContent:'space-between',
     paddingTop: 20,
+    paddingLeft:width*1/5,
+    paddingRight:width*1/5,
+  },
+  directionButtonContainer:{
+    backgroundColor: '#94ADFF',
+    borderRadius:15,
+    flexDirection:'row',
+    justifyContent:'space-around',
+    padding:20,
+    paddingLeft:10,
+    marginBottom:15,
+    marginLeft:width*1/12,
+    marginRight:width*1/15,
+    shadowOffset:{  width: 5,  height: 5,  },
+    shadowColor: '#475279',
+    shadowOpacity: .5,
   },
   directionContainer2:{
     flexDirection:'row',
     justifyContent:'space-around',
-    width: width,
-    paddingTop:10,
-    paddingLeft:50,
-    paddingRight:25,
+  },
 
+  shadow:{
+    backgroundColor: 'rgba(47, 52, 79, 0.5)',
   },
   containerTitle:{
     flex: 1,
@@ -340,17 +349,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
   },
   researchContainer:{
-    backgroundColor: '#FFCA41',
+    backgroundColor: '#F3F4FC',
     paddingBottom: 20,
-    borderRadius: 50,
-   },
-   researchSubContainer:{
-     paddingRight: 30,
-     backgroundColor: 'rgba(255, 255, 255, 0.5)',
-     borderRadius: 20,
-     padding: 10,
-     paddingTop:20,
-     margin:20,
    },
 
   shadowStyle: {
@@ -361,6 +361,7 @@ const styles = StyleSheet.create({
   headerText:{
     color: '#FFFFFF',
     ...textStyle.subheader,
+    paddingBottom:20,
     paddingLeft:30,
   },
   questionText:{
@@ -373,22 +374,16 @@ const styles = StyleSheet.create({
     ...textStyle.label,
     textAlign:'center',
   },
-  researchTitleText:{
-      paddingLeft:20,
-      marginBottom:height*.025,
-      color: '#475279',
-      ...textStyle.subheader,
-      justifyContent:'flex-start',
-  },
   researchBodyText:{
-    paddingLeft:20,
-    color:'#475279',
-    lineHeight:18,
-    ...textStyle.paragraph2,
+    paddingLeft:width*1/10,
+    paddingRight:width*1/10,
+    color:'#8393AD',
+//    lineHeight:18,
+    ...textStyle.paragraph,
   },
 
   exampleText:{
-    color: '#475279',
+    color: '#8393AD',
     ...textStyle.paragraph,
   },
   suggestionText:{

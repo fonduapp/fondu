@@ -57,10 +57,14 @@ export default class ArticleScreen extends Component {
     open (day) {
       console.log('open')
       console.log(day)
+      console.log(this.state.day)
+      console.log(day.dateString<=this.state.today.dateString)
+      if(day.dateString<=this.state.today.dateString){
       this.setState({
           day:day,
           opening:true
         });
+      }
       }
 
     async close(){
@@ -141,7 +145,6 @@ export default class ArticleScreen extends Component {
         var currDate = new Date();
         const month = JSON.stringify(currDate.getMonth()+1);
         const year = JSON.stringify(currDate.getFullYear());
-        console.log('getting month entry' + month +' ' + year)
         this.fetchMonth(month,year)
       }
 
@@ -156,7 +159,6 @@ export default class ArticleScreen extends Component {
           })
           .then((response) => response.json())
           .then((responseJson) => {
-            console.log('responseJson')
             responseJson.map((entry, i)=>{
               this.updateDate((entry["entry_date"]).substring(0,10),entry['entry'], entry['entry_rating'])
             });
@@ -397,8 +399,6 @@ const styles = StyleSheet.create({
     lineHeight:10,
     flexWrap:'wrap',
     margin:0,
-
-
   },
 
   entryContainer:{

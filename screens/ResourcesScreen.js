@@ -36,6 +36,17 @@ export default class ResourcesScreen extends React.Component{
     this.setState({search});
   };
 
+  static navigationOptions = ({navigation}) => {
+    const {params ={}} = navigation.state;
+    let headerTitle = 'Resources';
+    let headerTitleStyle = {
+      textAlign:'center',
+      ...textStyle.header,
+      color:"#7B80FF",
+    };
+    return{headerTitle,headerTitleStyle}
+
+  }
   async componentDidMount(){
     const {authToken, userId} = await _getAuthTokenUserId()
     return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
@@ -53,7 +64,7 @@ export default class ResourcesScreen extends React.Component{
   }
 
   render(){
-
+    const {navigation } = this.props;
     const { search } = this.state;
     //console.log(this.state.isLoading)
     if (this.state.isLoading){
@@ -66,12 +77,13 @@ export default class ResourcesScreen extends React.Component{
     } else {
       //console.log(this.state.articleList)
         let articles = (this.state.articleList).map((article,i)=>{
-          console.log('article id '+ article['area_id'])
+          console.log(article)
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}
                   onPress={()=> this.props.navigation.navigate('Subtopics', {
-                    areaId: article['area_id']
+                    areaId: article['area_id'],
+                    area_name: article['area_name'],
                   })
                 }>
                     <Text style = {styles.buttonText}>
