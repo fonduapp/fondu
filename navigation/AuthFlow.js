@@ -12,13 +12,14 @@ import {
   Picker,
   ImageBackground,
 } from 'react-native';
+import Color from 'color';
 import NextButton from '../components/NextButton';
 import CustomTextInput from '../components/CustomTextInput';
 import theme from '../styles/theme.style.js';
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {textStyle} from '../styles/text.style.js';
-import ReferencePopUp from '../components/ReferencePopUp.js';
+import PopUp from '../components/PopUp.js';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import host from '../constants/Server.js';
@@ -73,6 +74,7 @@ class SignInScreen extends React.Component {
     const { email, password, invalidLogin } = this.state;
 
     return (
+      <ImageBackground source={require("../assets/images/signupbg2.png")} style={styles.bgImage} >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Welcome back!</Text>
@@ -83,12 +85,14 @@ class SignInScreen extends React.Component {
             renderErrorAbove
             label='EMAIL'
             onChangeText={text => this.setState({email: text})}
+            darkText
           />
           <StyledInput
             containerStyle={{marginBottom: 20}}
             label='PASSWORD'
             onChangeText={text => this.setState({password: text})}
-            secureTextEntry={true}
+            secureTextEntry
+            darkText
           />
           <NextButton title="Sign In" onPress={this._signInAsync}
                 buttonStyle={{
@@ -106,6 +110,8 @@ class SignInScreen extends React.Component {
         </View>
 
       </View>
+      </ImageBackground>
+
     );
   }
 
@@ -237,11 +243,16 @@ class SignUpScreen extends React.Component {
   }
 
   _signUpAsync = async () => {
-    const { email, password } = this.state;
+    const {
+      name,
+      email,
+      password,
+    } = this.state;
     const emailLowerCase = email.toLowerCase();
 
     let data = {
       "email": emailLowerCase,
+      "username": name,
       "password": password,
     };
 
@@ -315,6 +326,7 @@ class SignUpScreen extends React.Component {
       emailErrorMessage = 'Please enter a valid email';
     }
     return (
+      <ImageBackground source={require("../assets/images/signupbg.png")} style={styles.bgImage} >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Create Account</Text>
@@ -359,6 +371,7 @@ class SignUpScreen extends React.Component {
           <TouchableOpacity onPress={()=>this.props.navigation.navigate('SignIn')}><Text style={styles.footerStyle}>Sign in</Text></TouchableOpacity>
         </View>
       </View>
+      </ImageBackground>
     );
   }
 }
@@ -421,6 +434,7 @@ class RelationshipStatusScreen extends React.Component {
       this.props.navigation.navigate('WeeklyGoal');
     };
     return (
+      <ImageBackground source={require("../assets/images/signupbg2.png")} style={styles.bgImage} >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Let's Get Started </Text>
@@ -446,6 +460,7 @@ class RelationshipStatusScreen extends React.Component {
         </View>
         <View style={styles.footer}/>
       </View>
+      </ImageBackground>
     );
   }
 }
@@ -515,6 +530,7 @@ class WeeklyGoalScreen extends React.Component {
       this.props.navigation.navigate('Main');
     };
     return (
+      <ImageBackground source={require("../assets/images/signupbg2.png")} style={styles.bgImage} >      
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style = {styles.headerText}>Let's Get Started </Text>
@@ -528,21 +544,16 @@ class WeeklyGoalScreen extends React.Component {
               <Icon name="help-outline" color={theme.TEXT_COLOR_2} size={20}/>
             </TouchableOpacity>
           </View>
-          <ReferencePopUp
-            showRef={showHelp}
-            refs={[]}
-            content={(
-              <View margin={20}>
-                <Text style={{ ...textStyle.subheader, marginBottom: 10 }}>
-                  What does the weekly goal mean?
-                </Text>
-                <Text style={{ ...textStyle.caption, color: theme.TEXT_COLOR_2 }}>
-                  This is the number of lessons we will be giving you per week. Each of our lessons will take around 5 minutes to complete and will teach you about different aspects of a healthy relationship!
-                </Text>
-              </View>
-            )}
-            hide={hideHelp}
-          />
+          <PopUp isVisible={showHelp} hide={hideHelp}>
+            <View margin={20}>
+              <Text style={{ ...textStyle.subheader, marginBottom: 10 }}>
+                What does the weekly goal mean?
+              </Text>
+              <Text style={{ ...textStyle.caption, color: theme.TEXT_COLOR_2 }}>
+                This is the number of lessons we will be giving you per week. Each of our lessons will take around 5 minutes to complete and will teach you about different aspects of a healthy relationship!
+              </Text>
+            </View>
+          </PopUp>
           <Text style={{ ...textStyle.footer, color: theme.TEXT_COLOR_2, opacity: 0.5}}>
             This information can be changed later
           </Text>
@@ -564,6 +575,7 @@ class WeeklyGoalScreen extends React.Component {
         </View>
         <View style={styles.footer}/>
       </View>
+      </ImageBackground>
     );
   }
 }
@@ -573,7 +585,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.PRIMARY_COLOR_7,
     paddingLeft: '20%',
     paddingRight: '20%',
   },
@@ -613,6 +624,7 @@ const StyledInput = (props) => {
     errorMessage,
     containerStyle,
     renderErrorAbove = false,
+    darkText = false,
     ...rest
   } = props;
   const errorComponent = !!errorMessage && (
@@ -620,20 +632,21 @@ const StyledInput = (props) => {
       {errorMessage}
     </Text>
   );
+  const darkTextColor = Color(theme.TEXT_COLOR_2).alpha(0.5).string()
   return (
     <View style={{ marginBottom: 10, ...containerStyle }}>
       {!!renderErrorAbove && errorComponent}
       <Input 
         containerStyle={{ paddingHorizontal: 0 }}
         labelStyle={{
-          color: 'rgba(255,255,255, 0.5)',
+          color: darkText?darkTextColor:'rgba(255,255,255, 0.5)',
           ...textStyle.caption,
         }}
         inputStyle={{
           ...textStyle.label,
-          color: 'white',
+          color: darkText?theme.TEXT_COLOR_2:'white',
         }}
-        inputContainerStyle={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
+        inputContainerStyle={{ borderColor: darkText?darkTextColor:'rgba(255, 255, 255, 0.5)' }}
         selectionColor={theme.PRIMARY_COLOR}
         { ...rest }
       />
@@ -658,6 +671,11 @@ const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
         borderRadius: 25,
         paddingHorizontal: '15%',
         paddingVertical: '5%',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
         width: '130%',
         marginTop: '5%',
         marginBottom: '20%',

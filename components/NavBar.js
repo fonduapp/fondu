@@ -9,7 +9,7 @@ import {
 import theme from '../styles/theme.style.js';
 import { Icon } from 'react-native-elements';
 import ProgressBar from '../components/ProgressBar';
-import ReferencePopUp from '../components/ReferencePopUp.js';
+import PopUp from '../components/PopUp.js';
 import { textStyle } from '../styles/text.style.js';
 
 export default class ProgressNavBar extends Component {
@@ -88,29 +88,24 @@ export default class ProgressNavBar extends Component {
           </View>
 
         </View>
-        <ReferencePopUp
-          showRef={showPopUp}
-          refs={[]}
-          content={(
-            <View style={styles.popUpContainer}>
-              <Text style={styles.popUpText}>
-                The quiz will restart if you exit
+        <PopUp isVisible={showPopUp} hide={this.hidePopUp}>
+          <View style={styles.popUpContainer}>
+            <Text style={styles.popUpText}>
+              The quiz will restart if you exit
+            </Text>
+            <TouchableOpacity onPress={this.exit}>
+              <Text style={styles.popUpButtonText}>
+                Exit
               </Text>
-              <TouchableOpacity onPress={this.exit}>
-                <Text style={styles.popUpButtonText}>
-                  Exit
-                </Text>
-              </TouchableOpacity>
-              <View style={styles.popUpButtonDivider}/>
-              <TouchableOpacity onPress={this.hidePopUp}>
-                <Text style={styles.popUpButtonText}>
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          hide={this.hidePopUp}
-        />
+            </TouchableOpacity>
+            <View style={styles.popUpButtonDivider}/>
+            <TouchableOpacity onPress={this.hidePopUp}>
+              <Text style={styles.popUpButtonText}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </PopUp>
       </>
 		);
 	}
@@ -118,9 +113,8 @@ export default class ProgressNavBar extends Component {
 
 const styles = StyleSheet.create({
   titleText:{
-    fontSize: 25,
-    fontWeight: 'bold',
     textAlign: 'center',
+    ...textStyle.header,
   },
   popUpContainer: {
     alignItems: 'center',
