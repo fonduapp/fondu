@@ -62,8 +62,9 @@ export default class HomeScreen extends Component {
   async fetchHomeInfo(){
 
     const {authToken, userId} = await _getAuthTokenUserId()
+
     //Get Streak
-    const streakFetch = fetch('http://' + host +':3000/streak/' + userId + '/' + authToken,{
+    const streakFetch = fetch('http://' + host +':3000/streak/' + userId + '/' + authToken + '/' + this.getDate(),{
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -82,7 +83,6 @@ export default class HomeScreen extends Component {
 
     //Get Recommended Area
     let recArea = 0;
-    console.log('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken)
     const recAreaFetch = fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
       method: 'GET',
       headers: {
@@ -95,7 +95,6 @@ export default class HomeScreen extends Component {
       this.setState({
         recommendedArea: responseJson.area_name,
       });
-      console.log(responseJson.area_id)
       recArea = responseJson.area_id
 
 
@@ -122,7 +121,6 @@ export default class HomeScreen extends Component {
     });
 
     //Get Recommended Behaviors
-    console.log('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken)
     const behaviorFetch = fetch('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken,{
       method: 'GET',
       headers: {
@@ -135,7 +133,6 @@ export default class HomeScreen extends Component {
       this.setState({
         recommendedBehaviors: JSON.parse(responseJson.behaviors_completed),
       });
-      console.log("recommendedBehaviors" + responseJson.behaviors_completed)
     })
     .catch((error) => {
       console.error(error);
@@ -143,16 +140,84 @@ export default class HomeScreen extends Component {
 
     const assessDateFetch = this.fetchAssessDate({ authToken, userId });
 
+    const profileInfoFetch = this.fetchProfileInfo({ authToken, userId })
+
     Promise.all([
-      streakFetch,
+      //streakFetch,
       recAreaFetch,
       behaviorFetch,
       assessDateFetch,
+      profileInfoFetch,
     ]).then(() => {
       this.setState({
         loading: false,
       }, this.compareAssessDate);
     });
+
+    
+
+  }
+
+  fetchProfileInfo(authTokenUserId){
+    const {
+      authToken,
+      userId,
+    } = authTokenUserId;
+
+    this.areaLevel = {}
+
+    //TODO: relationship level
+
+    //TODO: total xp earned
+
+    //TODO: xp progress
+
+    //areas and area level and xp
+    const path = `http://${host}:3000/allAreas/${userId}/${authToken}`;
+    
+    return fetch(path, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then(async (responseJson)=>{
+      this.props.navigation.setParams({
+        allAreas: responseJson,
+      });
+      
+        await Promise.all(
+        responseJson.map((area, key)=>
+        {
+          const areaId = area["area_id"]
+          return fetch(`http://${host}:3000/areaLevel/${userId}/${authToken}/${areaId}`, {
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+              },
+            })
+            .then((response) => response.json())
+            .then((responseJson)=> {
+              
+              this.areaLevel[areaId] = responseJson
+            })
+            .catch(console.error)
+
+        }
+        )
+      ).then(()=>
+      {
+        this.props.navigation.setParams({
+          areaLevels: this.areaLevel
+      });        
+      })
+
+    })
+    .catch(console.error);
+
 
   }
 
@@ -272,7 +337,6 @@ export default class HomeScreen extends Component {
   }
 
   async initialAssessComplete(){
-    console.log('initialAssessComplete')
     this.setState({
       loading: true,
       initialAssessTaken: true,
@@ -306,7 +370,6 @@ export default class HomeScreen extends Component {
 
   async learningAssessComplete(behaviorId){
 
-     console.log("behaviorId " + behaviorId)
      const {authToken, userId} = await _getAuthTokenUserId();
      //send answer to the db
       fetch('http://' + host +':3000/completedBehavior',{
@@ -325,7 +388,6 @@ export default class HomeScreen extends Component {
         console.error(error);
       });
 
-      console.log(this.state.recommendedBehaviors)
       //update rec behavior
       this.setState(previousState => {
         const recommendedBehaviors = previousState.recommendedBehaviors;
@@ -504,7 +566,12 @@ export default class HomeScreen extends Component {
                          fontFamily: 'fredokaone-regular',},
       headerLeft: (
                     <TouchableOpacity style={{marginLeft: 25, borderRadius: 50}}
-                                      onPress={()=> navigation.navigate('Profile')}>
+                                      onPress={()=> navigation.navigate('Profile',{
+                                         streak: navigation.getParam('streak'),
+                                         allAreas: navigation.getParam('allAreas'),
+                                         areaLevels : navigation.getParam('areaLevels'),
+                                         relationshipLevel: -1,
+                                       })}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
                   ),
