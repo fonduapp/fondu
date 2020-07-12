@@ -14,8 +14,6 @@ import { createStackNavigator } from 'react-navigation-stack';
 import { StackNavigator } from 'react-navigation';
 import {textStyle} from '../styles/text.style.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
-
-
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
 const arrows = ['keyboard-arrow-down','keyboard-arrow-up']
@@ -118,7 +116,6 @@ export default class SubtopicScreen extends React.Component{
       fetch('http://192.241.153.104:3000/area/'+userId+'/'+authToken+'/' + areaId)
         .then((response)=>response.json())
         .then((responseJson) =>{
-          console.log(responseJson)
           this.setState({
             area_name:responseJson['area_name'],
             area_text:responseJson['area_text'],
@@ -145,8 +142,7 @@ export default class SubtopicScreen extends React.Component{
                   key = {i}
                   style = {styles.articleContainer}
                   onPress={()=> this.props.navigation.navigate('Article', {
-                    behaviorId: article['behavior_id']
-                    behavior_name:article['be']
+                    behaviorId: article['behavior_id'],
                   })}>
                     <Text style = {styles.buttonText}>
                         {article.behavior_name}

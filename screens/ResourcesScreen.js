@@ -52,7 +52,6 @@ export default class ResourcesScreen extends React.Component{
     return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
       .then((response)=>response.json())
       .then((responseJson) =>{
-        console.log('resources: ' + JSON.stringify(responseJson))
         this.setState({
           isLoading: false,
           articleList:responseJson
@@ -66,7 +65,6 @@ export default class ResourcesScreen extends React.Component{
   render(){
     const {navigation } = this.props;
     const { search } = this.state;
-    //console.log(this.state.isLoading)
     if (this.state.isLoading){
 
       return(
@@ -75,9 +73,7 @@ export default class ResourcesScreen extends React.Component{
         </View>
       )
     } else {
-      //console.log(this.state.articleList)
         let articles = (this.state.articleList).map((article,i)=>{
-          console.log(article)
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}

@@ -42,13 +42,15 @@ async function loadResourcesAsync() {
       'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
       //custom icon
       'custom-icons': require('./assets/fonts/icomoon.ttf'),
-      
+
       //poppins
       'poppins-bold': require('./assets/fonts/Poppins/Poppins-Bold.ttf'),
       'poppins-semibold': require('./assets/fonts/Poppins/Poppins-SemiBold.ttf'),
       'poppins-medium': require('./assets/fonts/Poppins/Poppins-Medium.ttf'),
       'poppins-regular': require('./assets/fonts/Poppins/Poppins-Regular.ttf'),
       'poppins-black': require('./assets/fonts/Poppins/Poppins-Black.ttf'),
+      'poppins-italic': require('./assets/fonts/Poppins/Poppins-Italic.ttf'),
+
 
       //fredoka one
       'fredokaone-regular': require('./assets/fonts/FredokaOne/FredokaOne-Regular.ttf'),

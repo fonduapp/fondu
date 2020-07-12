@@ -3,6 +3,8 @@ import { useState } from 'react';
 
 import {textStyle} from '../styles/text.style.js';
 import DropDownItem from 'react-native-drop-down-item';
+import {DropDown} from 'react-native-material-dropdown';
+
 import Modal from 'react-native-modal';
 import ReferencePopUp from '../components/ReferencePopUp';
 import ReportProbPopUp from '../components/ReportProbPopUp';
@@ -23,7 +25,7 @@ import {
   Dimensions,
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
-import { createISC, renderText } from '../constants/Helper.js'
+import { createISC, renderText, italicize } from '../constants/Helper.js'
 
 
 //import theme from '../styles/theme.style.js';
@@ -109,12 +111,12 @@ export default class ArticleScreen extends Component {
             Theory: [(this.renderText(responseJson.behavior_text, 'Theory'))],
             suggestion:(this.renderText(responseJson.behavior_text, 'Suggestion')),
             research:(this.renderText(responseJson.behavior_text, 'Research')),
-            reference:(this.renderText(responseJson.behavior_text, 'Reference')),
+            reference:this.renderText(responseJson.behavior_text, 'Reference'),
             icons:(this.renderText(responseJson.behavior_text, 'SuggestionIcon')),
             image: 'http://192.241.153.104:3000/behaviorImage/'+userId+'/'+authToken+'/' + behaviorId,
           })
           console.log('icons')
-          console.log(this.state.reference)
+          //console.log(this.state.reference)
 
         })
         .then(()=>
@@ -177,16 +179,17 @@ export default class ArticleScreen extends Component {
       }else{
         color = '#9394FF'
       }
-      console.log(color)
       return<TouchableOpacity
-              style = {[styles.directionButtonContainer,{backgroundColor:color}]}
+              //style = {[styles.directionButtonContainer,{backgroundColor:color}]}
               key={i}
-              onPress={()=>this.changeColor(i)}
+              style = {styles.directionButtonContainer}
+              //onPress={()=>this.changeColor(i)}
               >
       <DropDownItem
         key = {i}
         contentVisible = {false}
-
+        backgroundColor = "#94ADFF"
+        contentColor = "#9394FF"
         header = {
           <View style = {styles.directionContainer2}>
             <Icon

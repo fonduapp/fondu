@@ -44,6 +44,9 @@ export function renderText(content, tag) {
       pattern = /<Answer>(.*?)<\/Answer>/i;
     }else if (tag == 'Theory'){
       pattern = /<Theory>(.*?)<\/Theory>/i;
+    }else if (tag == 'i'){
+      pattern = /<i>(.*?)<\/i>/gi;
+
     }else if (tag == 'Research'){
         pattern = /<Research>(.*?)<\/Research>/gi;
         isArray = true;
@@ -56,7 +59,6 @@ export function renderText(content, tag) {
     }else if (tag == 'Reference'){
         pattern = /<Reference>(.*?)<\/Reference>/gi;
         isArray = true;
-
     }else if (tag == 'isc'){
         pattern = /<isc>(.*?)<\/isc>/gi;
         isArray = true;
@@ -64,6 +66,7 @@ export function renderText(content, tag) {
     var result = content.match(pattern)
 
     if (tag == 'Reference'){
+      console.log('referemnce')
       console.log(content.match(pattern))
 }
     if (isArray){
@@ -72,7 +75,7 @@ export function renderText(content, tag) {
         group = group.replace('</'+tag+'>','');
         return group
       })
-      //console.log(result)
+      console.log(result)
       return result
     }
   //  console.log(result)
@@ -110,3 +113,21 @@ export function createISC(text, tag, endtag){
       });
       return result;
     }
+
+
+    export function italicize(res){
+            var title = this.renderText(res, 'i');
+            var start = 0;
+            var index = res.indexOf('<i>',start);
+            var subStart = res.substring(start, index);
+            var end = res.indexOf('</i>');
+            var subEnd = res.substring(index +3,end);
+            var remaining = res.substring(end+4)
+
+            return<Text style = {{flexDirection: 'row'}}>
+                <Text>{subStart}</Text>
+                <Text style = {{ fontFamily: 'poppins-italic'}}>{subEnd}</Text>
+                <Text>{remaining}</Text>
+                <Text>{'\n\n'}</Text>
+                </Text>
+                      }

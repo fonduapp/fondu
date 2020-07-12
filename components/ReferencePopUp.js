@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Modal from 'react-native-modal';
 import {textStyle} from '../styles/text.style.js';
+import { renderText, italicize } from '../constants/Helper.js'
+
 
 import {
   Image,
@@ -23,12 +25,13 @@ constructor(props) {
     super(props);
     this.state = {
       refs: props.refs,
-
     };
+    this.italicize = italicize.bind(this);
+    this.renderText = renderText.bind(this);
   };
 	render() {
     let references = this.props.refs.map((ref,i) =>{
-      return<Text>{ref}</Text>
+      return<Text style ={{marginBottom:20,paddingBottom:20}}>{this.italicize(ref)}</Text>
     })
 		return (
       //<View style= {styles.container}>
@@ -38,11 +41,15 @@ constructor(props) {
       onBackdropPress={()=>this.props.hide()}
       onBackButtonPress={() => this.props.hide()}
 >
+      <View>
+        <Text style={[styles.titleText, {textAlign:'left'}]}>References</Text>
+        </View>
+
         <ScrollView style ={{textAlign:'left'}}>
-            <Text style={[styles.problemText,{fontSize: 18, textAlign:'left'}]}>{references}</Text>
+            <Text style={[styles.refText, {textAlign:'left'}]}>{references}</Text>
         </ScrollView>
+
       </Modal>
-      //</View>
 		);
 	}
 }
@@ -65,12 +72,19 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     flex: 0,
   },
-  problemText:{
+  refText:{
     color: '#7B80FF',
     ...textStyle.paragraph,
-    lineHeight:20,
+    fontSize:12,
+    lineHeight:15,
     textAlign:'left',
-    marginBottom:20,
-
+  },
+  titleText:{
+    color: '#7B80FF',
+    ...textStyle.header,
+    paddingTop:15,
+    paddingBottom:5,
+    lineHeight:15,
+    textAlign:'left',
   },
 });
