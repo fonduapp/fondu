@@ -3,11 +3,12 @@ import { useState } from 'react';
 
 import {textStyle} from '../styles/text.style.js';
 import DropDownItem from 'react-native-drop-down-item';
-import {DropDown} from 'react-native-material-dropdown';
 
 import Modal from 'react-native-modal';
 import ReferencePopUp from '../components/ReferencePopUp';
 import ReportProbPopUp from '../components/ReportProbPopUp';
+import InfoButton from '../components/InfoButton';
+
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 import {Icon} from 'react-native-elements';
 
@@ -25,7 +26,7 @@ import {
   Dimensions,
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
-import { createISC, renderText, italicize } from '../constants/Helper.js'
+import { createISC, getIcon, renderText, italicize } from '../constants/Helper.js'
 
 
 //import theme from '../styles/theme.style.js';
@@ -44,14 +45,11 @@ export default class ArticleScreen extends Component {
     this.state = {
       screen: 'direction',
       article_title: '',
-      contents:[],
       example: [],
       descript: [],
       question: [],
       answer: [],
       Theory: [],
-      article1: [],
-      article2: [],
       articleList:[],
       research:[],
       suggestion:[],
@@ -69,6 +67,8 @@ export default class ArticleScreen extends Component {
     this.screens.bind(this);
     this.createISC = createISC.bind(this);
     this.renderText = renderText.bind(this);
+    this.getIcon = getIcon.bind(this);
+
   }
 
     _showDirections(){
@@ -116,7 +116,7 @@ export default class ArticleScreen extends Component {
             image: 'http://192.241.153.104:3000/behaviorImage/'+userId+'/'+authToken+'/' + behaviorId,
           })
           console.log('icons')
-          //console.log(this.state.reference)
+          //console.log(this.state.icons)
 
         })
         .then(()=>
@@ -157,9 +157,7 @@ export default class ArticleScreen extends Component {
             <Text style = {styles.headerText}>DIRECTIONS</Text>
               <View style = {styles.container}>{directions}</View>
               </View>
-              <View
-                style ={{paddingLeft:20, marginTop:20}}
-                >
+              <View style ={{paddingLeft:20, marginTop:20}}>
                 <Text style = {[styles.headerText,{paddingTop:30,color:'#ABAFFE'}]}>THE RESEARCH BEHIND IT</Text>
                 <Text style = {styles.researchBodyText}>{answer}{'\n\n'}<B>Theory:</B> {theory}</Text>
               </View>
@@ -170,46 +168,15 @@ export default class ArticleScreen extends Component {
   render(){
     let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
     let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
-    let research = this.createISC(this.state.research, '<Research>', '</Research>');
     let directions = this.state.suggestion.map((dir,i) =>{
-      var res = research[i];
-      var color;
-      if (this.state.buttonClosed[i]){
-        color = '#94ADFF'
-      }else{
-        color = '#9394FF'
-      }
-      return<TouchableOpacity
-              //style = {[styles.directionButtonContainer,{backgroundColor:color}]}
-              key={i}
-              style = {styles.directionButtonContainer}
-              //onPress={()=>this.changeColor(i)}
-              >
-      <DropDownItem
-        key = {i}
-        contentVisible = {false}
-        backgroundColor = "#94ADFF"
-        contentColor = "#9394FF"
-        header = {
-          <View style = {styles.directionContainer2}>
-            <Icon
-              name={'mood'}
-              type='material'
-              color='#FFFFFF'
-              containerStyle= {styles.iconContainer}
-              size={30}>
-              </Icon>
-            <View style = {{flex:10}}>
-              <Text
-              style = {styles.suggestionText}
-              >{dir}</Text>
-            </View>
-          </View>
-        }
-        >
-        <Text style = {styles.dropDownText}>{res}</Text>
-        </DropDownItem>
-        </TouchableOpacity>
+      var icons = this.getIcon(this.state.icons[i])
+      return<InfoButton
+      key={i}
+        iconName= {icons[1]}
+        iconType={icons[0]}
+        label={dir}
+        research = {this.state.research}
+      />
     });
     let articles = this.state.articleList.map((article,i) =>{
       return <TouchableOpacity
@@ -226,9 +193,8 @@ export default class ArticleScreen extends Component {
 
     <View>
     <ScrollView style ={{height: Dimensions.get('window').height}}>
-
       <View style = {styles.container}>
-      <Text>{this.state.article_title}</Text>
+      <Text style={styles.articleTitleText}>{this.state.article_title}</Text>
       <Image
       source={{uri:this.state.image}}
       style = {styles.imageContainer}
@@ -294,24 +260,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingLeft:width*1/5,
     paddingRight:width*1/5,
-  },
-  directionButtonContainer:{
-    backgroundColor: '#94ADFF',
-    borderRadius:15,
-    flexDirection:'row',
-    justifyContent:'space-around',
-    padding:20,
-    paddingLeft:10,
-    marginBottom:15,
-    marginLeft:width*1/12,
-    marginRight:width*1/15,
-    shadowOffset:{  width: 5,  height: 5,  },
-    shadowColor: '#475279',
-    shadowOpacity: .5,
-  },
-  directionContainer2:{
-    flexDirection:'row',
-    justifyContent:'space-around',
   },
 
   shadow:{
@@ -381,25 +329,12 @@ const styles = StyleSheet.create({
     paddingLeft:width*1/10,
     paddingRight:width*1/10,
     color:'#8393AD',
-//    lineHeight:18,
     ...textStyle.paragraph,
   },
 
   exampleText:{
     color: '#8393AD',
     ...textStyle.paragraph,
-  },
-  suggestionText:{
-    color: '#FFFFFF',
-    flex:5,
-    ...textStyle.subheader2,
-  },
-  dropDownText:{
-    color: '#FFFFFF',
-    ...textStyle.paragraph,
-    marginRight:width*.1,
-    marginLeft:width*.1,
-
   },
 
   titleText:{
@@ -408,5 +343,9 @@ const styles = StyleSheet.create({
     paddingLeft: 50,
     paddingTop: mainPadding,
     color: '#475279',
+  },
+  articleTitleText:{
+    color: '#7B80FF',
+    ...textStyle.header3,
   },
 });

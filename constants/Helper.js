@@ -46,7 +46,6 @@ export function renderText(content, tag) {
       pattern = /<Theory>(.*?)<\/Theory>/i;
     }else if (tag == 'i'){
       pattern = /<i>(.*?)<\/i>/gi;
-
     }else if (tag == 'Research'){
         pattern = /<Research>(.*?)<\/Research>/gi;
         isArray = true;
@@ -65,17 +64,16 @@ export function renderText(content, tag) {
     }
     var result = content.match(pattern)
 
-    if (tag == 'Reference'){
-      console.log('referemnce')
-      console.log(content.match(pattern))
-}
+//     if (tag == 'Reference'){
+//       console.log('referemnce')
+//       console.log(content.match(pattern))
+// }
     if (isArray){
       result = result.map((group,i)=>{
         group = group.replace('<'+tag+'>','');
         group = group.replace('</'+tag+'>','');
         return group
       })
-      console.log(result)
       return result
     }
   //  console.log(result)
@@ -115,19 +113,27 @@ export function createISC(text, tag, endtag){
     }
 
 
-    export function italicize(res){
-            var title = this.renderText(res, 'i');
-            var start = 0;
-            var index = res.indexOf('<i>',start);
-            var subStart = res.substring(start, index);
-            var end = res.indexOf('</i>');
-            var subEnd = res.substring(index +3,end);
-            var remaining = res.substring(end+4)
 
-            return<Text style = {{flexDirection: 'row'}}>
-                <Text>{subStart}</Text>
-                <Text style = {{ fontFamily: 'poppins-italic'}}>{subEnd}</Text>
-                <Text>{remaining}</Text>
-                <Text>{'\n\n'}</Text>
-                </Text>
-                      }
+  export function italicize(res){
+          var title = this.renderText(res, 'i');
+          var start = 0;
+          var index = res.indexOf('<i>',start);
+          var subStart = res.substring(start, index);
+          var end = res.indexOf('</i>');
+          var subEnd = res.substring(index +3,end);
+          var remaining = res.substring(end+4)
+
+          return<Text style = {{flexDirection: 'row'}}>
+              <Text>{subStart}</Text>
+              <Text style = {{ fontFamily: 'poppins-italic'}}>{subEnd}</Text>
+              <Text>{remaining}</Text>
+              <Text>{'\n\n'}</Text>
+              </Text>
+    }
+
+
+  export function getIcon(content){
+    let pattern = /(.*)\/(.*)/i;
+    var res = content.match(pattern)
+    return [res[1],res[2]]
+  }

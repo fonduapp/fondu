@@ -89,7 +89,8 @@ export default class ResourcesScreen extends React.Component{
                 });
 
         return(
-          <>
+          <View style={styles.resourceContainer}>
+
           <SearchBar
             containerStyle = {styles.searchContainer}
             inputContainerStyle = {{backgroundColor:"#D4D3FF"}}
@@ -100,7 +101,7 @@ export default class ResourcesScreen extends React.Component{
             value = {search}
           />
             {articles}
-        </>
+        </View>
       );
     }
   }
@@ -113,19 +114,25 @@ ResourcesScreen.navigationOptions = {
 const styles = StyleSheet.create({
 
   container: {
-    flex: 1,
     paddingTop: 15,
     alignItems:'center',
-    backgroundColor: '#fff',
   },
+
+  resourceContainer:{
+    justifyContent:'center',
+    paddingLeft:width*.075,
+  },
+
   searchContainer:{
     borderRadius:50,
     backgroundColor:"#D4D3FF",
     marginLeft:20,
     marginRight:20,
-    height: height * .06,
+    height: height * .07,
     width: width*.8,
     justifyContent:'center',
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent'
   },
   articleContainer:{
     borderRadius: 15,

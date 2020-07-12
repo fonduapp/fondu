@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Modal from 'react-native-modal';
 import {textStyle} from '../styles/text.style.js';
 import { renderText, italicize } from '../constants/Helper.js'
+import {Icon} from 'react-native-elements';
 
 
 import {
