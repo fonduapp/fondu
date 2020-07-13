@@ -41,12 +41,12 @@ export default class ResourcesScreen extends React.Component{
     let headerTitle = 'Resources';
     let headerTitleStyle = {
       textAlign:'center',
-      ...textStyle.header,
+      ...textStyle.header4,
       color:"#7B80FF",
     };
     return{headerTitle,headerTitleStyle}
-
   }
+  
   async componentDidMount(){
     const {authToken, userId} = await _getAuthTokenUserId()
     return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
@@ -107,9 +107,6 @@ export default class ResourcesScreen extends React.Component{
   }
 }
 
-ResourcesScreen.navigationOptions = {
-  title: 'Resources',
-};
 
 const styles = StyleSheet.create({
 
@@ -121,6 +118,7 @@ const styles = StyleSheet.create({
   resourceContainer:{
     justifyContent:'center',
     paddingLeft:width*.075,
+    marginTop:height*.02,
   },
 
   searchContainer:{

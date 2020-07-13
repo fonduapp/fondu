@@ -78,10 +78,9 @@ export default class ArticleScreen extends Component {
         // Create a new object using object property spread since it should be immutable
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay, this.state.entry, this.state.entryRating);
-        //console.log("POSTED RESPONSE " + this.state.entry)
         const data ={
-          userId: '5',
-          authToken: '4ea711f7f1146c8de28612d2700ff102',
+          userId: this.state.userId,
+          authToken: this.state.authToken,
           entryDate: (this.state.day).dateString,
           entry:this.state.entry,
           entryRating:this.state.entryRating,

@@ -28,11 +28,14 @@ export default class ProbReport extends React.Component{
         <Text style={styles.problemText}>Description</Text>
         <TextInput
         style = {styles.problemInput}
+        onChangeText={this.props.handleReport}
+        value={this.props.report}
         multiline
         numberOfLines={6}
         />
         <TouchableOpacity
-        style = {styles.submitButton}>
+        style = {styles.submitButton}
+        onPress={()=>this.props.hide()}>
           <Text style = {{fontWeight:'bold', color:'#FFFFFF'}}>Submit</Text>
         </TouchableOpacity>
       </View>
@@ -42,7 +45,6 @@ export default class ProbReport extends React.Component{
 
 const styles = StyleSheet.create({
 
-//problem report pop up styling
 problemText:{
   color: '#7B80FF',
   fontWeight:'bold',

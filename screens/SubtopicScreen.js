@@ -36,7 +36,7 @@ export default class SubtopicScreen extends React.Component{
     let headerTitle = params.title;
     let headerTitleStyle = {
       textAlign:'center',
-      ...textStyle.header,
+      ...textStyle.header4,
       color:"#7B80FF",
     };
     let headerRight =(
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     borderTopColor: 'transparent',
     marginLeft:20,
     marginRight:20,
-    marginTop:20,
+    marginTop:height*.02,
     height: height * .07,
     justifyContent:'center',
 
@@ -203,11 +203,6 @@ const styles = StyleSheet.create({
     ...textStyle.subheader,
     fontSize:16,
     color:"#FFFFFF",
-  },
-  titleText:{
-    textAlign:'center',
-    ...textStyle.header,
-    color:"#7B80FF",
   },
   dropDownText:{
     textAlign:'left',

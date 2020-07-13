@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { useState } from 'react';
-
 import {textStyle} from '../styles/text.style.js';
 import DropDownItem from 'react-native-drop-down-item';
 
@@ -10,6 +9,7 @@ import ReportProbPopUp from '../components/ReportProbPopUp';
 import InfoButton from '../components/InfoButton';
 
 import { _getAuthTokenUserId } from '../constants/Helper.js'
+import host from '../constants/Server.js';
 import {Icon} from 'react-native-elements';
 
 import {
@@ -57,12 +57,13 @@ export default class ArticleScreen extends Component {
       iscite:[],
       icons:[],
       reportProb: false,
+      report:"",
       showRef: false,
       behaviorId:'',
       userId:'',
       authToken:'',
       newPage:false,
-      buttonClosed:[true,true,true]
+      buttonClosed:[true,true,true],
     };
     this.screens.bind(this);
     this.createISC = createISC.bind(this);
@@ -81,13 +82,34 @@ export default class ArticleScreen extends Component {
       this.setState({reportProb:true});
       console.log("problem state" + this.state.reportProb)
     }
+
     hideProbReport = () => {
-      this.setState({reportProb:false});
-      console.log("problem state" + this.state.reportProb)
+      console.log("problem state" + this.state.report + "hello")
+      if (this.state.report){
+          const data ={
+            userId: this.state.userId,
+            authToken: this.state.authToken,
+            report: this.state.report
+          };
+        fetch('http://'+host+':3000/report/', {
+                method: 'POST',
+                headers: {
+                  Accept: 'application/json',
+                          'Content-Type': 'application/json'
+                },
+               body: JSON.stringify(data)
+            })
+        }
+        this.setState({reportProb:false});
     }
+    handleReport = (text) => {
+      if (text != this.state.report){
+        this.setState({ report: text })
+      };
+    }
+
     hideReferences = () => {
       this.setState({showRef:false});
-      console.log("ref state" + this.state.showRef)
     }
     changeColor=(i)=>{
       var temp = this.state.buttonClosed
@@ -116,8 +138,6 @@ export default class ArticleScreen extends Component {
             image: 'http://192.241.153.104:3000/behaviorImage/'+userId+'/'+authToken+'/' + behaviorId,
           })
           console.log('icons')
-          //console.log(this.state.icons)
-
         })
         .then(()=>
         fetch(rarticle_path)
@@ -231,6 +251,8 @@ export default class ArticleScreen extends Component {
         <ReportProbPopUp
           isVisible = {this.state.reportProb}
           hide ={this.hideProbReport}
+          handleReport={this.handleReport}
+          value={this.state.report}
         />
         <Text style = {styles.titleText}>Related Articles</Text>
         <View style = {styles.welcomeContainerContainer}>
