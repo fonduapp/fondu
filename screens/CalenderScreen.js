@@ -55,10 +55,6 @@ export default class ArticleScreen extends Component {
   }
 
     open (day) {
-      console.log('open')
-      console.log(day)
-      console.log(this.state.day)
-      console.log(day.dateString<=this.state.today.dateString)
       if(day.dateString<=this.state.today.dateString){
       this.setState({
           day:day,
@@ -99,9 +95,11 @@ export default class ArticleScreen extends Component {
       });
 
     }
-      handleEntry = (text) => {
+    handleEntry = (text) => {
+      if (text != this.state.entry){
         this.setState({ entry: text })
       }
+    };
 
     updateDate = (_selectedDay, entry, entryRating) => {
       var updatedMarkedDates
@@ -279,6 +277,7 @@ export default class ArticleScreen extends Component {
             style={[styles.textInputContainer, {backgroundColor:color[1]}]}
             onChangeText={this.handleEntry}
             value={this.state.entry}
+            multiline
             />
             <Icon
               name={'check-circle'}
@@ -481,7 +480,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     lineHeight: 40,
     backgroundColor: '#94ADFF',
-    color:'#FFFFFF',
     justifyContent: 'space-around',
   },
 });

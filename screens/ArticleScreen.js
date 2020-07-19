@@ -103,9 +103,7 @@ export default class ArticleScreen extends Component {
         this.setState({reportProb:false});
     }
     handleReport = (text) => {
-      if (text != this.state.report){
-        this.setState({ report: text })
-      };
+         this.setState({ report: text })
     }
 
     hideReferences = () => {
@@ -196,6 +194,7 @@ export default class ArticleScreen extends Component {
         iconType={icons[0]}
         label={dir}
         research = {this.state.research}
+        reference={this.state.reference}
       />
     });
     let articles = this.state.articleList.map((article,i) =>{

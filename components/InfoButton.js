@@ -1,5 +1,6 @@
 import  React,{Component} from 'react';
 import { Text, Dimensions, TouchableOpacity, View, StyleSheet } from 'react-native';
+import ReferencePopUp from '../components/ReferencePopUp';
 import {textStyle} from '../styles/text.style.js';
 import {Icon} from 'react-native-elements';
 import { createISC, renderText} from '../constants/Helper.js'
@@ -12,6 +13,7 @@ export default class InfoButton extends Component {
   constructor(props){
     super(props);
     this.state = {
+      showRef:false,
       screen: 'closed',
       color:'#94ADFF',
     };
@@ -24,6 +26,9 @@ export default class InfoButton extends Component {
         color:'#94ADFF',
         screen:'closed',
     });
+  }
+  hideReferences = () => {
+    this.setState({showRef:false});
   }
 
   open(){
@@ -89,7 +94,13 @@ export default class InfoButton extends Component {
   return (
     <View>
       {buttons}
-    </View>
+    <ReferencePopUp
+      showRef = {this.state.showRef}
+      refs = {this.props.reference}
+      hide ={this.hideReferences}
+      />
+      </View>
+
   );
 }
 }
