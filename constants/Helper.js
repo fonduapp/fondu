@@ -19,6 +19,20 @@ export async function _getAuthTokenUserId(){
     }
   }
 
+
+export async function getMatch(userId, authToken, query){
+  return fetch('http://192.241.153.104:3000/search/'+userId+'/'+authToken+'/' + query)
+    .then((response)=>response.json())
+    .then((responseJson) =>{
+      this.setState({matches:responseJson.article_ids})
+    })
+  .catch((error)=>{
+    console.log(error)
+  });
+}
+
+
+
 /*When using renderText and createISC make sure to bind the functions
   within the constructor:
 
@@ -63,11 +77,6 @@ export function renderText(content, tag) {
         isArray = true;
     }
     var result = content.match(pattern)
-
-//     if (tag == 'Reference'){
-//       console.log('referemnce')
-//       console.log(content.match(pattern))
-// }
     if (isArray){
       result = result.map((group,i)=>{
         group = group.replace('<'+tag+'>','');
@@ -76,8 +85,6 @@ export function renderText(content, tag) {
       })
       return result
     }
-  //  console.log(result)
-
     return (content.match(pattern))[1];
   }
 
