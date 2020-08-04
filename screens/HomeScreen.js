@@ -54,6 +54,7 @@ export default class HomeScreen extends Component {
       recommendedBehaviors:[],
       loading: true,
       unlockReview: false,
+      paired: false,
     };
 
     this.learningAssessComplete.bind(this)
@@ -153,7 +154,6 @@ export default class HomeScreen extends Component {
         loading: false,
       }, this.compareAssessDate);
     });
-
     
 
   }
@@ -166,16 +166,40 @@ export default class HomeScreen extends Component {
 
     this.areaLevel = {}
 
-    //TODO: relationship level
+    //relationship level
+    const RelationshipInfoFetch = fetch(`http://${host}:3000/getRelationship/${userId}/${authToken}`,{
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      //set relationship info
+
+      let paired = responseJson.length > 0
+      this.props.navigation.setParams({
+          paired: paired,
+      });
+      this.setState({paired : paired})
+      //if empty array, not paired
+      if(paired){
+        
+      }
+
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 
     //TODO: total xp earned
+
 
     //TODO: xp progress
 
     //areas and area level and xp
-    const path = `http://${host}:3000/allAreas/${userId}/${authToken}`;
-    
-    return fetch(path, {
+    return fetch(`http://${host}:3000/allAreas/${userId}/${authToken}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -571,6 +595,7 @@ export default class HomeScreen extends Component {
                                          allAreas: navigation.getParam('allAreas'),
                                          areaLevels : navigation.getParam('areaLevels'),
                                          relationshipLevel: -1,
+                                         paired : navigation.getParam('paired'),
                                        })}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
@@ -582,7 +607,9 @@ export default class HomeScreen extends Component {
       headerRight: ( navigation.getParam('initialAssessTaken') ? <View style={{marginRight: 25, flexDirection: 'row'}}>
                       <Image source={require('../assets/images/streak/streak-fire.png')} style={{height: 30, width: 30}}/>
                       <Text style={[{marginLeft:5, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.label]}>{navigation.getParam('streak')}</Text>
-                      <Text style={[{marginLeft:7, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.label]}>lv ?</Text>
+                      {navigation.getParam('paired') ? <Text style={[{marginLeft:7, color:theme.TEXT_COLOR, alignSelf:'center', opacity: 0.5}, textStyle.label]}>lv ?</Text>
+                                                    : null
+                      }
                       </View>: null
                     )
     }

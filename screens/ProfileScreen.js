@@ -20,7 +20,7 @@ import ProgressBar from '../components/ProgressBar';
 import { Icon, Avatar } from 'react-native-elements';
 import {LineChart} from 'react-native-chart-kit';
 import host from '../constants/Server.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js';
+import { _getAuthTokenUserId, getIcon } from '../constants/Helper.js';
 import { shortDayNames } from '../constants/Date.js';
 
 const { width } = Dimensions.get('window');
@@ -34,16 +34,18 @@ export default class ProfileScreen extends Component {
     this.streak = props.navigation.getParam('streak', -1);
     this.allAreas = props.navigation.getParam('allAreas', []);
     this.areaLevels = props.navigation.getParam('areaLevels', {});
-  }
 
-  state = {
+    this.state = {
     scrollBarValue: new Animated.Value(0),
     checkpointDayOpacity: new Animated.Value(1),
     accountPairedNotif: true,
-    accountPaired:true,
+    accountPaired:props.navigation.getParam('paired', false),
     relationshipStatusSelectedIndex: -1,
-    checkpointDaySelectedIndex: -1,
-  };
+    checkpointDaySelectedIndex: -1, 
+    };
+  }
+
+
 
   componentDidMount() {
     this.fetchRelationshipStatus();
