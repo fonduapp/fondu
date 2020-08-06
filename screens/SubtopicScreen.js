@@ -13,7 +13,8 @@ import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
 import { StackNavigator } from 'react-navigation';
 import {textStyle} from '../styles/text.style.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+import { _getAuthTokenUserId, getMatch } from '../constants/Helper.js'
+
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
 const arrows = ['keyboard-arrow-down','keyboard-arrow-up']
@@ -23,14 +24,20 @@ export default class SubtopicScreen extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      search:'',
       isLoading: true,
       showInfo:false,
       subList:[],
       area_name:'',
       area_text:'',
+      matches:[],
+      isSearching:false,
+      search:'',
+      prev:'',
     }
+    this.getMatch = getMatch.bind(this);
   }
+
+
   static navigationOptions = ({navigation}) => {
     const {params ={}} = navigation.state;
     let headerTitle = params.title;
@@ -52,16 +59,29 @@ export default class SubtopicScreen extends React.Component{
     return{headerTitle,headerTitleStyle,headerRight}
   }
 
-
-  updateSeach = search =>{
-    this.setState({search});
-  };
   toggle(){
     this.setState({showInfo:!this.state.showInfo});
   }
 
+  onChangeText = text =>{
+    console.log("search text " + text)
+    if (text==""){
+      console.log("clear")
+      this.setState({
+        isSearching:false,
+        search:'',
+      });
+    }else{
+      this.setState({
+        isSearching:true,
+        search:text,
+      });
+  }
+}
 
-  showText(search,articles){
+
+
+  showText(search, articles){
     if (!this.state.showInfo){
       return(
         <>
@@ -71,7 +91,7 @@ export default class SubtopicScreen extends React.Component{
         inputStyle = {{color:'#FFFFFF', fontSize:14}}
         placeholderTextColor = '#FFFFFF'
         placeholder = "Ask a question or search for a topic..."
-        onChangeText={this.updateSeach}
+        onChangeText={this.onChangeText}
         value = {search}
       />
       <View style = {styles.container}>
@@ -88,8 +108,8 @@ export default class SubtopicScreen extends React.Component{
       inputContainerStyle = {{backgroundColor:"#D4D3FF"}}
       inputStyle = {{color:'#FFFFFF', fontSize:14}}
       placeholderTextColor = '#FFFFFF'
-      placeholder = "Ask a question or search for a topic..."
-      onChangeText={this.updateSeach}
+      placeholder = "Search for a topic..."
+      onChangeText={this.onChangeText}
       value = {search}
     />
     <View style = {styles.container}>
@@ -126,6 +146,14 @@ export default class SubtopicScreen extends React.Component{
       });
   }
 
+  async componentDidUpdate(){
+    const {authToken, userId} = await _getAuthTokenUserId()
+    if (this.state.isSearching && this.state.prev != this.state.search){
+      this.getMatch(userId,authToken,this.state.search)
+      this.setState({prev:this.state.search})
+    }
+  }
+
   render(){
     const { search } = this.state;
     const {navigation } = this.props;
@@ -137,18 +165,48 @@ export default class SubtopicScreen extends React.Component{
         </View>
       )
     } else {
-        let articles = this.state.subList.map((article,i)=>{
+      console.log("are you serch " + this.state.search)
+
+      var articles;
+      if (this.state.isSearching){
+        var matchCount = 0;
+        articles = (this.state.subList).map((article,i)=>{
+            console.log(article['behavior_id'] + " " + this.state.isSearching)
+            console.log(this.state.matches[0])
+            console.log(this.state.matches.indexOf(article['behavior_id']) !== -1)
+            if (this.state.matches.indexOf(article['behavior_id']) !== -1){
+              matchCount++;
+              return <TouchableOpacity
+                    key = {i}
+                    style = {styles.articleContainer}
+                    onPress={()=> this.props.navigation.navigate('Article', {
+                      behaviorId: article['behavior_id'],
+                      behavior_name: article['behavior_name'],
+                    })
+                  }>
+                      <Text style = {styles.buttonText}>
+                          {article.behavior_name}
+                      </Text>
+                    </TouchableOpacity>
+                  }
+              });
+      }else{
+        console.log("show all")
+        articles = (this.state.subList).map((article,i)=>{
             return <TouchableOpacity
                   key = {i}
                   style = {styles.articleContainer}
                   onPress={()=> this.props.navigation.navigate('Article', {
                     behaviorId: article['behavior_id'],
-                  })}>
+                    behavior_name: article['behavior_name'],
+                  })
+                }>
                     <Text style = {styles.buttonText}>
                         {article.behavior_name}
                     </Text>
                   </TouchableOpacity>
                 });
+      }
         return(
           this.showText(search,articles)
       );

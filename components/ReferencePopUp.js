@@ -35,7 +35,6 @@ constructor(props) {
       return<Text style ={{marginBottom:20,paddingBottom:20}}>{this.italicize(ref)}</Text>
     })
 		return (
-      //<View style= {styles.container}>
       <Modal
       style = {styles.modalContainer}
       isVisible = {this.props.showRef}
