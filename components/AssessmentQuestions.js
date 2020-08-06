@@ -23,7 +23,7 @@ import Loader from '../components/Loader';
 
 
 const { width, height } = Dimensions.get('window')
-var jsonData = []
+let jsonData = []
 var originalFetch = require('isomorphic-fetch');
 var fetch = require('fetch-retry')(originalFetch);
 
@@ -73,10 +73,8 @@ export default class AssessmentQuestions extends Component {
   }
 
   async componentDidMount(){
+    jsonData = [];
     const {authToken, userId} = await _getAuthTokenUserId();
-
-
-
 
     this.setState({authToken: authToken, userId: userId});
     const {
@@ -131,6 +129,7 @@ export default class AssessmentQuestions extends Component {
       jsonData = jsonData.concat(
         responseJson.map(row => (row.answers = JSON.parse(row.answers), row))
       );
+
     })
     .catch((error) => {
       console.error(error);
