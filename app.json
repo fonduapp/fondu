@@ -3,7 +3,7 @@
     "name": "FondU",
     "slug": "FondU",
     "privacy": "public",
-    "sdkVersion": "36.0.0",
+    "sdkVersion": "38.0.0",
     "platforms": [
       "ios",
       "android",
@@ -25,6 +25,6 @@
     ],
     "ios": {
       "supportsTablet": true
-      }
     }
   }
+}

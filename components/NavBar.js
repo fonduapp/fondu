@@ -113,9 +113,8 @@ export default class ProgressNavBar extends Component {
 
 const styles = StyleSheet.create({
   titleText:{
-    fontSize: 25,
-    fontWeight: 'bold',
     textAlign: 'center',
+    ...textStyle.header,
   },
   popUpContainer: {
     alignItems: 'center',

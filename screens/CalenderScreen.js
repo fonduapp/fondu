@@ -47,6 +47,7 @@ export default class ArticleScreen extends Component {
       opening:false,
       closing:true,
       moodName: ['error','awful', 'down', 'alright', 'good', 'amazing'],
+      moodOpacity:[1,1,1,1,1],
       markedDates: {},
       day: {dateString:Moment(new Date()).format('YYYY-MM-DD')},
       today:{dateString:Moment(new Date()).format('YYYY-MM-DD')},
@@ -55,12 +56,26 @@ export default class ArticleScreen extends Component {
   }
 
     open (day) {
-      console.log('open')
-      console.log(day)
+      if(day.dateString<=this.state.today.dateString){
       this.setState({
           day:day,
           opening:true
         });
+      }
+      }
+
+      moodPressed (mood) {
+        let tempMoodOpacity = this.state.moodOpacity;
+        this.setState({entryRating:(mood + 1)});
+        for (let i = 0; i < 5; i++){
+          if (i==mood){
+            tempMoodOpacity[i] = 1;
+          }else{
+            tempMoodOpacity[i] = .5;
+          }
+        }
+        console.log(tempMoodOpacity)
+        this.setState({moodOpacity:tempMoodOpacity})
       }
 
     async close(){
@@ -74,10 +89,9 @@ export default class ArticleScreen extends Component {
         // Create a new object using object property spread since it should be immutable
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay, this.state.entry, this.state.entryRating);
-        //console.log("POSTED RESPONSE " + this.state.entry)
         const data ={
-          userId: '5',
-          authToken: '4ea711f7f1146c8de28612d2700ff102',
+          userId: this.state.userId,
+          authToken: this.state.authToken,
           entryDate: (this.state.day).dateString,
           entry:this.state.entry,
           entryRating:this.state.entryRating,
@@ -96,9 +110,11 @@ export default class ArticleScreen extends Component {
       });
 
     }
-      handleEntry = (text) => {
+    handleEntry = (text) => {
+      if (text != this.state.entry){
         this.setState({ entry: text })
       }
+    };
 
     updateDate = (_selectedDay, entry, entryRating) => {
       var updatedMarkedDates
@@ -141,7 +157,6 @@ export default class ArticleScreen extends Component {
         var currDate = new Date();
         const month = JSON.stringify(currDate.getMonth()+1);
         const year = JSON.stringify(currDate.getFullYear());
-        console.log('getting month entry' + month +' ' + year)
         this.fetchMonth(month,year)
       }
 
@@ -156,7 +171,6 @@ export default class ArticleScreen extends Component {
           })
           .then((response) => response.json())
           .then((responseJson) => {
-            console.log('responseJson')
             responseJson.map((entry, i)=>{
               this.updateDate((entry["entry_date"]).substring(0,10),entry['entry'], entry['entry_rating'])
             });
@@ -278,6 +292,7 @@ export default class ArticleScreen extends Component {
             style={[styles.textInputContainer, {backgroundColor:color[1]}]}
             onChangeText={this.handleEntry}
             value={this.state.entry}
+            multiline
             />
             <Icon
               name={'check-circle'}
@@ -320,15 +335,14 @@ export default class ArticleScreen extends Component {
       let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
         <Icon
-          //key={i.toString()}
           name={moodIcons[i]}
           type='material'
           color='#FFFFFF'
           size={40}
-          onPress={() => this.setState({entryRating:(i + 1)})}
+          onPress={() => this.moodPressed(i)}
           containerStyle={[
             styles.moodButton,
-            { backgroundColor: color },
+            { backgroundColor: color, opacity:this.state.moodOpacity[i]},
           ]}></Icon>
       );
     });
@@ -397,8 +411,6 @@ const styles = StyleSheet.create({
     lineHeight:10,
     flexWrap:'wrap',
     margin:0,
-
-
   },
 
   entryContainer:{
@@ -482,7 +494,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     lineHeight: 40,
     backgroundColor: '#94ADFF',
-    color:'#FFFFFF',
     justifyContent: 'space-around',
   },
 });

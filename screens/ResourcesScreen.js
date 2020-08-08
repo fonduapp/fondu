@@ -12,8 +12,9 @@ import { ListItem, SearchBar} from 'react-native-elements';
 import theme from '../styles/theme.style.js';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+import { _getAuthTokenUserId,getMatch } from '../constants/Helper.js'
 import {textStyle} from '../styles/text.style.js';
+
 
 
 
@@ -27,21 +28,48 @@ export default class ResourcesScreen extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      search:'',
       isLoading: true,
       articleList: [],
+      matches:[],
+      isSearching:false,
+      search:'',
+      prev:'',
     }
+    this.getMatch = getMatch.bind(this);
   }
-  updateSeach = search =>{
-    this.setState({search});
-  };
+
+
+  onChangeText = text =>{
+    if (text==""){
+      this.setState({
+        isSearching:false,
+        search:'',
+      });
+    }else{
+      this.setState({
+        isSearching:true,
+        search:text,
+      });
+  }
+}
+
+
+  static navigationOptions = ({navigation}) => {
+    const {params ={}} = navigation.state;
+    let headerTitle = 'Resources';
+    let headerTitleStyle = {
+      textAlign:'center',
+      ...textStyle.header4,
+      color:"#7B80FF",
+    };
+    return{headerTitle,headerTitleStyle}
+  }
 
   async componentDidMount(){
     const {authToken, userId} = await _getAuthTokenUserId()
     return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
       .then((response)=>response.json())
       .then((responseJson) =>{
-        console.log('resources: ' + JSON.stringify(responseJson))
         this.setState({
           isLoading: false,
           articleList:responseJson
@@ -51,11 +79,17 @@ export default class ResourcesScreen extends React.Component{
         console.log(error)
       });
   }
-
+  async componentDidUpdate(){
+    const {authToken, userId} = await _getAuthTokenUserId()
+    if (this.state.isSearching && this.state.prev != this.state.search){
+      this.getMatch(userId,authToken,this.state.search)
+      this.setState({prev:this.state.search})
+    }
+  }
   render(){
-
+    const {navigation } = this.props;
     const { search } = this.state;
-    //console.log(this.state.isLoading)
+    console.log(search)
     if (this.state.isLoading){
 
       return(
@@ -64,60 +98,88 @@ export default class ResourcesScreen extends React.Component{
         </View>
       )
     } else {
-      //console.log(this.state.articleList)
-        let articles = (this.state.articleList).map((article,i)=>{
-          console.log('article id '+ article['area_id'])
-            return <TouchableOpacity
-                  key = {i}
-                  style = {styles.articleContainer}
-                  onPress={()=> this.props.navigation.navigate('Subtopics', {
-                    areaId: article['area_id']
-                  })
-                }>
-                    <Text style = {styles.buttonText}>
-                        {article.area_name}
-                    </Text>
-                  </TouchableOpacity>
-                });
+        console.log("are you serch " + this.state.search)
 
-        return(
-          <>
-          <SearchBar
-            containerStyle = {styles.searchContainer}
-            inputContainerStyle = {{backgroundColor:"#D4D3FF"}}
-            inputStyle = {{color:'#FFFFFF', fontSize:14}}
-            placeholderTextColor = '#FFFFFF'
-            placeholder = "Ask a question or search for a topic..."
-            onChangeText={this.updateSeach}
-            value = {search}
-          />
-            {articles}
-        </>
-      );
+        var articles;
+        if (this.state.isSearching){
+          var matchCount = 0;
+          articles = (this.state.articleList).map((article,i)=>{
+              if (this.state.matches.indexOf(article['area_id']) !== -1){
+                matchCount++;
+                return <TouchableOpacity
+                      key = {i}
+                      style = {styles.articleContainer}
+                      onPress={()=> this.props.navigation.navigate('Subtopics', {
+                        areaId: article['area_id'],
+                        area_name: article['area_name'],
+                      })
+                    }>
+                        <Text style = {styles.buttonText}>
+                            {article.area_name}
+                        </Text>
+                      </TouchableOpacity>
+                    }
+                });
+        }else{
+          articles = (this.state.articleList).map((article,i)=>{
+              return <TouchableOpacity
+                    key = {i}
+                    style = {styles.articleContainer}
+                    onPress={()=> this.props.navigation.navigate('Subtopics', {
+                      areaId: article['area_id'],
+                      area_name: article['area_name'],
+                    })
+                  }>
+                      <Text style = {styles.buttonText}>
+                          {article.area_name}
+                      </Text>
+                    </TouchableOpacity>
+                  });
+        }
+
+          return(
+            <View style={styles.resourceContainer}>
+            <SearchBar
+              containerStyle = {styles.searchContainer}
+              inputContainerStyle = {{backgroundColor:"#D4D3FF"}}
+              inputStyle = {{color:'#FFFFFF', fontSize:14}}
+              placeholderTextColor = '#FFFFFF'
+              placeholder = "Ask a question or search for a topic..."
+              onChangeText={this.onChangeText}
+              onClearText={this.onClearText}
+              value={search}
+            />
+              {articles}
+          </View>
+          );
     }
   }
 }
 
-ResourcesScreen.navigationOptions = {
-  title: 'Resources',
-};
 
 const styles = StyleSheet.create({
 
   container: {
-    flex: 1,
     paddingTop: 15,
     alignItems:'center',
-    backgroundColor: '#fff',
   },
+
+  resourceContainer:{
+    justifyContent:'center',
+    paddingLeft:width*.075,
+    marginTop:height*.02,
+  },
+
   searchContainer:{
     borderRadius:50,
     backgroundColor:"#D4D3FF",
     marginLeft:20,
     marginRight:20,
-    height: height * .06,
+    height: height * .07,
     width: width*.8,
     justifyContent:'center',
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent'
   },
   articleContainer:{
     borderRadius: 15,

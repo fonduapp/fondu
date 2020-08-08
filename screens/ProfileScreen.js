@@ -14,30 +14,38 @@ import {
   AsyncStorage
 } from 'react-native';
 import theme from '../styles/theme.style.js';
+import {textStyle} from '../styles/text.style.js';
 import ProgressNavBar from '../components/NavBar';
-import ProgressRing from '../components/ProgressRing';
+import ProgressBar from '../components/ProgressBar';
 import { Icon, Avatar } from 'react-native-elements';
 import {LineChart} from 'react-native-chart-kit';
 import host from '../constants/Server.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js';
+import { _getAuthTokenUserId, getIcon } from '../constants/Helper.js';
 import { shortDayNames } from '../constants/Date.js';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;
 
 export default class ProfileScreen extends Component {
+
   constructor(props) {
     super(props);
     this.focusCheckpointDay = props.navigation.getParam('focusCheckpointDay', false);
-  }
+    this.streak = props.navigation.getParam('streak', -1);
+    this.allAreas = props.navigation.getParam('allAreas', []);
+    this.areaLevels = props.navigation.getParam('areaLevels', {});
 
-  state = {
+    this.state = {
     scrollBarValue: new Animated.Value(0),
     checkpointDayOpacity: new Animated.Value(1),
     accountPairedNotif: true,
+    accountPaired:props.navigation.getParam('paired', false),
     relationshipStatusSelectedIndex: -1,
-    checkpointDaySelectedIndex: -1,
-  };
+    checkpointDaySelectedIndex: -1, 
+    };
+  }
+
+
 
   componentDidMount() {
     this.fetchRelationshipStatus();
@@ -157,7 +165,7 @@ export default class ProfileScreen extends Component {
 
   _moveScrollBar = (event) => {
     Animated.timing(this.state.scrollBarValue, {
-      toValue: (event.nativeEvent.contentOffset.x*(width-mainPadding*2)/width)/3,
+      toValue: (event.nativeEvent.contentOffset.x*(width-mainPadding*2)/width)/2,
       duration: 0
     }).start();
 
@@ -177,7 +185,7 @@ export default class ProfileScreen extends Component {
     }
     catch(exception) {
 
-      console.log("furk " + exception);
+      console.log(exception);
     }
 
 
@@ -229,34 +237,27 @@ export default class ProfileScreen extends Component {
       checkpointDaySelectedIndex,
     } = this.state;
     const line = {
-      labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+      labels: ['6/12', '6/19', '6/26', '7/2', '7/9', '7/16'],
       datasets: [
         {
-          data: [20, 45, 28, 80, 99, 43],
-          strokeWidth: 2, // optional
+          data: [20, 45, 28, 80, 101, 43],
+          strokeWidth: 0.01, // optional
         },
       ],
-    };
-
-    const data = {
-      data: [0.4, ]
     };
 
     return (
       <View style = {styles.container}>
         <StatusBar hidden />
         <ProgressNavBar navigation={this.props.navigation} title = {"Profile"}/>
-        <View style= {{alignItems: 'center', marginBottom: 30}}>
-          <Avatar rounded size="xlarge" icon={{name: 'person'}} />
+        <View style= {{alignItems: 'center', marginBottom: 20}}>
+          <Avatar rounded size={100} icon={{name: 'person'}} />
+          <Text style={[textStyle.header4,{color:'white', marginTop: 5}]}>Joe Schmoe</Text>
         </View>
         <View style={styles.containerLabel}>
           <TouchableOpacity style={styles.containerLabelContainer}
                             onPress={() => { this.scroll.scrollTo({ x: 0 }) }}>
             <Text style={styles.textContainer}>Performance</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.containerLabelContainer}
-                            onPress={() => { this.scroll.scrollTo({ x: width }) }}>
-            <Text style={styles.textContainer}>Relationship</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.containerLabelContainer}
                             onPress={() => { this.scroll.scrollTo({ x: width*2 }) }}>
@@ -290,88 +291,83 @@ export default class ProfileScreen extends Component {
                 onScroll={this._moveScrollBar}
                 ref={(node) => this.scroll = node}>
 
-                <ScrollView contentContainerstyle={styles.scrollContainer}>
-                  <Text style = {[styles.accountHeaderText,{ alignSelf: "flex-start", marginLeft: 30, marginTop: 0}]}>OVERALL RELATIONSHIP HEALTH</Text>
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {this.state.relationshipStatus != 1 && this.state.accountPaired ?
+                  <>
+                  <Text style = {[styles.performanceHeaderText,{marginTop: 20}]}>Your Relationship Level</Text>
+                  <View style= {{
+                    flexDirection:'row', 
+                    alignItems:'center',
+                  }}>
+                  <StatsContainer icon="favorite" 
+                                  mainText="lv 2" 
+                                  color={theme.PRIMARY_COLOR_3}
+                                  textColor='white'/>
+                  <ProgressBar progress={0.5} color={theme.PRIMARY_COLOR_3} style={{marginLeft: 15, flex: 1}} label={"5/30"}/>
+                  
+                  </View>
+                  </>
+                  :
+                  null
+
+                }
+                  <Text style = {styles.performanceHeaderText}>Your Statistics</Text>
+                  <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
+                    <StatsContainer icon="whatshot" 
+                                    mainText={this.streak} 
+                                    subText="week streak" 
+                                    color={theme.SECONDARY_COLOR}
+                                    textColor = {theme.TEXT_COLOR}/>
+                    <StatsContainer icon="star" 
+                                    mainText="20" 
+                                    subText="XP earned" 
+                                    color={theme.SECONDARY_COLOR}
+                                    style={{marginLeft: 10}}
+                                    textColor = {theme.TEXT_COLOR}/>
+                  </View>
+                  <Text style = {styles.performanceHeaderText}>Your XP Earned</Text>
                   <View style={{alignSelf:"center"}}>
                     <LineChart
                       data={line}
-                      width={width} // from react-native
-                      height={220}
-                      yAxisSuffix={'%'}
+                      width={width}
+                      height={180}
                       chartConfig={{
                         backgroundGradientFrom: 'white',
                         backgroundGradientTo: 'white',
                         color: (opacity = 1) => `rgba(123, 127, 255, ${opacity})`,
                         decimalPlaces: 0,
+                        propsForLabels:{fontFamily:'poppins-bold', fontWeight: 'bold', opacity: 0.5},
+                        fillShadowGradient:theme.PRIMARY_COLOR,
+                        fillShadowGradientOpacity:0.5
+
                       }}
-                      bezier
+
+                      bezier={false}
+                      withInnerLines={false}
+                      withOuterLines={false}
+                      fontFamily={"poppins-bold"}
+                      segments={2}
+                      fromZero={true}
+                      withDots={true}
                     />
 
-                    <Text style = {[styles.accountHeaderText,{ alignSelf: "flex-start", marginLeft: 30, marginTop: 40}]}>TOPIC HEALTH</Text>
-
-                    <View style = {{paddingLeft: 20, paddingRight: 20, flexDirection: 'row', justifyContent: 'space-evenly', marginTop:20, marginBottom:5}}>
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 50 }
+                  </View>
+                  <Text style = {styles.performanceHeaderText}>Area Level</Text>
+                  <View style={{flexDirection:'column', justifyContent:'space-evenly', flex:1 }}>
+                    {
+                      this.allAreas.map((area, key)=>(
+                        <AreaLevelContainer areaName={area.area_name} 
+                                            key={key} 
+                                            level={this.areaLevels[area.area_id].area_level}
+                                            totalExp = {this.areaLevels[area.area_id].total_exp}
+                                            areaExp = {this.areaLevels[area.area_id].area_exp}
                         />
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 70 }
-                        />
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 25 }
-                        />
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 90 }
-                        />
-                    </View>
-                    <View style = {{paddingLeft: 20, paddingRight: 20, flexDirection: 'row', justifyContent: 'space-evenly', marginBottom:40}}>
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 80 }
-                        />
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 30 }
-                        />
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 40 }
-                        />
-                        <ProgressRing
-                          radius={ 35 }
-                          stroke={ 5 }
-                          progress={ 90 }
-                        />
-                    </View>
+                      ))
+                    }
+                    
                   </View>
 
 
-                </ScrollView>
-
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
-                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
-                                    onPress={()=> this.props.navigation.navigate('Assessment')}>
-                    <Text style={styles.relationshipText}>What is my Love Language?</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_5}]}>
-                    <Text style={styles.relationshipText}>What is my Attachment Type?</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_2}]}>
-                    <Text style={styles.relationshipText}>What is my XXXX?</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_2}]}>
-                    <Text style={styles.relationshipText}>What is my XXXX?</Text>
-                  </TouchableOpacity>
                 </ScrollView>
 
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -444,14 +440,12 @@ const styles = StyleSheet.create({
     backgroundColor:theme.PRIMARY_COLOR,
   },
   contentContainer:{
-    paddingTop: 40,
+    paddingTop: 20,
   },
   welcomeContainer: {
     alignItems: 'center',
     marginTop: 10,
     backgroundColor: 'white',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
     flex:1,
 
   },
@@ -469,7 +463,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     color: 'white',
-    fontSize:13,
+    ...textStyle.caption,
   },
   mainImageContainer:{
     width: 150,
@@ -481,12 +475,13 @@ const styles = StyleSheet.create({
     flex:1,
     borderWidth: 1,
     borderColor: theme.PRIMARY_COLOR,
+    opacity: 0.5,
     marginTop:10,
     marginLeft:10,
     marginRight:10,
   },
   containerLabelScrollContainerNoBorder:{
-    flex:2,
+    flex:1,
     marginTop:10,
     marginLeft:10,
     marginRight:10,
@@ -501,9 +496,7 @@ const styles = StyleSheet.create({
   scrollContainer:{
     width: width,
     alignItems: 'stretch',
-    paddingLeft: 30,
-    paddingRight: 30,
-
+    paddingHorizontal:30 ,
   },
   relationshipButton:{
     height: 50,
@@ -524,6 +517,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 11,
   },
+  performanceHeaderText:{
+    color: theme.TEXT_COLOR,
+    alignSelf: "flex-start",
+    marginBottom: 10,
+    marginTop: 20,
+    ...textStyle.subheader,
+  },
   accountText:{
     color: theme.PRIMARY_COLOR,
     fontWeight: 'normal',
@@ -534,6 +534,40 @@ const styles = StyleSheet.create({
   }
 
 });
+const AreaLevelContainer = ({areaName, level, areaExp, totalExp}) =>{
+  let progress = areaExp/totalExp
+  let label = areaExp + "/" + totalExp
+  return(
+    <View style={{flexDirection:'row',marginVertical:10, flex: 1}}>
+      <View style={{backgroundColor:theme.PRIMARY_COLOR, borderRadius: 20, width: 75, height: 75}}></View>
+      <View style={{justifyContent:'space-evenly', paddingHorizontal: 20, flex: 1, }}>
+        <Text style={[{flex:1, color:theme.PRIMARY_COLOR},textStyle.subheader]}>{areaName}</Text>
+        <Text style={[{flex:1, color:theme.PRIMARY_COLOR, opacity: 0.5},textStyle.label]}>Level {level}</Text>
+        <ProgressBar progress={progress} label={label}/>
+      </View>
+
+    </View>
+  )
+}
+
+const StatsContainer = ({ icon, mainText, subText, color, textColor, style}) => (
+
+    <View style={{
+            backgroundColor:color,
+            borderRadius: 20, paddingLeft: 15,
+            paddingRight: 20,paddingVertical: 12,
+            flexDirection:'row',
+            alignItems: 'center',
+            ...style
+          }}
+    >
+      <Icon name={icon} size={20} color={textColor}/>
+      <Text style={ [textStyle.label,{marginLeft: 5, color:textColor}]}>{mainText}</Text>
+      <Text style={ [textStyle.caption,{marginLeft: 5, color:textColor,opacity:0.5}]}>{subText}</Text>
+    </View>
+
+
+)
 
 const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => (
   <View
