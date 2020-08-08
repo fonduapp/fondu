@@ -197,7 +197,9 @@ export default class ArticleScreen extends Component {
         reference={this.state.reference}
       />
     });
-    let articles = this.state.articleList.map((article,i) =>{
+    var articles;
+    if (this.state.articleList){
+     articles = this.state.articleList.map((article,i) =>{
       return <TouchableOpacity
         style={styles.relatedArticleContainer}
         onPress={()=> this.setState({
@@ -208,10 +210,11 @@ export default class ArticleScreen extends Component {
       <Text style = {styles.relatedArticleText}>{article['name']}</Text>
       </TouchableOpacity>
   });
+}
   return(
 
     <View>
-    <ScrollView style ={{height: Dimensions.get('window').height}}>
+    <ScrollView style ={{height: height}}>
       <View style = {styles.container}>
       <Text style={styles.articleTitleText}>{this.state.article_title}</Text>
       <Image
@@ -254,11 +257,9 @@ export default class ArticleScreen extends Component {
           value={this.state.report}
         />
         <Text style = {styles.titleText}>Related Articles</Text>
-        <View style = {styles.welcomeContainerContainer}>
             <View style = {styles.relatedArticle}>
                 {articles}
             </View>
-        </View>
       </View>
 
     </ScrollView>
@@ -319,7 +320,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     textAlign:'center',
     justifyContent: 'space-evenly',
+    marginBottom:120,
   },
+
   researchContainer:{
     backgroundColor: '#F3F4FC',
     paddingBottom: 20,
@@ -368,5 +371,7 @@ const styles = StyleSheet.create({
   articleTitleText:{
     color: '#7B80FF',
     ...textStyle.header3,
+    marginLeft:width*.1,
+    marginRight: width*.1,
   },
 });
