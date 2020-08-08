@@ -47,6 +47,7 @@ export default class ArticleScreen extends Component {
       opening:false,
       closing:true,
       moodName: ['error','awful', 'down', 'alright', 'good', 'amazing'],
+      moodOpacity:[1,1,1,1,1],
       markedDates: {},
       day: {dateString:Moment(new Date()).format('YYYY-MM-DD')},
       today:{dateString:Moment(new Date()).format('YYYY-MM-DD')},
@@ -61,6 +62,20 @@ export default class ArticleScreen extends Component {
           opening:true
         });
       }
+      }
+
+      moodPressed (mood) {
+        let tempMoodOpacity = this.state.moodOpacity;
+        this.setState({entryRating:(mood + 1)});
+        for (let i = 0; i < 5; i++){
+          if (i==mood){
+            tempMoodOpacity[i] = 1;
+          }else{
+            tempMoodOpacity[i] = .5;
+          }
+        }
+        console.log(tempMoodOpacity)
+        this.setState({moodOpacity:tempMoodOpacity})
       }
 
     async close(){
@@ -320,15 +335,14 @@ export default class ArticleScreen extends Component {
       let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
         <Icon
-          //key={i.toString()}
           name={moodIcons[i]}
           type='material'
           color='#FFFFFF'
           size={40}
-          onPress={() => this.setState({entryRating:(i + 1)})}
+          onPress={() => this.moodPressed(i)}
           containerStyle={[
             styles.moodButton,
-            { backgroundColor: color },
+            { backgroundColor: color, opacity:this.state.moodOpacity[i]},
           ]}></Icon>
       );
     });
