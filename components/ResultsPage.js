@@ -42,6 +42,7 @@ export default class ResultsPage extends Component {
     Animated.timing(this.slideAnim, {
       toValue: 0,
       duration: 500,
+      useNativeDriver: true,
     }).start();
   }
 
@@ -114,10 +115,12 @@ export default class ResultsPage extends Component {
           </Text>
         </View> 
         <Animated.View
-          top={this.slideAnim}
-          height="100%"
-          width="100%"
-          position="absolute"
+          style={{
+            transform: [{ translateY: this.slideAnim }],
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+          }}
         >
           <ScrollView ref={this.scroll} showsVerticalScrollIndicator={false}>
             <View paddingTop={200}>

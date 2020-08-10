@@ -166,7 +166,8 @@ export default class ProfileScreen extends Component {
   _moveScrollBar = (event) => {
     Animated.timing(this.state.scrollBarValue, {
       toValue: (event.nativeEvent.contentOffset.x*(width-mainPadding*2)/width)/2,
-      duration: 0
+      duration: 0,
+      useNativeDriver: true,
     }).start();
 
   };
@@ -210,11 +211,13 @@ export default class ProfileScreen extends Component {
     Animated.timing(checkpointDayOpacity, {
       toValue: 0.5,
       duration,
+      useNativeDriver: true,
     }).start();
     setTimeout(() => {
       Animated.timing(checkpointDayOpacity, {
         toValue: 1,
         duration,
+        useNativeDriver: true,
       }).start();
     }, duration);
   }

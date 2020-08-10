@@ -36,6 +36,7 @@ export default class Dropdown extends Component {
       this.animHeight,
       {
         toValue: endHeight,
+        useNativeDriver: false,
       },
     ).start(() => {
       if (isOpen) {

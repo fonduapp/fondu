@@ -46,7 +46,6 @@ export default class HomeScreen extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      scrollBarValue: new Animated.Value(0),
       assessmentNotif: false, // toggle to determine whether assessment is ready
       initialAssessReady: true,
       initialAssessTaken: false,
@@ -329,14 +328,6 @@ export default class HomeScreen extends Component {
     });
   }
 
-  _moveScrollBar = (event) => {
-    Animated.timing(this.state.scrollBarValue, {
-      toValue: (event.nativeEvent.contentOffset.x*(width-mainPadding*2)/width)/2,
-      duration: 0
-    }).start();
-
-  };
-
   getDate() {
     const date = new Date();
     return `${date.getFullYear()}-${1+date.getMonth()}-${date.getDate()}`;
@@ -469,7 +460,7 @@ export default class HomeScreen extends Component {
                   {this.state.recommendedArea.toUpperCase()}
                 </Text>
               </View>
-              <ScrollView
+              <Animated.ScrollView
                 style={styles.container}
                 contentContainerStyle={[styles.contentContainer,{paddingLeft: (moduleMargin - moduleSpace/2), paddingRight: (moduleMargin - moduleSpace/2)}]}
                 horizontal= {true}
@@ -478,7 +469,8 @@ export default class HomeScreen extends Component {
                 snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
-                onScroll={Animated.event([
+                onScroll={Animated.event(
+                  [
                     {
                       nativeEvent: {
                         contentOffset: {
@@ -486,8 +478,10 @@ export default class HomeScreen extends Component {
                         }
                       }
                     }
-                  ])}
-                  scrollEventThrottle={1}
+                  ],
+                  { useNativeDriver: true }
+                )}
+                scrollEventThrottle={1}
                 ref={(node) => this.scroll = node}
                 >
 
@@ -555,7 +549,7 @@ export default class HomeScreen extends Component {
                                unlockReview={unlockReview}
                 />
 
-              </ScrollView>
+              </Animated.ScrollView>
             </View>
           </View>
     );

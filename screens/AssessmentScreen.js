@@ -366,15 +366,18 @@ export default class AssessmentScreen extends Component{
                   snapToAlignment={"center"}
                   decelerationRate="fast"
                   showsHorizontalScrollIndicator={false}
-                  onScroll={Animated.event([
-                    {
-                      nativeEvent: {
-                        contentOffset: {
-                          x: scrollX
+                  onScroll={Animated.event(
+                    [
+                      {
+                        nativeEvent: {
+                          contentOffset: {
+                            x: scrollX
+                          }
                         }
                       }
-                    }
-                  ])}
+                    ],
+                    { useNativeDriver: false }
+                  )}
                   scrollEventThrottle={1}
                   >
               {tips.map((tip, index)=> (
