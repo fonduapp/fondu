@@ -20,6 +20,8 @@ import {textStyle} from '../styles/text.style.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
 import host from '../constants/Server.js';
 import ResultsPage from '../components/ResultsPage.js';
+import SetCheckpointDayPage from '../components/SetCheckpointDayPage';
+import { longDayNames } from '../constants/Date';
 
 const { width } = Dimensions.get('window');
 
@@ -49,6 +51,7 @@ export default class AssessmentScreen extends Component{
       recBehaviors: [],
       allAreas: [],
       allBehaviors: [],
+      checkpointDay: 'Sunday',
     }
     this.assessmentScreen.bind(this);
     navigation.state.params.assessmentComplete.bind(this);
@@ -179,6 +182,10 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen: 'tutorial'})
   }
 
+  _seeSetCheckpointDay() {
+    this.setState({ screen: 'setCheckpointDay' });
+  }
+
   finishOnPressNext = () => {
     const { assessmentType } = this.state;
     switch (assessmentType) {
@@ -192,7 +199,7 @@ export default class AssessmentScreen extends Component{
     // TODO: server POST requests
     const { assessmentType } = this.state;
     if (assessmentType === 'initial') {
-      this._seeTutorial();
+      this._seeSetCheckpointDay();
     } else {
       this._exitAssessment();
     }
@@ -332,6 +339,44 @@ export default class AssessmentScreen extends Component{
             onPressNewBehavior={changeRecBehavior}
             focusList={allAreas}
             behaviorList={allBehaviors}
+          />
+        );
+      case 'setCheckpointDay':
+        const onPressCheckpointDay = (checkpointDay) => {
+          this.setState({ checkpointDay });
+        };
+
+        const setAssessDay = async (assessDay) => {
+          const { authToken, userId } = await _getAuthTokenUserId();
+
+          const data = {
+            userId,
+            authToken,
+            assessDay,
+          };
+
+          fetch(`http://${host}:3000/setAssessDay`, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          }).catch(console.error);
+
+          this._exitAssessment();
+        };
+
+        const setCheckpointDayOnPressNext = () => {
+          setAssessDay(longDayNames.indexOf(this.state.checkpointDay));
+        };
+
+        return (
+          <SetCheckpointDayPage
+            styles={styles}
+            onPressCheckpointDay={onPressCheckpointDay}
+            selectedDay={this.state.checkpointDay}
+            onPressNext={setCheckpointDayOnPressNext}
           />
         );
       case 'tutorial':

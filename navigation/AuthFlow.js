@@ -24,7 +24,7 @@ import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import host from '../constants/Server.js';
 import { _getAuthTokenUserId } from '../constants/Helper.js'
-
+import StyledButtonGroup from '../components/StyledButtonGroup';
 
 class LandingScreen extends React.Component {
   static navigationOptions = {
@@ -447,6 +447,7 @@ class RelationshipStatusScreen extends React.Component {
             This information can be changed later
           </Text>
           <StyledButtonGroup
+            containerStyle={styles.buttonGroupContainer}
             onPress={onPressRelationshipStatus}
             selectedIndex={selectedIndex}
             buttons={['Single', 'In a relationship', 'Other']}
@@ -558,6 +559,7 @@ class WeeklyGoalScreen extends React.Component {
             This information can be changed later
           </Text>
           <StyledButtonGroup
+            containerStyle={styles.buttonGroupContainer}
             onPress={onPressWeeklyGoal}
             selectedIndex={selectedIndex}
             buttons={[
@@ -594,6 +596,16 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     alignSelf: 'stretch',
+  },
+  buttonGroupContainer: {
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    width: '130%',
+    marginTop: '5%',
+    marginBottom: '20%',
   },
   footer: {
     alignItems: 'center',
@@ -651,82 +663,6 @@ const StyledInput = (props) => {
         { ...rest }
       />
       {!renderErrorAbove && errorComponent}
-    </View>
-  );
-};
-
-const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
-  const textStyle = (index) => ({
-    fontSize: 14,
-    color: theme.TEXT_COLOR_2,
-    fontFamily: 'poppins-bold',
-    textTransform: 'uppercase',
-    opacity: selectedIndex < 0 || selectedIndex === index ? 1.0 : 0.5,
-  });
-  return (
-    <View
-      style={{
-        alignSelf: 'center',
-        backgroundColor: theme.SECONDARY_COLOR,
-        borderRadius: 25,
-        paddingHorizontal: '15%',
-        paddingVertical: '5%',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        width: '130%',
-        marginTop: '5%',
-        marginBottom: '20%',
-      }}
-    >
-      {buttons.map((button, i) => (
-        <View
-          key={i}
-          style={{
-            height: 40,
-            alignItems: 'center',
-            borderColor: theme.TRANSLUCENT_GRAY,
-            ...(i !== buttons.length - 1 ? { borderBottomWidth: 1 } : []),
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => onPress(i)}
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              borderRadius: 20,
-              width: '115%',
-              paddingHorizontal: '7%',
-              backgroundColor: 'transparent',
-              ...(selectedIndex === i ? {
-                backgroundColor: 'white',
-                elevation: 5,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.8,
-                shadowRadius: 2,
-              } : []),
-            }}
-          >
-            <View style={{ flexDirection: 'row' }}>
-              <Text style={textStyle(i)}>
-                {button.left ? button.left : button}
-              </Text>
-              {button.right && (
-                <Text style={{
-                  flex: 1,
-                  textAlign: 'right',
-                  ...textStyle(i),
-                }}>
-                  {button.right}
-                </Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-      ))}
     </View>
   );
 };
