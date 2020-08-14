@@ -38,7 +38,7 @@ const StyledButtonGroup = (props) => {
           outerContainer: {
             paddingTop: i === 0 ? '5%' : 0,
             paddingBottom: i === buttons.length - 1 ? '5%' : 0,
-            paddingHorizontal: '15%',
+            paddingHorizontal: '11.5%',
             backgroundColor: addEmphasisArray && addEmphasisArray[i]
               ? emphasisColor
               : 'transparent',
@@ -46,15 +46,17 @@ const StyledButtonGroup = (props) => {
           buttonContainer: {
             height: 40,
             alignItems: 'center',
-            borderColor: theme.TRANSLUCENT_GRAY,
+            borderColor: i < selectedIndex - 1 || i > selectedIndex
+              ? theme.TRANSLUCENT_GRAY
+              : 'transparent',
             ...(i !== buttons.length - 1 ? { borderBottomWidth: 1 } : []),
           },
           button: {
             flex: 1,
             justifyContent: 'center',
             borderRadius: 20,
-            width: '115%',
-            paddingHorizontal: '7%',
+            width: '120%',
+            paddingHorizontal: '8.5%',
             backgroundColor: 'transparent',
             ...(selectedIndex === i
               ? {
