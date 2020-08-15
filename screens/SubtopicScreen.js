@@ -13,7 +13,7 @@ import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
 import { StackNavigator } from 'react-navigation';
 import {textStyle} from '../styles/text.style.js';
-import { _getAuthTokenUserId, getMatch } from '../constants/Helper.js'
+import { _getAuthTokenUserId, getMatch } from '../utils/Helper.js'
 
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;

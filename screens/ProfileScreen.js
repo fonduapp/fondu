@@ -20,7 +20,7 @@ import ProgressBar from '../components/ProgressBar';
 import { Icon, Avatar } from 'react-native-elements';
 import {LineChart} from 'react-native-chart-kit';
 import host from '../constants/Server.js';
-import { _getAuthTokenUserId, getIcon } from '../constants/Helper.js';
+import { _getAuthTokenUserId, getIcon } from '../utils/Helper.js';
 import { shortDayNames } from '../constants/Date.js';
 
 const { width } = Dimensions.get('window');

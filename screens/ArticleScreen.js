@@ -8,7 +8,7 @@ import ReferencePopUp from '../components/ReferencePopUp';
 import ReportProbPopUp from '../components/ReportProbPopUp';
 import InfoButton from '../components/InfoButton';
 
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+import { _getAuthTokenUserId } from '../utils/Helper.js'
 import host from '../constants/Server.js';
 import {Icon} from 'react-native-elements';
 
@@ -26,7 +26,7 @@ import {
   Dimensions,
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
-import { createISC, getIcon, renderText, italicize } from '../constants/Helper.js'
+import { createISC, getIcon, renderText, italicize } from '../utils/Helper.js'
 
 
 //import theme from '../styles/theme.style.js';

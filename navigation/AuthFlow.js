@@ -23,7 +23,7 @@ import PopUp from '../components/PopUp.js';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import host from '../constants/Server.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+import { _getAuthTokenUserId } from '../utils/Helper.js'
 import StyledButtonGroup from '../components/StyledButtonGroup';
 
 class LandingScreen extends React.Component {

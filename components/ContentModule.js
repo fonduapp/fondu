@@ -4,9 +4,9 @@ import theme from '../styles/theme.style.js';
 import {textStyle} from '../styles/text.style.js';
 import { Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
-import { _getAuthTokenUserId } from '../constants/Helper.js';
+import { _getAuthTokenUserId } from '../utils/Helper.js';
 import host from '../constants/Server.js';
-import { renderText, getIcon } from '../constants/Helper.js'
+import { renderText, getIcon } from '../utils/Helper.js'
 import { withNavigation } from 'react-navigation';
 import { longDayNames, shortMonthNames } from '../constants/Date.js';
 

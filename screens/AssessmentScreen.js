@@ -17,7 +17,7 @@ import { Button, Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
 import ProgressNavBar from '../components/NavBar';
 import {textStyle} from '../styles/text.style.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+import { _getAuthTokenUserId } from '../utils/Helper.js'
 import host from '../constants/Server.js';
 import ResultsPage from '../components/ResultsPage.js';
 import SetCheckpointDayPage from '../components/SetCheckpointDayPage';

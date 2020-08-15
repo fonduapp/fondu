@@ -3,7 +3,7 @@ import { Text, Dimensions, TouchableOpacity, View, StyleSheet } from 'react-nati
 import ReferencePopUp from '../components/ReferencePopUp';
 import {textStyle} from '../styles/text.style.js';
 import {Icon} from 'react-native-elements';
-import { createISC, renderText} from '../constants/Helper.js'
+import { createISC, renderText} from '../utils/Helper.js'
 
 
 

@@ -28,7 +28,7 @@ import ProgressBar from '../components/ProgressBar';
 import ModuleProgressBar from '../components/ModuleProgressBar';
 import { SafeAreaView } from 'react-navigation';
 import host from '../constants/Server.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+import { _getAuthTokenUserId } from '../utils/Helper.js'
 import Loader from '../components/Loader';
 
 

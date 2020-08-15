@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Modal from 'react-native-modal';
 import Collapsible from 'react-native-collapsible';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
+import { _getAuthTokenUserId } from '../utils/Helper.js'
 import {textStyle} from '../styles/text.style.js';
 import host from '../constants/Server.js';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
