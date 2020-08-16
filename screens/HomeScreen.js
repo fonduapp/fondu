@@ -117,7 +117,7 @@ export default class HomeScreen extends Component {
     this.areaLevel = {}
 
     //relationship level
-    const RelationshipInfoFetch = fetch('GET', 'getRelationship')
+    const relationshipInfoFetch = fetch('GET', 'getRelationship')
       .then((responseJson) => {
         //set relationship info
 
@@ -140,36 +140,36 @@ export default class HomeScreen extends Component {
     //TODO: xp progress
 
     //areas and area level and xp
-    fetch('GET', 'allAreas')
-    .then(async (responseJson)=>{
-      this.props.navigation.setParams({
-        allAreas: responseJson,
-      });
-      
-        await Promise.all(
-        responseJson.map((area, key)=>
-        {
-          const areaId = area["area_id"]
-          return fetch('GET', 'areaLevel', { areaId })
-            .then((responseJson)=> {
-              
-              this.areaLevel[areaId] = responseJson
-            })
-            .catch(console.error)
-
-        }
-        )
-      ).then(()=>
-      {
+    const areasFetch = fetch('GET', 'allAreas')
+      .then(async (responseJson)=>{
         this.props.navigation.setParams({
-          areaLevels: this.areaLevel
-      });        
+          allAreas: responseJson,
+        });
+
+        await Promise.all(
+          responseJson.map((area, key)=>
+            {
+              const areaId = area["area_id"]
+              return fetch('GET', 'areaLevel', { areaId })
+                .then((responseJson)=> {
+
+                  this.areaLevel[areaId] = responseJson
+                })
+                .catch(console.error)
+
+            }
+          )
+        ).then(()=>
+          {
+            this.props.navigation.setParams({
+              areaLevels: this.areaLevel
+            });        
+          })
+
       })
+      .catch(console.error);
 
-    })
-    .catch(console.error);
-
-
+    return Promise.all([relationshipInfoFetch, areasFetch]);
   }
 
   fetchAssessDate() {
