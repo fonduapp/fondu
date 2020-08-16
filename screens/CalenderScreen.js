@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import Modal from 'react-native-modal';
 import Collapsible from 'react-native-collapsible';
-import { _getAuthTokenUserId } from '../utils/Helper.js'
 import {textStyle} from '../styles/text.style.js';
-import host from '../constants/Server.js';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import {Icon} from 'react-native-elements';
 import Moment from 'moment';
@@ -21,9 +19,7 @@ import {
   View,
   Dimensions,
 } from 'react-native';
-
-var originalFetch = require('isomorphic-fetch');
-var fetch = require('fetch-retry')(originalFetch);
+import fetch from '../utils/Fetch';
 
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
@@ -39,8 +35,6 @@ export default class ArticleScreen extends Component {
   constructor(props){
     super(props);
     this.state = {
-      userId:'',
-      authToken:'',
       isCollapsed:true,
       screen:'closed',
       entryRating:0,
@@ -78,7 +72,7 @@ export default class ArticleScreen extends Component {
         this.setState({moodOpacity:tempMoodOpacity})
       }
 
-    async close(){
+    close(){
       if (this.state.entryRating != 0){
         const _selectedDay = this.state.day.dateString;
         let marked = true;
@@ -90,20 +84,12 @@ export default class ArticleScreen extends Component {
         // Reading: https://davidwalsh.name/merge-objects
         this.updateDate(_selectedDay, this.state.entry, this.state.entryRating);
         const data ={
-          userId: this.state.userId,
-          authToken: this.state.authToken,
           entryDate: (this.state.day).dateString,
           entry:this.state.entry,
           entryRating:this.state.entryRating,
         };
-        fetch('http://'+host+':3000/writeEntry/', {
-              method: 'POST',
-              headers: {
-                Accept: 'application/json',
-                        'Content-Type': 'application/json'
-              },
-             body: JSON.stringify(data)
-          })
+
+        fetch('POST', 'writeEntry', data);
       }
       this.setState({
         closing:true,
@@ -149,11 +135,6 @@ export default class ArticleScreen extends Component {
     };
 
     async componentDidMount(){
-        const {authToken, userId} = await _getAuthTokenUserId()
-        this.setState({
-          userId:userId,
-          authToken:authToken,
-        })
         var currDate = new Date();
         const month = JSON.stringify(currDate.getMonth()+1);
         const year = JSON.stringify(currDate.getFullYear());
@@ -161,15 +142,7 @@ export default class ArticleScreen extends Component {
       }
 
       async fetchMonth(month,year){
-        let url = 'http://192.241.153.104:3000/monthEntries/'+this.state.userId+'/'+this.state.authToken+'/' + month + '/' + year;
-        const response = await fetch(url, {
-              method: 'GET',
-              headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json',
-              }
-          })
-          .then((response) => response.json())
+        const response = await fetch('GET', 'monthEntries', { month, year })
           .then((responseJson) => {
             responseJson.map((entry, i)=>{
               this.updateDate((entry["entry_date"]).substring(0,10),entry['entry'], entry['entry_rating'])
@@ -181,7 +154,7 @@ export default class ArticleScreen extends Component {
       }
 
 
-      async getEntry(day){
+      getEntry(day){
         var _markedDate = this.state.markedDates[day.dateString]
         this.setState({
           entryRating:_markedDate['entryRating'],

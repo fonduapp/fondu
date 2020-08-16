@@ -19,13 +19,11 @@ import { _getAuthTokenUserId } from '../utils/Helper.js'
 import host from '../constants/Server.js';
 import {textStyle} from '../styles/text.style.js';
 import Loader from '../components/Loader';
-
+import fetch from '../utils/Fetch';
 
 
 const { width, height } = Dimensions.get('window')
 let jsonData = []
-var originalFetch = require('isomorphic-fetch');
-var fetch = require('fetch-retry')(originalFetch);
 
 export default class AssessmentQuestions extends Component {
   constructor(props){
@@ -108,32 +106,16 @@ export default class AssessmentQuestions extends Component {
     });
   }
 
-  async fetchAndAddQuestions(request, behaviorId) {
-    const {authToken, userId} = await _getAuthTokenUserId();
-    let path = `http://${host}:3000/${request}/${userId}/${authToken}`;
-    if (!!behaviorId) {
-      path += `/${behaviorId}`;
-    }
-    console.log('fetching ', path);
-    //get questions
-    return fetch(path, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      //convert json string to json object
-      jsonData = jsonData.concat(
-        responseJson.map(row => (row.answers = JSON.parse(row.answers), row))
-      );
+  fetchAndAddQuestions(request, behaviorId) {
+    return fetch('GET', request, !!behaviorId ? { behaviorId } : {})
+      .then((responseJson) => {
+        //convert json string to json object
+        jsonData = jsonData.concat(
+          responseJson.map(row => (row.answers = JSON.parse(row.answers), row))
+        );
 
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      })
+      .catch(console.error);
   }
 
   shuffleArray(arr){
@@ -159,39 +141,34 @@ export default class AssessmentQuestions extends Component {
     }
   }
 
-  async check(){
+  check(){
 
     this.setState({qFeedback: true});
     this.props.questionFinish(this.state.options[this.state.selectedOption].exp===10, true);
     let request;
+    let idParam;
     switch(this.props.assessmentType) {
       case 'review':
       case 'initial':
         request = 'addExp';
+        idParam = { questionId: this.state.questionId };
         break;
       case 'learning':
         request = 'addExpLearning';
+        idParam = { behaviorId: this.state.behaviorId };
         break;
       default:
         console.error('unknown assessment type');
     }
+
+    const params = {
+      ...idParam,
+      exp: this.state.options[this.state.selectedOption].exp,
+    };
+
     //send answer to the db
-    fetch(`http://${host}:3000/${request}`, {
-      method: 'POST',
-      headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        'userId': this.state.userId,
-        'authToken': this.state.authToken,
-        'questionId': this.state.questionId,
-        'exp': this.state.options[this.state.selectedOption].exp,
-      })
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    fetch('POST', request, params)
+      .catch(console.error);
 
   }
   next(){

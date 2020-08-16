@@ -22,9 +22,8 @@ import {textStyle} from '../styles/text.style.js';
 import PopUp from '../components/PopUp.js';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
-import host from '../constants/Server.js';
-import { _getAuthTokenUserId } from '../utils/Helper.js'
 import StyledButtonGroup from '../components/StyledButtonGroup';
+import fetch from '../utils/Fetch.js';
 
 class LandingScreen extends React.Component {
   static navigationOptions = {
@@ -115,43 +114,32 @@ class SignInScreen extends React.Component {
     );
   }
 
-  _signInAsync = async () => {
+  _signInAsync = () => {
 
     const { email, password } = this.state;
     const emailLowerCase = email.toLowerCase();
     let data={"email": emailLowerCase,
       "password": password};
 
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/login',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      console.log(responseJson);
-      if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
-        AsyncStorage.setItem('authToken', responseJson.authToken);
-        AsyncStorage.setItem('userId', responseJson.userId.toString());
-        this.props.navigation.navigate('Main');
-      } else {
-        // error
-        if (
-          responseJson.error === 'Email doesn\'t exist'
-          || responseJson.error === 'Incorrect password'
-        ) {
-          this.setState({ invalidLogin: true });
+    return fetch('POST', 'login', data)
+      .then((responseJson) => {
+        console.log(responseJson);
+        if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
+          AsyncStorage.setItem('authToken', responseJson.authToken);
+          AsyncStorage.setItem('userId', responseJson.userId.toString());
+          this.props.navigation.navigate('Main');
         } else {
-          // unknown error
-        }
-    }})
-    .catch((error) => {
-      console.error(error);
-    });
+          // error
+          if (
+            responseJson.error === 'Email doesn\'t exist'
+            || responseJson.error === 'Incorrect password'
+          ) {
+            this.setState({ invalidLogin: true });
+          } else {
+            // unknown error
+          }
+      }})
+      .catch(console.error);
 
 
   };
@@ -242,7 +230,7 @@ class SignUpScreen extends React.Component {
     this.setState({ badConfirmPass: !this.isConfirmPassValid(password, confirmPass) });
   }
 
-  _signUpAsync = async () => {
+  _signUpAsync = () => {
     const {
       name,
       email,
@@ -256,34 +244,23 @@ class SignUpScreen extends React.Component {
       "password": password,
     };
 
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/signup',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      console.log(responseJson);
-      if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
-        AsyncStorage.setItem('authToken', responseJson.authToken);
-        AsyncStorage.setItem('userId', responseJson.userId.toString());
-        this.props.navigation.navigate('RelationshipStatus');
-      } else {
-        // error
-        if (responseJson.code === 'ER_DUP_ENTRY') {
-          this.setState({ duplicateEmail: true });
+    return fetch('POST', 'signup', data)
+      .then((responseJson) => {
+        console.log(responseJson);
+        if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
+          AsyncStorage.setItem('authToken', responseJson.authToken);
+          AsyncStorage.setItem('userId', responseJson.userId.toString());
+          this.props.navigation.navigate('RelationshipStatus');
         } else {
-          // unknown error
+          // error
+          if (responseJson.code === 'ER_DUP_ENTRY') {
+            this.setState({ duplicateEmail: true });
+          } else {
+            // unknown error
+          }
         }
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      })
+      .catch(console.error);
 
   };
 
@@ -400,28 +377,11 @@ class RelationshipStatusScreen extends React.Component {
     }
   }
 
-  _relationshipStatusAsync = async () => {
+  _relationshipStatusAsync = () => {
     const relationshipStatus = this.getRelationshipStatus();
-    const { authToken, userId } = await _getAuthTokenUserId();
 
-    let data = {
-      "userId": userId,
-      "authToken": authToken,
-      "relationshipStatus": relationshipStatus,
-    };
-
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/updateRelationshipStatus',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    return fetch('POST', 'updateRelationshipStatus', { relationshipStatus })
+      .catch(console.error);
   };
 
   render() {
@@ -491,28 +451,11 @@ class WeeklyGoalScreen extends React.Component {
     }
   }
 
-  _intervalAsync = async () => {
-    const interval = this.getInterval();
-    const { authToken, userId } = await _getAuthTokenUserId();
+  _intervalAsync = () => {
+    const weeklyNum = this.getInterval();
 
-    let data = {
-      "userId": userId,
-      "authToken": authToken,
-      "weeklyNum": interval,
-    };
-
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/updateWeeklyNum',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    return fetch('POST', 'updateWeeklyNum', { weeklyNum })
+      .catch(console.error);
   };
 
   render() {

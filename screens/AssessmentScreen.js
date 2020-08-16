@@ -17,18 +17,12 @@ import { Button, Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
 import ProgressNavBar from '../components/NavBar';
 import {textStyle} from '../styles/text.style.js';
-import { _getAuthTokenUserId } from '../utils/Helper.js'
-import host from '../constants/Server.js';
 import ResultsPage from '../components/ResultsPage.js';
 import SetCheckpointDayPage from '../components/SetCheckpointDayPage';
 import { longDayNames } from '../constants/Date';
+import fetch from '../utils/Fetch';
 
 const { width } = Dimensions.get('window');
-
-var originalFetch = require('isomorphic-fetch');
-var fetch = require('fetch-retry')(originalFetch);
-
-
 
 export default class AssessmentScreen extends Component{
     constructor(props){
@@ -78,28 +72,20 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen: 'streak'})
   }
 
-  async _seeResults(){
-    const {authToken, userId} = await _getAuthTokenUserId();
-
-    fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => response.json())
+  _seeResults(){
+    fetch('GET', 'recommendedArea')
       .then(({
         area_id: areaId,
         area_name: recArea,
       }) => {
         this.updateArea({ recArea, areaId });
-        this.fetchAllAreas({ authToken, userId });
+        this.fetchAllAreas();
         this.setState({ screen: 'result' });
       })
       .catch(console.error);
   }
 
-  async updateArea(recAreaId) {
+  updateArea(recAreaId) {
     const { recArea, areaId } = recAreaId;
 
     this.setState({
@@ -108,42 +94,24 @@ export default class AssessmentScreen extends Component{
       recBehaviors: [],
     });
 
-    const authTokenUserId = await _getAuthTokenUserId();
-
-    this.fetchSuggestedBehaviors(areaId, authTokenUserId);
-    this.fetchAllBehaviors(areaId, authTokenUserId);
+    this.fetchSuggestedBehaviors(areaId);
+    this.fetchAllBehaviors(areaId);
   }
 
-  fetchSuggestedBehaviors(areaId, authTokenUserId) {
-    const { authToken, userId } = authTokenUserId;
-
-    return fetch(`http://${host}:3000/suggestedBehaviors/${userId}/${authToken}/${areaId}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => response.json())
+  fetchSuggestedBehaviors(areaId) {
+    return fetch('GET', 'suggestedBehaviors', { areaId })
       .then((responseJson) => {
         this.setState({
-          recBehaviors: Object.values(responseJson).map((val) => val.name),
+          recBehaviors: Object.values(responseJson).map((val) => val.behavior_name),
         });
       })
       .catch(console.error);
   }
 
-  fetchAllBehaviors(areaId, authTokenUserId) {
+  fetchAllBehaviors(areaId) {
     this.setState({ allBehaviors: [] });
 
-    const { authToken, userId } = authTokenUserId;
-
-    return fetch(`http://${host}:3000/allBehaviors/${userId}/${authToken}/${areaId}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => response.json())
+    return fetch('GET', 'allBehaviors', { areaId })
       .then((responseJson) => {
         this.setState({
           allBehaviors: responseJson.map((behavior) => behavior.behavior_name),
@@ -152,16 +120,8 @@ export default class AssessmentScreen extends Component{
       .catch(console.error);
   }
 
-  fetchAllAreas(authTokenUserId) {
-    const { authToken, userId } = authTokenUserId;
-
-    fetch(`http://${host}:3000/allAreas/${userId}/${authToken}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then((response) => response.json())
+  fetchAllAreas() {
+    fetch('GET', 'allAreas')
       .then((responseJson) => {
         const nameIdPairs = responseJson.map(({ area_id, area_name }) => [area_name, area_id]);
         this.setState({
@@ -346,23 +306,9 @@ export default class AssessmentScreen extends Component{
           this.setState({ checkpointDay });
         };
 
-        const setAssessDay = async (assessDay) => {
-          const { authToken, userId } = await _getAuthTokenUserId();
-
-          const data = {
-            userId,
-            authToken,
-            assessDay,
-          };
-
-          fetch(`http://${host}:3000/setAssessDay`, {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-          }).catch(console.error);
+        const setAssessDay = (assessDay) => {
+          fetch('POST', 'setAssessDay', { assessDay })
+            .catch(console.error);
 
           this._exitAssessment();
         };

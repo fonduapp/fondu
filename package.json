@@ -26,8 +26,10 @@
     "expo-asset": "~8.1.7",
     "expo-constants": "~9.1.1",
     "expo-font": "~8.2.1",
+    "expo-screen-orientation": "~1.1.1",
     "expo-web-browser": "~8.3.1",
     "fetch-retry": "^3.1.0",
+    "invariant": "^2.2.4",
     "moment": "^2.27.0",
     "react": "16.11.0",
     "react-dom": "16.11.0",
@@ -55,8 +57,7 @@
     "react-navigation": "^4.0.10",
     "react-navigation-stack": "~1.10.3",
     "react-navigation-tabs": "~2.6.2",
-    "react-transition-group": "^4.3.0",
-    "expo-screen-orientation": "~1.1.1"
+    "react-transition-group": "^4.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

@@ -9,7 +9,6 @@ import ReportProbPopUp from '../components/ReportProbPopUp';
 import InfoButton from '../components/InfoButton';
 
 import { _getAuthTokenUserId } from '../utils/Helper.js'
-import host from '../constants/Server.js';
 import {Icon} from 'react-native-elements';
 
 import {
@@ -27,7 +26,7 @@ import {
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
 import { createISC, getIcon, renderText, italicize } from '../utils/Helper.js'
-
+import fetch from '../utils/Fetch';
 
 //import theme from '../styles/theme.style.js';
 
@@ -86,19 +85,8 @@ export default class ArticleScreen extends Component {
     hideProbReport = () => {
       console.log("problem state" + this.state.report + "hello")
       if (this.state.report){
-          const data ={
-            userId: this.state.userId,
-            authToken: this.state.authToken,
-            report: this.state.report
-          };
-        fetch('http://'+host+':3000/report/', {
-                method: 'POST',
-                headers: {
-                  Accept: 'application/json',
-                          'Content-Type': 'application/json'
-                },
-               body: JSON.stringify(data)
-            })
+          fetch('POST', 'report', { report: this.state.report })
+            .catch(console.error);
         }
         this.setState({reportProb:false});
     }
@@ -115,12 +103,8 @@ export default class ArticleScreen extends Component {
       this.setState({buttonClosed:temp})
     }
 
-    async getArticle(userId, authToken, behaviorId){
-      const info_path = 'http://192.241.153.104:3000/behavior/'+userId+'/'+authToken+'/' + behaviorId;
-      const rarticle_path = 'http://192.241.153.104:3000/relatedBehaviors/'+userId+'/'+authToken+'/' + behaviorId;
-
-      return fetch(info_path)
-        .then((response)=>response.json())
+    getArticle(userId, authToken, behaviorId){
+      return fetch('GET', 'behavior', { behaviorId })
         .then((responseJson) =>{
           this.setState({
             article_title:responseJson.behavior_name,
@@ -138,8 +122,7 @@ export default class ArticleScreen extends Component {
           console.log('icons')
         })
         .then(()=>
-        fetch(rarticle_path)
-          .then((response)=>response.json())
+        fetch('GET', 'relatedBehaviors', { behaviorId })
           .then((response)=>JSON.parse(response['related_behaviors']))
           .then((responseJson) =>{
             this.setState({
@@ -161,7 +144,7 @@ export default class ArticleScreen extends Component {
       this.getArticle(userId,authToken,this.state.behaviorId)
 
   }
-  async componentDidUpdate(){
+  componentDidUpdate(){
     if (this.state.newPage == true){
       this.getArticle(this.state.userId,this.state.authToken,this.state.behaviorId)
       this.setState({newPage:false})
