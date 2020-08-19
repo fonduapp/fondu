@@ -12,16 +12,14 @@ import { ListItem, SearchBar} from 'react-native-elements';
 import theme from '../styles/theme.style.js';
 import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
-import { _getAuthTokenUserId,getMatch } from '../constants/Helper.js'
+import { getMatch } from '../utils/Helper.js'
 import {textStyle} from '../styles/text.style.js';
-
+import fetch from '../utils/Fetch';
 
 
 
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
-var originalFetch = require('isomorphic-fetch');
-var fetch = require('fetch-retry')(originalFetch);
 
 export default class ResourcesScreen extends React.Component{
 
@@ -65,10 +63,8 @@ export default class ResourcesScreen extends React.Component{
     return{headerTitle,headerTitleStyle}
   }
 
-  async componentDidMount(){
-    const {authToken, userId} = await _getAuthTokenUserId()
-    return fetch('http://192.241.153.104:3000/allAreas/'+userId+'/'+authToken)
-      .then((response)=>response.json())
+  componentDidMount(){
+    return fetch('GET', 'allAreas')
       .then((responseJson) =>{
         this.setState({
           isLoading: false,
@@ -79,10 +75,9 @@ export default class ResourcesScreen extends React.Component{
         console.log(error)
       });
   }
-  async componentDidUpdate(){
-    const {authToken, userId} = await _getAuthTokenUserId()
+  componentDidUpdate(){
     if (this.state.isSearching && this.state.prev != this.state.search){
-      this.getMatch(userId,authToken,this.state.search)
+      this.getMatch(this.state.search)
       this.setState({prev:this.state.search})
     }
   }

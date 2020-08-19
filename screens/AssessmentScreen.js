@@ -17,16 +17,12 @@ import { Button, Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
 import ProgressNavBar from '../components/NavBar';
 import {textStyle} from '../styles/text.style.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
-import host from '../constants/Server.js';
-
+import ResultsPage from '../components/ResultsPage.js';
+import SetCheckpointDayPage from '../components/SetCheckpointDayPage';
+import { longDayNames } from '../constants/Date';
+import fetch from '../utils/Fetch';
 
 const { width } = Dimensions.get('window');
-
-var originalFetch = require('isomorphic-fetch');
-var fetch = require('fetch-retry')(originalFetch);
-
-
 
 export default class AssessmentScreen extends Component{
     constructor(props){
@@ -46,6 +42,10 @@ export default class AssessmentScreen extends Component{
       recArea:'nothing',
       areaId: -1,
       behaviorId : navigation.getParam('behaviorId','none'),
+      recBehaviors: [],
+      allAreas: [],
+      allBehaviors: [],
+      checkpointDay: 'Sunday',
     }
     this.assessmentScreen.bind(this);
     navigation.state.params.assessmentComplete.bind(this);
@@ -72,52 +72,64 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen: 'streak'})
   }
 
-  async _seeResults(){
-    const {authToken, userId} = await _getAuthTokenUserId();
-
-    //find recommended area
-    console.log('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken)
-    fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      const {
+  _seeResults(){
+    fetch('GET', 'recommendedArea')
+      .then(({
         area_id: areaId,
         area_name: recArea,
-      } = responseJson;
-      this.setState({
-        areaId,
-        recArea,
-      });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-    this.setState({ screen:'result' })
+      }) => {
+        this.updateArea({ recArea, areaId });
+        this.fetchAllAreas();
+        this.setState({ screen: 'result' });
+      })
+      .catch(console.error);
   }
 
-  async seeSuggestedBehaviors(){
-    const {authToken, userId} = await _getAuthTokenUserId();
-    const { areaId } = this.state;
-    fetch(`http://${host}:3000/suggestedBehaviors/${userId}/${authToken}/${areaId}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(() => {
-      this.setState({ screen: 'suggestedBehaviors' });
-    })
-    .catch((error) => {
-      console.error(error);
+  updateArea(recAreaId) {
+    const { recArea, areaId } = recAreaId;
+
+    this.setState({
+      areaId,
+      recArea,
+      recBehaviors: [],
     });
+
+    this.fetchSuggestedBehaviors(areaId);
+    this.fetchAllBehaviors(areaId);
+  }
+
+  fetchSuggestedBehaviors(areaId) {
+    return fetch('GET', 'suggestedBehaviors', { areaId })
+      .then((responseJson) => {
+        this.setState({
+          recBehaviors: Object.values(responseJson).map((val) => val.behavior_name),
+        });
+      })
+      .catch(console.error);
+  }
+
+  fetchAllBehaviors(areaId) {
+    this.setState({ allBehaviors: [] });
+
+    return fetch('GET', 'allBehaviors', { areaId })
+      .then((responseJson) => {
+        this.setState({
+          allBehaviors: responseJson.map((behavior) => behavior.behavior_name),
+        });
+      })
+      .catch(console.error);
+  }
+
+  fetchAllAreas() {
+    fetch('GET', 'allAreas')
+      .then((responseJson) => {
+        const nameIdPairs = responseJson.map(({ area_id, area_name }) => [area_name, area_id]);
+        this.setState({
+          allAreas: responseJson.map((area) => area.area_name),
+          areaNameToId: Object.fromEntries(nameIdPairs),
+        });
+      })
+      .catch(console.error);
   }
 
   _exitAssessment(){
@@ -130,6 +142,10 @@ export default class AssessmentScreen extends Component{
     this.setState({ screen: 'tutorial'})
   }
 
+  _seeSetCheckpointDay() {
+    this.setState({ screen: 'setCheckpointDay' });
+  }
+
   finishOnPressNext = () => {
     const { assessmentType } = this.state;
     switch (assessmentType) {
@@ -140,13 +156,10 @@ export default class AssessmentScreen extends Component{
   };
 
   resultOnPressNext = () => {
-    this.seeSuggestedBehaviors();
-  };
-
-  suggestedBehaviorsOnPressNext = () => {
+    // TODO: server POST requests
     const { assessmentType } = this.state;
     if (assessmentType === 'initial') {
-      this._seeTutorial();
+      this._seeSetCheckpointDay();
     } else {
       this._exitAssessment();
     }
@@ -251,79 +264,66 @@ export default class AssessmentScreen extends Component{
         </View> 
         );
       case 'result':
-        const changeBehaviorTextStyle = {
-          ...textStyle.caption,
-          color: theme.TEXT_COLOR,
-          opacity: 0.5,
-          alignSelf: 'center',
+        const {
+          recArea,
+          recBehaviors,
+          areaNameToId,
+          allAreas,
+          allBehaviors,
+        } = this.state;
+
+        const changeRecArea = (recArea) => {
+          if (this.state.recArea !== recArea) {
+            this.updateArea({
+              recArea,
+              areaId: areaNameToId[recArea],
+            });
+          }
         };
-        const Component = (slideAnim) => (
-          <View style={styles.darkContainer}>
-            <View style={styles.startScreen} flex={1}>
-              <Text style={[textStyle.header, {color:theme.TEXT_COLOR, alignSelf:'flex-start'}]}>
-                Your Results
-              </Text>
-              <Text style={[textStyle.paragraph, {color:theme.TEXT_COLOR}]}>
-                Based on the results of this assessment, we have calculated areas that you should focus a bit more on and areas that you are already excelling at.
-              </Text>
-            </View> 
-            <Animated.View
-              top={slideAnim}
-              flex={3}
-            >
-              <View
-                position="absolute"
-                backgroundColor="white"
-                borderRadius={40}
-                width={'100%'}
-                height={500}
-                top={125}
-              />
-              <View alignItems="center" flex={1}>
-                <Image source={require("../assets/images/heart.png")} style={styles.mainImageContainer}/>
-                <Text style={[textStyle.subheader, {color:theme.TEXT_COLOR, opacity: 0.5}]}>
-                  YOUR RECOMMENDED FOCUS
-                </Text>
-                <Text style={[textStyle.header3, {color:theme.PRIMARY_COLOR_6, textAlign: 'center'}]}>
-                  {this.state.recArea}
-                </Text>
-              </View>
-              <View style={styles.nextButtonContainer}>
-                <Text style={changeBehaviorTextStyle}>
-                  Don't want to focus on this?
-                </Text>
-                <TouchableOpacity>
-                  <Text
-                    style={{
-                      ...changeBehaviorTextStyle,
-                      fontFamily: 'poppins-black',
-                      marginBottom: 10,
-                    }}
-                  >
-                    Choose another area
-                  </Text>
-                </TouchableOpacity>
-                <NextButton 
-                onPress={this.resultOnPressNext} 
-                title="NEXT >"/>
-              </View>
-            </Animated.View>
-          </View>
-        );
-        return <SlideAnimController Component={Component}/>
-      case 'suggestedBehaviors':
+
+        const changeRecBehavior = (index, recBehavior) => {
+          this.setState(({ recBehaviors: oldRecBehaviors }) => {
+            const newRecBehaviors = oldRecBehaviors.slice();
+            newRecBehaviors[index] = recBehavior;
+            return { recBehaviors: newRecBehaviors };
+          });
+        };
+
         return (
-          <View style={styles.darkContainer}>
-            <View style={styles.startScreen}>
-              {/*TODO*/}
-            </View>
-            <View style={styles.nextButtonContainer}>
-              <NextButton 
-                onPress={this.suggestedBehaviorsOnPressNext}
-                title="NEXT >"
-              />
-            </View>
-          </View>
+          <ResultsPage
+            styles={styles}
+            recArea={recArea}
+            onPressNext={this.resultOnPressNext}
+            recBehaviors={recBehaviors}
+            onPressNewFocus={changeRecArea}
+            onPressNewBehavior={changeRecBehavior}
+            focusList={allAreas}
+            behaviorList={allBehaviors}
+          />
+        );
+      case 'setCheckpointDay':
+        const onPressCheckpointDay = (checkpointDay) => {
+          this.setState({ checkpointDay });
+        };
+
+        const setAssessDay = (assessDay) => {
+          fetch('POST', 'setAssessDay', { assessDay })
+            .catch(console.error);
+
+          this._exitAssessment();
+        };
+
+        const setCheckpointDayOnPressNext = () => {
+          setAssessDay(longDayNames.indexOf(this.state.checkpointDay));
+        };
+
+        return (
+          <SetCheckpointDayPage
+            styles={styles}
+            onPressCheckpointDay={onPressCheckpointDay}
+            selectedDay={this.state.checkpointDay}
+            onPressNext={setCheckpointDayOnPressNext}
+          />
         );
       case 'tutorial':
         const tips = [
@@ -357,15 +357,18 @@ export default class AssessmentScreen extends Component{
                   snapToAlignment={"center"}
                   decelerationRate="fast"
                   showsHorizontalScrollIndicator={false}
-                  onScroll={Animated.event([
-                    {
-                      nativeEvent: {
-                        contentOffset: {
-                          x: scrollX
+                  onScroll={Animated.event(
+                    [
+                      {
+                        nativeEvent: {
+                          contentOffset: {
+                            x: scrollX
+                          }
                         }
                       }
-                    }
-                  ])}
+                    ],
+                    { useNativeDriver: false }
+                  )}
                   scrollEventThrottle={1}
                   >
               {tips.map((tip, index)=> (
@@ -490,29 +493,6 @@ export default class AssessmentScreen extends Component{
         }
       </View>
     );
-  }
-}
-
-class SlideAnimController extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      slideAnim: new Animated.Value(500),
-    };
-  }
-
-  componentDidMount() {
-    const { slideAnim } = this.state;
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 500,
-    }).start();
-  }
-
-  render() {
-    const { Component } = this.props;
-    const { slideAnim } = this.state;
-    return Component(slideAnim);
   }
 }
 

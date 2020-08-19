@@ -8,6 +8,10 @@ export const longDayNames = [
   'Saturday',
 ];
 
+export const longDayNamesStartingMonday = (
+  longDayNames.slice(1).concat([longDayNames[0]])
+);
+
 export const shortDayNames = longDayNames.map((day) => day.substring(0, 3));
 
 export const longMonthNames = [

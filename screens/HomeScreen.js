@@ -27,15 +27,11 @@ import {textStyle} from '../styles/text.style.js';
 import ProgressBar from '../components/ProgressBar';
 import ModuleProgressBar from '../components/ModuleProgressBar';
 import { SafeAreaView } from 'react-navigation';
-import host from '../constants/Server.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
 import Loader from '../components/Loader';
-
+import fetch from '../utils/Fetch';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 40;
-var originalFetch = require('isomorphic-fetch');
-var fetch = require('fetch-retry')(originalFetch);
 
 if (Platform.OS === 'android') {
   SafeAreaView.setStatusBarHeight(0);
@@ -46,7 +42,6 @@ export default class HomeScreen extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      scrollBarValue: new Animated.Value(0),
       assessmentNotif: false, // toggle to determine whether assessment is ready
       initialAssessReady: true,
       initialAssessTaken: false,
@@ -60,88 +55,48 @@ export default class HomeScreen extends Component {
     this.learningAssessComplete.bind(this)
   }
 
-  async fetchHomeInfo(){
-
-    const {authToken, userId} = await _getAuthTokenUserId()
-
-    //Get Streak
-    const streakFetch = fetch('http://' + host +':3000/streak/' + userId + '/' + authToken + '/' + this.getDate(),{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      this.props.navigation.setParams({
-        streak: responseJson.streak,
-      });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+  fetchHomeInfo(){
+    const streakFetch = fetch('GET', 'streak', { currentDate: this.getDate() })
+      .then((responseJson) => {
+        this.props.navigation.setParams({
+          streak: responseJson.streak,
+        });
+      })
+      .catch(console.error);
 
     //Get Recommended Area
     let recArea = 0;
-    const recAreaFetch = fetch('http://' + host +':3000/recommendedArea/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      this.setState({
-        recommendedArea: responseJson.area_name,
-      });
-      recArea = responseJson.area_id
+    const recAreaFetch = fetch('GET', 'recommendedArea')
+      .then((responseJson) => {
+        this.setState({
+          recommendedArea: responseJson.area_name,
+        });
+        recArea = responseJson.area_id
 
 
-          //Get Area Level
-          return fetch('http://' + host +':3000/areaLevel/' + userId + '/' + authToken+ '/' + recArea,{
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
-          })
-          .then((response) => response.json())
+        //Get Area Level
+        return fetch('GET', 'areaLevel', { areaId: recArea })
           .then((responseJson) => {
             this.setState({
               areaLevel: responseJson.area_level,
             });
           })
-          .catch((error) => {
-            console.error(error);
-          });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+          .catch(console.error);
+      })
+      .catch(console.error);
 
     //Get Recommended Behaviors
-    const behaviorFetch = fetch('http://' + host +':3000/currentBehaviors/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      this.setState({
-        recommendedBehaviors: JSON.parse(responseJson.behaviors_completed),
-      });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    const behaviorFetch = fetch('GET', 'currentBehaviors')
+      .then((responseJson) => {
+        this.setState({
+          recommendedBehaviors: JSON.parse(responseJson.behaviors_completed),
+        });
+      })
+      .catch(console.error);
 
-    const assessDateFetch = this.fetchAssessDate({ authToken, userId });
+    const assessDateFetch = this.fetchAssessDate();
 
-    const profileInfoFetch = this.fetchProfileInfo({ authToken, userId })
+    const profileInfoFetch = this.fetchProfileInfo()
 
     Promise.all([
       //streakFetch,
@@ -158,40 +113,26 @@ export default class HomeScreen extends Component {
 
   }
 
-  fetchProfileInfo(authTokenUserId){
-    const {
-      authToken,
-      userId,
-    } = authTokenUserId;
-
+  fetchProfileInfo(){
     this.areaLevel = {}
 
     //relationship level
-    const RelationshipInfoFetch = fetch(`http://${host}:3000/getRelationship/${userId}/${authToken}`,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      //set relationship info
+    const RelationshipInfoFetch = fetch('GET', 'getRelationship')
+      .then((responseJson) => {
+        //set relationship info
 
-      let paired = responseJson.length > 0
-      this.props.navigation.setParams({
-          paired: paired,
-      });
-      this.setState({paired : paired})
-      //if empty array, not paired
-      if(paired){
-        
-      }
+        let paired = responseJson.length > 0
+        this.props.navigation.setParams({
+            paired: paired,
+        });
+        this.setState({paired : paired})
+        //if empty array, not paired
+        if(paired){
+          
+        }
 
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      })
+      .catch(console.error);
 
     //TODO: total xp earned
 
@@ -199,14 +140,7 @@ export default class HomeScreen extends Component {
     //TODO: xp progress
 
     //areas and area level and xp
-    return fetch(`http://${host}:3000/allAreas/${userId}/${authToken}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
+    fetch('GET', 'allAreas')
     .then(async (responseJson)=>{
       this.props.navigation.setParams({
         allAreas: responseJson,
@@ -216,14 +150,7 @@ export default class HomeScreen extends Component {
         responseJson.map((area, key)=>
         {
           const areaId = area["area_id"]
-          return fetch(`http://${host}:3000/areaLevel/${userId}/${authToken}/${areaId}`, {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-              },
-            })
-            .then((response) => response.json())
+          return fetch('GET', 'areaLevel', { areaId })
             .then((responseJson)=> {
               
               this.areaLevel[areaId] = responseJson
@@ -245,64 +172,42 @@ export default class HomeScreen extends Component {
 
   }
 
-  fetchAssessDate(authTokenUserId) {
-    const {
-      authToken,
-      userId,
-    } = authTokenUserId;
-    return fetch(`http://${host}:3000/nextAssessDate/${userId}/${authToken}`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      const {
-        next_assess_date: nextAssessDate,
-      } = responseJson;
-      // append midnight to parse as local time instead of utc
-      this.nextAssessDate = new Date(nextAssessDate + 'T00:00:00'); 
-    })
-    .catch(console.error);
+  fetchAssessDate() {
+    return fetch('GET', 'nextAssessDate')
+      .then((responseJson) => {
+        const {
+          next_assess_date: nextAssessDate,
+        } = responseJson;
+        // append midnight to parse as local time instead of utc
+        this.nextAssessDate = new Date(nextAssessDate + 'T00:00:00'); 
+      })
+      .catch(console.error);
   }
 
-  async componentDidMount(){
+  componentDidMount(){
     //find initialAssessTaken
-
-    const {authToken, userId} = await _getAuthTokenUserId()
     let initialAssessTaken = false
 
     //Get whether user finished initial assessment
-    fetch('http://'+host+':3000/finishedInitial/' + userId + '/' + authToken,{
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      const {
-        finished_initial: finishedInitialDate,
-      } = responseJson;
-      const finishedInitial = finishedInitialDate !== null;
-      this.setState({initialAssessTaken: finishedInitial});
-      this.props.navigation.setParams({
-        initialAssessTaken: finishedInitial,
-      });
-      this.setState({initialAssessReady:true});
+    fetch('GET', 'finishedInitial')
+      .then((responseJson) => {
+        const {
+          finished_initial: finishedInitialDate,
+        } = responseJson;
+        const finishedInitial = finishedInitialDate !== null;
+        this.setState({initialAssessTaken: finishedInitial});
+        this.props.navigation.setParams({
+          initialAssessTaken: finishedInitial,
+        });
+        this.setState({initialAssessReady:true});
 
-      if(finishedInitial){
-        this.fetchHomeInfo();
-      } else {
-        this.setState({ loading: false });
-      }
-    })
-    .catch((error) => {
-      console.error(error)
-    });
+        if(finishedInitial){
+          this.fetchHomeInfo();
+        } else {
+          this.setState({ loading: false });
+        }
+      })
+      .catch(console.error);
 
     AppState.addEventListener('change', this.handleAppStateChange);
 
@@ -329,88 +234,36 @@ export default class HomeScreen extends Component {
     });
   }
 
-  _moveScrollBar = (event) => {
-    Animated.timing(this.state.scrollBarValue, {
-      toValue: (event.nativeEvent.contentOffset.x*(width-mainPadding*2)/width)/2,
-      duration: 0
-    }).start();
-
-  };
-
   getDate() {
     const date = new Date();
     return `${date.getFullYear()}-${1+date.getMonth()}-${date.getDate()}`;
   }
 
-  async setAssessDate() {
-    const {authToken, userId} = await _getAuthTokenUserId();
-    const data = {
-      userId,
-      authToken,
-      dateFinished: this.getDate(),
-    };
-
-    fetch('http://' + host +':3000/setAssessDate/',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
+  setAssessDate() {
+    fetch('POST', 'setAssessDate', { dateFinished: this.getDate() });
   }
 
-  async initialAssessComplete(){
+  initialAssessComplete(){
     this.setState({
       loading: true,
       initialAssessTaken: true,
     });
+
     this.props.navigation.setParams({
       initialAssessTaken: true,
     });
+
     //update in database
-
-    const {authToken, userId} = await _getAuthTokenUserId();
-
-    const data = {
-      userId: userId,
-      authToken:authToken,
-      finishDate: this.getDate(),
-    };
-
-    fetch('http://' + host +':3000/finishInitial/',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
+    fetch('POST', 'finishInitial', { finishDate: this.getDate() });
 
     this.setAssessDate();
 
     this.fetchHomeInfo()
   }
 
-  async learningAssessComplete(behaviorId){
-
-     const {authToken, userId} = await _getAuthTokenUserId();
-     //send answer to the db
-      fetch('http://' + host +':3000/completedBehavior',{
-        method: 'POST',
-        headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          'userId': userId,
-          'authToken': authToken,
-          'behaviorId': behaviorId,
-        })
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  learningAssessComplete(behaviorId){
+      fetch('POST', 'completedBehavior', { behaviorId })
+        .catch(console.error);
 
       //update rec behavior
       this.setState(previousState => {
@@ -469,7 +322,7 @@ export default class HomeScreen extends Component {
                   {this.state.recommendedArea.toUpperCase()}
                 </Text>
               </View>
-              <ScrollView
+              <Animated.ScrollView
                 style={styles.container}
                 contentContainerStyle={[styles.contentContainer,{paddingLeft: (moduleMargin - moduleSpace/2), paddingRight: (moduleMargin - moduleSpace/2)}]}
                 horizontal= {true}
@@ -478,7 +331,8 @@ export default class HomeScreen extends Component {
                 snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
-                onScroll={Animated.event([
+                onScroll={Animated.event(
+                  [
                     {
                       nativeEvent: {
                         contentOffset: {
@@ -486,8 +340,10 @@ export default class HomeScreen extends Component {
                         }
                       }
                     }
-                  ])}
-                  scrollEventThrottle={1}
+                  ],
+                  { useNativeDriver: true }
+                )}
+                scrollEventThrottle={1}
                 ref={(node) => this.scroll = node}
                 >
 
@@ -555,7 +411,7 @@ export default class HomeScreen extends Component {
                                unlockReview={unlockReview}
                 />
 
-              </ScrollView>
+              </Animated.ScrollView>
             </View>
           </View>
     );

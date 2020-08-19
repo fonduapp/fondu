@@ -19,9 +19,8 @@ import ProgressNavBar from '../components/NavBar';
 import ProgressBar from '../components/ProgressBar';
 import { Icon, Avatar } from 'react-native-elements';
 import {LineChart} from 'react-native-chart-kit';
-import host from '../constants/Server.js';
-import { _getAuthTokenUserId, getIcon } from '../constants/Helper.js';
 import { shortDayNames } from '../constants/Date.js';
+import fetch from '../utils/Fetch';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;
@@ -106,67 +105,42 @@ export default class ProfileScreen extends Component {
     });
   }
 
-  async fetchRequest(request) {
-    const {
-      authToken,
-      userId,
-    } = await _getAuthTokenUserId();
-    const path = `http://${host}:3000/${request}/${userId}/${authToken}`;
-    return fetch(path, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-    .then((response) => response.json())
-    .catch(console.error);
+  fetchRequest(request) {
+    return fetch('GET', request)
+      .catch(console.error);
   }
 
   async updateInfo() {
     const relationshipStatus = this.getRelationshipStatus();
     const checkpointDay = this.getCheckpointDay();
 
-    const authTokenUserId = await _getAuthTokenUserId();
     let promises = [];
 
     if (relationshipStatus >= 0) {
       promises.push(
-        this.updateRequest('updateRelationshipStatus', {
-          ...authTokenUserId,
-          relationshipStatus,
-        })
+        this.updateRequest('updateRelationshipStatus', { relationshipStatus })
       );
     }
 
     if (checkpointDay >= 0) {
       promises.push(
-        this.updateRequest('setAssessDay', {
-          ...authTokenUserId,
-          assessDay: checkpointDay,
-        })
+        this.updateRequest('setAssessDay', { assessDay: checkpointDay })
       );
     }
 
     await Promise.all(promises);
   }
 
-  updateRequest(request, data) {
-    return fetch(`http://${host}:3000/${request}/`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    .catch(console.error);
+  updateRequest(request, params) {
+    return fetch('POST', request, params)
+      .catch(console.error);
   }
 
   _moveScrollBar = (event) => {
     Animated.timing(this.state.scrollBarValue, {
       toValue: (event.nativeEvent.contentOffset.x*(width-mainPadding*2)/width)/2,
-      duration: 0
+      duration: 0,
+      useNativeDriver: true,
     }).start();
 
   };
@@ -210,11 +184,13 @@ export default class ProfileScreen extends Component {
     Animated.timing(checkpointDayOpacity, {
       toValue: 0.5,
       duration,
+      useNativeDriver: true,
     }).start();
     setTimeout(() => {
       Animated.timing(checkpointDayOpacity, {
         toValue: 1,
         duration,
+        useNativeDriver: true,
       }).start();
     }, duration);
   }

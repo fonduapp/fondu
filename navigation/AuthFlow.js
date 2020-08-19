@@ -22,9 +22,8 @@ import {textStyle} from '../styles/text.style.js';
 import PopUp from '../components/PopUp.js';
 import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
-import host from '../constants/Server.js';
-import { _getAuthTokenUserId } from '../constants/Helper.js'
-
+import StyledButtonGroup from '../components/StyledButtonGroup';
+import fetch from '../utils/Fetch.js';
 
 class LandingScreen extends React.Component {
   static navigationOptions = {
@@ -115,43 +114,32 @@ class SignInScreen extends React.Component {
     );
   }
 
-  _signInAsync = async () => {
+  _signInAsync = () => {
 
     const { email, password } = this.state;
     const emailLowerCase = email.toLowerCase();
     let data={"email": emailLowerCase,
       "password": password};
 
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/login',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      console.log(responseJson);
-      if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
-        AsyncStorage.setItem('authToken', responseJson.authToken);
-        AsyncStorage.setItem('userId', responseJson.userId.toString());
-        this.props.navigation.navigate('Main');
-      } else {
-        // error
-        if (
-          responseJson.error === 'Email doesn\'t exist'
-          || responseJson.error === 'Incorrect password'
-        ) {
-          this.setState({ invalidLogin: true });
+    return fetch('POST', 'login', data)
+      .then((responseJson) => {
+        console.log(responseJson);
+        if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
+          AsyncStorage.setItem('authToken', responseJson.authToken);
+          AsyncStorage.setItem('userId', responseJson.userId.toString());
+          this.props.navigation.navigate('Main');
         } else {
-          // unknown error
-        }
-    }})
-    .catch((error) => {
-      console.error(error);
-    });
+          // error
+          if (
+            responseJson.error === 'Email doesn\'t exist'
+            || responseJson.error === 'Incorrect password'
+          ) {
+            this.setState({ invalidLogin: true });
+          } else {
+            // unknown error
+          }
+      }})
+      .catch(console.error);
 
 
   };
@@ -242,7 +230,7 @@ class SignUpScreen extends React.Component {
     this.setState({ badConfirmPass: !this.isConfirmPassValid(password, confirmPass) });
   }
 
-  _signUpAsync = async () => {
+  _signUpAsync = () => {
     const {
       name,
       email,
@@ -256,34 +244,23 @@ class SignUpScreen extends React.Component {
       "password": password,
     };
 
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/signup',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      console.log(responseJson);
-      if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
-        AsyncStorage.setItem('authToken', responseJson.authToken);
-        AsyncStorage.setItem('userId', responseJson.userId.toString());
-        this.props.navigation.navigate('RelationshipStatus');
-      } else {
-        // error
-        if (responseJson.code === 'ER_DUP_ENTRY') {
-          this.setState({ duplicateEmail: true });
+    return fetch('POST', 'signup', data)
+      .then((responseJson) => {
+        console.log(responseJson);
+        if (responseJson.hasOwnProperty('authToken') && responseJson.hasOwnProperty('userId')) {
+          AsyncStorage.setItem('authToken', responseJson.authToken);
+          AsyncStorage.setItem('userId', responseJson.userId.toString());
+          this.props.navigation.navigate('RelationshipStatus');
         } else {
-          // unknown error
+          // error
+          if (responseJson.code === 'ER_DUP_ENTRY') {
+            this.setState({ duplicateEmail: true });
+          } else {
+            // unknown error
+          }
         }
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      })
+      .catch(console.error);
 
   };
 
@@ -400,28 +377,11 @@ class RelationshipStatusScreen extends React.Component {
     }
   }
 
-  _relationshipStatusAsync = async () => {
+  _relationshipStatusAsync = () => {
     const relationshipStatus = this.getRelationshipStatus();
-    const { authToken, userId } = await _getAuthTokenUserId();
 
-    let data = {
-      "userId": userId,
-      "authToken": authToken,
-      "relationshipStatus": relationshipStatus,
-    };
-
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/updateRelationshipStatus',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    return fetch('POST', 'updateRelationshipStatus', { relationshipStatus })
+      .catch(console.error);
   };
 
   render() {
@@ -447,6 +407,7 @@ class RelationshipStatusScreen extends React.Component {
             This information can be changed later
           </Text>
           <StyledButtonGroup
+            containerStyle={styles.buttonGroupContainer}
             onPress={onPressRelationshipStatus}
             selectedIndex={selectedIndex}
             buttons={['Single', 'In a relationship', 'Other']}
@@ -490,28 +451,11 @@ class WeeklyGoalScreen extends React.Component {
     }
   }
 
-  _intervalAsync = async () => {
-    const interval = this.getInterval();
-    const { authToken, userId } = await _getAuthTokenUserId();
+  _intervalAsync = () => {
+    const weeklyNum = this.getInterval();
 
-    let data = {
-      "userId": userId,
-      "authToken": authToken,
-      "weeklyNum": interval,
-    };
-
-    //replace with your ip address
-    return fetch('http://' + host + ':3000/updateWeeklyNum',{
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+    return fetch('POST', 'updateWeeklyNum', { weeklyNum })
+      .catch(console.error);
   };
 
   render() {
@@ -558,6 +502,7 @@ class WeeklyGoalScreen extends React.Component {
             This information can be changed later
           </Text>
           <StyledButtonGroup
+            containerStyle={styles.buttonGroupContainer}
             onPress={onPressWeeklyGoal}
             selectedIndex={selectedIndex}
             buttons={[
@@ -594,6 +539,16 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     alignSelf: 'stretch',
+  },
+  buttonGroupContainer: {
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    width: '130%',
+    marginTop: '5%',
+    marginBottom: '20%',
   },
   footer: {
     alignItems: 'center',
@@ -651,82 +606,6 @@ const StyledInput = (props) => {
         { ...rest }
       />
       {!renderErrorAbove && errorComponent}
-    </View>
-  );
-};
-
-const StyledButtonGroup = ({ onPress, selectedIndex, buttons }) => {
-  const textStyle = (index) => ({
-    fontSize: 14,
-    color: theme.TEXT_COLOR_2,
-    fontFamily: 'poppins-bold',
-    textTransform: 'uppercase',
-    opacity: selectedIndex < 0 || selectedIndex === index ? 1.0 : 0.5,
-  });
-  return (
-    <View
-      style={{
-        alignSelf: 'center',
-        backgroundColor: theme.SECONDARY_COLOR,
-        borderRadius: 25,
-        paddingHorizontal: '15%',
-        paddingVertical: '5%',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        width: '130%',
-        marginTop: '5%',
-        marginBottom: '20%',
-      }}
-    >
-      {buttons.map((button, i) => (
-        <View
-          key={i}
-          style={{
-            height: 40,
-            alignItems: 'center',
-            borderColor: theme.TRANSLUCENT_GRAY,
-            ...(i !== buttons.length - 1 ? { borderBottomWidth: 1 } : []),
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => onPress(i)}
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              borderRadius: 20,
-              width: '115%',
-              paddingHorizontal: '7%',
-              backgroundColor: 'transparent',
-              ...(selectedIndex === i ? {
-                backgroundColor: 'white',
-                elevation: 5,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.8,
-                shadowRadius: 2,
-              } : []),
-            }}
-          >
-            <View style={{ flexDirection: 'row' }}>
-              <Text style={textStyle(i)}>
-                {button.left ? button.left : button}
-              </Text>
-              {button.right && (
-                <Text style={{
-                  flex: 1,
-                  textAlign: 'right',
-                  ...textStyle(i),
-                }}>
-                  {button.right}
-                </Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-      ))}
     </View>
   );
 };

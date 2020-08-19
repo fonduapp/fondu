@@ -13,7 +13,8 @@ import { ExpoLinksView } from '@expo/samples';
 import { createStackNavigator } from 'react-navigation-stack';
 import { StackNavigator } from 'react-navigation';
 import {textStyle} from '../styles/text.style.js';
-import { _getAuthTokenUserId, getMatch } from '../constants/Helper.js'
+import { getMatch } from '../utils/Helper.js'
+import fetch from '../utils/Fetch';
 
 const width =  Dimensions.get('window').width;
 const height =  Dimensions.get('window').height;
@@ -120,12 +121,10 @@ export default class SubtopicScreen extends React.Component{
 )}
   }
 
-  async componentDidMount(){
-    const {authToken, userId} = await _getAuthTokenUserId();
+  componentDidMount(){
     const areaId = this.props.navigation.state.params.areaId;
     this.props.navigation.setParams({title:this.props.navigation.state.params.area_name, toggle:this.toggle.bind(this), showInfo:false});
-    return fetch('http://192.241.153.104:3000/allBehaviors/'+userId+'/'+authToken+'/' + areaId)
-      .then((response)=>response.json())
+    return fetch('GET', 'allBehaviors', { areaId })
       .then((responseJson) =>{
         this.setState({
           isLoading: false,
@@ -133,8 +132,7 @@ export default class SubtopicScreen extends React.Component{
         })
       })
       .then(()=>
-      fetch('http://192.241.153.104:3000/area/'+userId+'/'+authToken+'/' + areaId)
-        .then((response)=>response.json())
+      fetch('GET', 'area', { areaId })
         .then((responseJson) =>{
           this.setState({
             area_name:responseJson['area_name'],
@@ -146,10 +144,9 @@ export default class SubtopicScreen extends React.Component{
       });
   }
 
-  async componentDidUpdate(){
-    const {authToken, userId} = await _getAuthTokenUserId()
+  componentDidUpdate(){
     if (this.state.isSearching && this.state.prev != this.state.search){
-      this.getMatch(userId,authToken,this.state.search)
+      this.getMatch(this.state.search)
       this.setState({prev:this.state.search})
     }
   }

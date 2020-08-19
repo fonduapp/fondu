@@ -5,7 +5,7 @@ import {
   View,
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
-
+import fetch from './Fetch';
 
 export async function _getAuthTokenUserId(){
   try {
@@ -20,9 +20,8 @@ export async function _getAuthTokenUserId(){
   }
 
 
-export async function getMatch(userId, authToken, query){
-  return fetch('http://192.241.153.104:3000/search/'+userId+'/'+authToken+'/' + query)
-    .then((response)=>response.json())
+export function getMatch(query){
+  return fetch('GET', 'search', { query })
     .then((responseJson) =>{
       this.setState({matches:responseJson.article_ids})
     })

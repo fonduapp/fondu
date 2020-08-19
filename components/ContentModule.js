@@ -4,11 +4,12 @@ import theme from '../styles/theme.style.js';
 import {textStyle} from '../styles/text.style.js';
 import { Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
-import { _getAuthTokenUserId } from '../constants/Helper.js';
+import { _getAuthTokenUserId } from '../utils/Helper.js';
 import host from '../constants/Server.js';
-import { renderText, getIcon } from '../constants/Helper.js'
+import { renderText, getIcon } from '../utils/Helper.js'
 import { withNavigation } from 'react-navigation';
 import { longDayNames, shortMonthNames } from '../constants/Date.js';
+import fetch from '../utils/Fetch';
 
 const { width } = Dimensions.get('window');
 
@@ -40,14 +41,14 @@ class ContentModule extends Component {
 
     }
 
-    async componentDidUpdate(prevProps){
+    componentDidUpdate(prevProps){
         if(this.props.contentType !== prevProps.contentType){
             this.getArticleText()
         }
     }
 
-    async getArticleText(){
-        const { contentType } = this.props;
+    getArticleText(){
+        const { contentType, behaviorId } = this.props;
         let property;
         let tag;
         switch (contentType) {
@@ -64,28 +65,16 @@ class ContentModule extends Component {
             return;
         }
 
-        const {authToken, userId} = await _getAuthTokenUserId()
-
         //fetch article content
-        console.log('http://' + host +':3000/behavior/' + userId + '/' + authToken + '/' + this.props.behaviorId)
-        fetch('http://' + host +':3000/behavior/' + userId + '/' + authToken + '/' + this.props.behaviorId,{
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        })
-        .then((response) => response.json())
-        .then((responseJson) => {
-            this.setState({[property]: renderText(responseJson.behavior_text, tag)})
-            if (contentType === 'suggest'){
-                //get icons
-                this.setState({icons:renderText(responseJson.behavior_text, 'SuggestionIcon')})
-            }
-        })
-        .catch((error) => {
-        console.error(error);
-        });
+        fetch('GET', 'behavior', { behaviorId })
+          .then((responseJson) => {
+              this.setState({[property]: renderText(responseJson.behavior_text, tag)})
+              if (contentType === 'suggest'){
+                  //get icons
+                  this.setState({icons:renderText(responseJson.behavior_text, 'SuggestionIcon')})
+              }
+          })
+          .catch(console.error);
 
         
     }
