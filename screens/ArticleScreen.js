@@ -57,6 +57,7 @@ export default class ArticleScreen extends Component {
       reportProb: false,
       report:"",
       showRef: false,
+      showInfo: false,
       behaviorId:'',
       userId:'',
       authToken:'',
@@ -75,6 +76,13 @@ export default class ArticleScreen extends Component {
     }
     _showResearch(){
       this.setState({ screen:'research' })
+    }
+    closeTheory(){
+      this.setState({showInfo:false})
+    }
+
+    openTheory(){
+      this.setState({showInfo:true})
     }
     showProbReport = () => {
       this.setState({reportProb:true});
@@ -150,16 +158,41 @@ export default class ArticleScreen extends Component {
     }
   }
 
+
+  showText( theory){
+    if (!this.state.showInfo){
+      return(
+        <View>
+      <Text style = {styles.dropDownText}>THE THEORY BEHIND IT</Text>
+      <Icon
+        name={'keyboard-arrow-down'}
+        type='material'
+        color='#FFFFFF'
+        onPress={()=>this.openTheory()}
+        size={30}/>
+    </View>)
+  }else{
+    return(
+    <View>
+    <Text style = {styles.dropDownText}>THE THEORY BEHIND IT</Text>
+    <Icon
+      name={'keyboard-arrow-down'}
+      type='material'
+      color='#FFFFFF'
+      onPress={()=>this.closeTheory()}
+      size={30}/>
+    <Text style = {styles.dropDownText}>{theory}</Text>
+  </View>
+
+)}
+  }
+
   screens=(directions, answer, theory)=>{
         return(
           <View style = {[styles.researchContainer,{marginTop:20}]}>
           <View style = {[styles.directionContainer,{paddingLeft:20, paddingRight:20, paddingBottom:40}]}>
             <Text style = {styles.headerText}>DIRECTIONS</Text>
               <View style = {styles.container}>{directions}</View>
-              </View>
-              <View style ={{paddingLeft:20, marginTop:20}}>
-                <Text style = {[styles.headerText,{paddingTop:30,color:'#ABAFFE'}]}>THE RESEARCH BEHIND IT</Text>
-                <Text style = {styles.researchBodyText}>{answer}{'\n\n'}<B>Theory:</B> {theory}</Text>
               </View>
           </View>
         );
@@ -168,6 +201,8 @@ export default class ArticleScreen extends Component {
   render(){
     let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
     let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
+    let caption = this.createISC(this.state.descript, '<Description>', '</Description>');
+
     let directions = this.state.suggestion.map((dir,i) =>{
       var icons = this.getIcon(this.state.icons[i])
       return<InfoButton
@@ -206,10 +241,13 @@ export default class ArticleScreen extends Component {
       </Image>
         <View style={{marginLeft:width*.1, marginRight:width*.1}}>
         <Text style ={[styles.exampleText, {textAlign:'center', marginBottom:width*.1}]}>
-          {this.state.example}
+          {caption}
         </Text>
         <Text style = {styles.questionText}>{this.state.question}</Text>
-        <Text style = {styles.exampleText}>{this.state.descript}</Text>
+        <Text style = {styles.exampleText}>{answer}</Text>
+        <View>
+        {this.showText(theory)}
+        </View>
       </View>
       </View>
 

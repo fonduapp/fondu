@@ -7,6 +7,8 @@ import {Icon} from 'react-native-elements';
 import Moment from 'moment';
 import {
   Image,
+  Keyboard,
+  TouchableWithoutFeedback,
   ScrollView,
   StyleSheet,
   Text,
@@ -28,7 +30,6 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 ];
 const moodIcons= ['mood-bad','sentiment-dissatisfied','sentiment-satisfied','mood','sentiment-very-satisfied'];
 const moodColors= ['#FFFFFF','#94ADFF', '#FFCA41', '#FFC3BD', '#FF998E', '#FF7D71'];
-
 
 
 export default class ArticleScreen extends Component {
@@ -96,10 +97,9 @@ export default class ArticleScreen extends Component {
       });
 
     }
-    handleEntry = (text) => {
-      if (text != this.state.entry){
-        this.setState({ entry: text })
-      }
+    handleEntry = text => {
+      this.setState({ entry: text })
+
     };
 
     updateDate = (_selectedDay, entry, entryRating) => {
@@ -161,7 +161,6 @@ export default class ArticleScreen extends Component {
           entry: _markedDate['entry']
         })
       }
-
       in_markedDates(day){
         const keys = Object.keys(this.state.markedDates);
         for (var i = 0; i < keys.length; i++) {
@@ -208,7 +207,7 @@ export default class ArticleScreen extends Component {
 
      }
 
-    switchScreens=(moods, date, color)=>{
+    switchScreens=(moods, date, color, entry)=>{
       switch(this.state.screen){
 
         case 'closed-unselected':
@@ -247,6 +246,8 @@ export default class ArticleScreen extends Component {
         case 'open-unselected':
         //open-unselected
           return(
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+
             <View style = {[styles.openContainer, {backgroundColor:color[0]}]}>
               <View style = {styles.headerContainer}>
                 <Text style = {[styles.subtitleText, {color:color[1]}]}>{date.getDate()+1} {monthNames[date.getMonth()]} </Text>
@@ -261,12 +262,14 @@ export default class ArticleScreen extends Component {
             <View style={styles.moodButtonContainer}>
               {moods}
             </View>
-            <TextInput
-            style={[styles.textInputContainer, {backgroundColor:color[1]}]}
-            onChangeText={this.handleEntry}
-            value={this.state.entry}
-            multiline
-            />
+              <View style={{flex: 1}}>
+                <TextInput
+                style={[styles.textInputContainer, {backgroundColor:color[1]}]}
+                onChangeText={this.handleEntry}
+                value={entry}
+                multiline
+                ></TextInput>
+                </View>
             <Icon
               name={'check-circle'}
               type='material'
@@ -275,6 +278,9 @@ export default class ArticleScreen extends Component {
               size={45}/>
 
             </View>
+            </TouchableWithoutFeedback>
+
+
           );
           case 'open-selected':
             //open-selected
@@ -305,6 +311,7 @@ export default class ArticleScreen extends Component {
       }
     }
     render(){
+      const { entry } = this.state;
       let moods = (moodColors.slice(1,6)).map((color, i) => {
       return (
         <Icon
@@ -357,7 +364,7 @@ export default class ArticleScreen extends Component {
    textDayHeaderFontSize: 13
  }}
 />
-  {this.switchScreens(moods, new Date(this.state.day.dateString), this.get_containerColor())}
+  {this.switchScreens(moods, new Date(this.state.day.dateString), this.get_containerColor(), entry)}
   </View>
 
 );}
@@ -465,8 +472,10 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     height: 30,
     borderRadius: 50,
-    lineHeight: 40,
     backgroundColor: '#94ADFF',
+    color: 'white',
+    textAlign: 'center',
     justifyContent: 'space-around',
+    ...textStyle.subtitle,
   },
 });

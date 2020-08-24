@@ -102,7 +102,7 @@ export default class AssessmentScreen extends Component{
     return fetch('GET', 'suggestedBehaviors', { areaId })
       .then((responseJson) => {
         this.setState({
-          recBehaviors: Object.values(responseJson).map((val) => val.behavior_name),
+          recBehaviors: responseJson,
         });
       })
       .catch(console.error);
@@ -156,7 +156,11 @@ export default class AssessmentScreen extends Component{
   };
 
   resultOnPressNext = () => {
-    // TODO: server POST requests
+    // TODO: server POST requests for areaID
+
+    fetch('POST', 'chooseBehaviors', { behaviorIds: this.state.recBehaviors.map((val) => val.behavior_id)})
+      .catch(console.error);
+
     const { assessmentType } = this.state;
     if (assessmentType === 'initial') {
       this._seeSetCheckpointDay();
@@ -294,7 +298,7 @@ export default class AssessmentScreen extends Component{
             styles={styles}
             recArea={recArea}
             onPressNext={this.resultOnPressNext}
-            recBehaviors={recBehaviors}
+            recBehaviors={recBehaviors.map((val) => val.behavior_name)}
             onPressNewFocus={changeRecArea}
             onPressNewBehavior={changeRecBehavior}
             focusList={allAreas}
