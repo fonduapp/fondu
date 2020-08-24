@@ -29,22 +29,35 @@ export default class ProfileScreen extends Component {
 
   constructor(props) {
     super(props);
-    this.focusCheckpointDay = props.navigation.getParam('focusCheckpointDay', false);
-    this.streak = props.navigation.getParam('streak', -1);
-    this.allAreas = props.navigation.getParam('allAreas', []);
-    this.areaLevels = props.navigation.getParam('areaLevels', {});
+    const { getParam } = props.navigation;
+    this.focusCheckpointDay = getParam('focusCheckpointDay', false);
+    this.streak = getParam('streak', -1);
+    this.allAreas = getParam('allAreas', []);
+    this.areaLevels = getParam('areaLevels', {});
+    this.totalExp = getParam('totalExp', 0);
+    this.progressionExps = [];
+    this.progressionDates = [];
+    getParam('expProgression', []).forEach(({ exp, date: dateString }) => {
+      this.progressionExps.push(exp);
+      const date = new Date(dateString);
+      const dateFormatted = `${1 + date.getMonth()}/${date.getDate()}`;
+      // TODO: replace with dateFormatted
+      this.progressionDates.push(dateString);
+    });
 
     this.state = {
     scrollBarValue: new Animated.Value(0),
     checkpointDayOpacity: new Animated.Value(1),
     accountPairedNotif: true,
-    accountPaired:props.navigation.getParam('paired', false),
+    accountPaired: getParam('paired', false),
     relationshipStatusSelectedIndex: -1,
     checkpointDaySelectedIndex: -1, 
     };
+
+    this.updateRelationshipInfo();
   }
 
-
+  
 
   componentDidMount() {
     this.fetchRelationshipStatus();
@@ -53,6 +66,22 @@ export default class ProfileScreen extends Component {
 
   componentWillUnmount() {
     this.updateInfo();
+  }
+
+  async updateRelationshipInfo() {
+    const { relationshipInfo } = this.props.navigation.state.params;
+    if (this.state.accountPaired && relationshipInfo) {
+      const {
+        relationship_level,
+        relationship_exp,
+        person1_id,
+        person2_id,
+      } = relationshipInfo;
+      this.relationshipLevel = relationship_level;
+      this.relationshipExp = relationship_exp;
+      const { userId } = await _getAuthTokenUserId();
+      this.partnerId = person1_id !== userId ? person1_id : person2_id;
+    }
   }
 
   getRelationshipStatus() {
@@ -213,14 +242,17 @@ export default class ProfileScreen extends Component {
       checkpointDaySelectedIndex,
     } = this.state;
     const line = {
-      labels: ['6/12', '6/19', '6/26', '7/2', '7/9', '7/16'],
+      labels: this.progressionDates,
       datasets: [
         {
-          data: [20, 45, 28, 80, 101, 43],
+          data: this.progressionExps,
           strokeWidth: 0.01, // optional
         },
       ],
     };
+
+    // TODO: replace with actual value
+    const totalRelationshipExp = 100;
 
     return (
       <View style = {styles.container}>
@@ -268,7 +300,7 @@ export default class ProfileScreen extends Component {
                 ref={(node) => this.scroll = node}>
 
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {this.state.relationshipStatus != 1 && this.state.accountPaired ?
+                {this.getRelationshipStatus() !== 1 && this.state.accountPaired ?
                   <>
                   <Text style = {[styles.performanceHeaderText,{marginTop: 20}]}>Your Relationship Level</Text>
                   <View style= {{
@@ -276,10 +308,15 @@ export default class ProfileScreen extends Component {
                     alignItems:'center',
                   }}>
                   <StatsContainer icon="favorite" 
-                                  mainText="lv 2" 
+                                  mainText={`lv ${this.relationshipLevel}`}
                                   color={theme.PRIMARY_COLOR_3}
                                   textColor='white'/>
-                  <ProgressBar progress={0.5} color={theme.PRIMARY_COLOR_3} style={{marginLeft: 15, flex: 1}} label={"5/30"}/>
+                  <ProgressBar
+                    progress={Math.min(1,
+                      this.relationshipExp/totalRelationshipExp)}
+                    color={theme.PRIMARY_COLOR_3}
+                    style={{marginLeft: 15, flex: 1}}
+                    label={`${this.relationshipExp}/${totalRelationshipExp}`}/>
                   
                   </View>
                   </>
@@ -295,7 +332,7 @@ export default class ProfileScreen extends Component {
                                     color={theme.SECONDARY_COLOR}
                                     textColor = {theme.TEXT_COLOR}/>
                     <StatsContainer icon="star" 
-                                    mainText="20" 
+                                    mainText={this.totalExp}
                                     subText="XP earned" 
                                     color={theme.SECONDARY_COLOR}
                                     style={{marginLeft: 10}}

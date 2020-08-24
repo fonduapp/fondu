@@ -29,6 +29,7 @@ import ModuleProgressBar from '../components/ModuleProgressBar';
 import { SafeAreaView } from 'react-navigation';
 import Loader from '../components/Loader';
 import fetch from '../utils/Fetch';
+import invariant from 'invariant';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 40;
@@ -114,6 +115,8 @@ export default class HomeScreen extends Component {
   }
 
   fetchProfileInfo(){
+    const { setParams } = this.props.navigation;
+
     this.areaLevel = {}
 
     //relationship level
@@ -122,27 +125,42 @@ export default class HomeScreen extends Component {
         //set relationship info
 
         let paired = responseJson.length > 0
-        this.props.navigation.setParams({
+        setParams({
             paired: paired,
         });
         this.setState({paired : paired})
         //if empty array, not paired
         if(paired){
-          
+          invariant(responseJson.length === 1,
+            `Unsupported number of relationships: ${responseJson.length}.`);
+          setParams({
+            relationshipInfo: responseJson[0],
+          });
         }
 
       })
       .catch(console.error);
 
-    //TODO: total xp earned
+    const totalExpFetch = fetch('GET', 'totalExp')
+      .then(({ experience }) => {
+        setParams({
+          totalExp: experience,
+        });
+      })
+      .catch(console.error);
 
-
-    //TODO: xp progress
+    const expProgressionFetch = fetch('GET', 'getPastWeeks')
+      .then(({ individual }) => {
+        setParams({
+          expProgression: individual,
+        });
+      })
+      .catch(console.error);
 
     //areas and area level and xp
     const areasFetch = fetch('GET', 'allAreas')
       .then(async (responseJson)=>{
-        this.props.navigation.setParams({
+        setParams({
           allAreas: responseJson,
         });
 
@@ -161,7 +179,7 @@ export default class HomeScreen extends Component {
           )
         ).then(()=>
           {
-            this.props.navigation.setParams({
+            setParams({
               areaLevels: this.areaLevel
             });        
           })
@@ -169,7 +187,12 @@ export default class HomeScreen extends Component {
       })
       .catch(console.error);
 
-    return Promise.all([relationshipInfoFetch, areasFetch]);
+    return Promise.all([
+      relationshipInfoFetch,
+      totalExpFetch,
+      expProgressionFetch,
+      areasFetch,
+    ]);
   }
 
   fetchAssessDate() {
@@ -452,6 +475,9 @@ export default class HomeScreen extends Component {
                                          areaLevels : navigation.getParam('areaLevels'),
                                          relationshipLevel: -1,
                                          paired : navigation.getParam('paired'),
+                                         totalExp: navigation.getParam('totalExp'),
+                                         expProgression: navigation.getParam('expProgression'),
+                                         relationshipInfo: navigation.getParam('relationshipInfo'),
                                        })}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
