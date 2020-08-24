@@ -129,5 +129,7 @@ export default async function fetch(requestType, requestName, extraParams = {}) 
         `Server returned response with errno ${responseJson.errno} for ${requestType} request ${requestName}`);
       return responseJson;
     })
-    .catch(console.error);
+    .catch((error) => {
+      console.error(`${requestType} request ${requestName} failed: `, error);
+    });
 }
