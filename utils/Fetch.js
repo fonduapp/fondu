@@ -1,8 +1,8 @@
-import { _getAuthTokenUserId } from '../utils/Helper.js'
 import host from '../constants/Server.js';
 import invariant from 'invariant';
 import isomorphicFetch from 'isomorphic-fetch';
 import fetchRetry from 'fetch-retry';
+import { AsyncStorage } from 'react-native';
 
 const isomorphicFetchRetry = fetchRetry(isomorphicFetch);
 
@@ -58,6 +58,17 @@ const allParamNames = {
     search: ['userId', 'authToken', 'query'],
   },
 };
+
+export async function _getAuthTokenUserId(){
+  try {
+    const authToken = await AsyncStorage.getItem('authToken');
+    const userId = await AsyncStorage.getItem('userId');
+    console.log("authToken:" + authToken);
+    return { authToken, userId };
+  } catch(error) {
+    console.error("Error getting authToken and userId: ", error);
+  }
+}
 
 // used to fetch from the server
 // params:

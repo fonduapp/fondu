@@ -20,7 +20,7 @@ import ProgressBar from '../components/ProgressBar';
 import { Icon, Avatar } from 'react-native-elements';
 import {LineChart} from 'react-native-chart-kit';
 import { shortDayNames } from '../constants/Date.js';
-import fetch from '../utils/Fetch';
+import fetch, { _getAuthTokenUserId } from '../utils/Fetch';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;

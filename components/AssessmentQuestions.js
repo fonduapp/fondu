@@ -15,11 +15,10 @@ import {QuizRadioButton, QuizButton} from '../components/QuizRadioButton';
 import { Icon } from 'react-native-elements';
 import NextButton from '../components/NextButton';
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import { _getAuthTokenUserId } from '../utils/Helper.js'
 import host from '../constants/Server.js';
 import {textStyle} from '../styles/text.style.js';
 import Loader from '../components/Loader';
-import fetch from '../utils/Fetch';
+import fetch, { _getAuthTokenUserId } from '../utils/Fetch';
 
 
 const { width, height } = Dimensions.get('window')

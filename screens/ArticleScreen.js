@@ -8,7 +8,6 @@ import ReferencePopUp from '../components/ReferencePopUp';
 import ReportProbPopUp from '../components/ReportProbPopUp';
 import InfoButton from '../components/InfoButton';
 
-import { _getAuthTokenUserId } from '../utils/Helper.js'
 import {Icon} from 'react-native-elements';
 
 import {
@@ -26,7 +25,7 @@ import {
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
 import { createISC, getIcon, renderText, italicize } from '../utils/Helper.js'
-import fetch from '../utils/Fetch';
+import fetch, { _getAuthTokenUserId } from '../utils/Fetch';
 
 //import theme from '../styles/theme.style.js';
 

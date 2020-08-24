@@ -1,24 +1,10 @@
 import React, { Component } from 'react';
 import {
-  AsyncStorage,
   Text,
   View,
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
 import fetch from './Fetch';
-
-export async function _getAuthTokenUserId(){
-  try {
-    const authToken = await AsyncStorage.getItem('authToken');
-    const userId = await AsyncStorage.getItem('userId');
-    console.log("authToken:" + authToken);
-
-    return {authToken: authToken, userId: userId};
-    }catch(error){
-    	console.log("error: " + error);
-    }
-  }
-
 
 export function getMatch(query){
   return fetch('GET', 'search', { query })
@@ -29,8 +15,6 @@ export function getMatch(query){
     console.log(error)
   });
 }
-
-
 
 /*When using renderText and createISC make sure to bind the functions
   within the constructor:
