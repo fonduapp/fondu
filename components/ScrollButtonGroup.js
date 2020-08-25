@@ -127,7 +127,7 @@ export default class ScrollButtonGroup extends Component {
                     <View key={item+j} style={styles.buttonContainer}>
                       <TouchableOpacity
                         onPress={() => onPress(item)}
-                        disabled={isDisabled}
+                        disabled={isSelected || isDisabled}
                         style={[
                           styles.button,
                           isSelected ? styles.selectedButton : {},

@@ -182,6 +182,7 @@ export default class ResultsPage extends Component {
                         <TouchableOpacity
                           onPress={() => this.onPressRecBehavior(i)}
                           style={[styleSheet.button, isSelected ? styleSheet.selectedButton : {}]}
+                          disabled={isSelected}
                         >
                           <Text style={[
                             styleSheet.buttonText,
