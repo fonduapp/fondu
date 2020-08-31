@@ -117,7 +117,7 @@ export default class ArticleScreen extends Component {
           this.setState({
             article_title:responseJson.behavior_name,
             example: (this.renderText(responseJson.behavior_text, 'Example')),
-            descript: (this.renderText(responseJson.behavior_text, 'Description')),
+            descript: [(this.renderText(responseJson.behavior_text, 'Description'))],
             question: (this.renderText(responseJson.behavior_text, 'Question')),
             answer: [(this.renderText(responseJson.behavior_text, 'Answer'))],
             Theory: [(this.renderText(responseJson.behavior_text, 'Theory'))],
@@ -202,12 +202,12 @@ export default class ArticleScreen extends Component {
 
   render(){
     if (this.state.finishedMounting){
-      console.log("here")
     let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
     console.log('anser')
     let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
     console.log("theory")
-    let caption = this.state.descript;//this.createISC(this.state.descript, '<Description>', '</Description>');
+    let caption = this.createISC(this.state.descript, '<Description>', '</Description>');
+    console.log("description")
 
     let directions = this.state.suggestion.map((dir,i) =>{
       var icons = this.getIcon(this.state.icons[i])
