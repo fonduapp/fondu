@@ -25,7 +25,7 @@ import {
 } from 'react-native';
 import ParsedText from 'react-native-parsed-text';
 import { createISC, getIcon, renderText, italicize } from '../utils/Helper.js'
-import fetch, { _getAuthTokenUserId } from '../utils/Fetch';
+import fetch, { _getAuthTokenUserId } from '../utils/Fetch.js';
 
 //import theme from '../styles/theme.style.js';
 
@@ -41,6 +41,7 @@ export default class ArticleScreen extends Component {
     super(props);
 
     this.state = {
+      finishedMounting:false,
       screen: 'direction',
       article_title: '',
       example: [],
@@ -146,6 +147,7 @@ export default class ArticleScreen extends Component {
       this.setState({
         userId:userId,
         authToken:authToken,
+        finishedMounting: true,
         behaviorId:this.props.navigation.state.params.behaviorId
       });
       this.getArticle(userId,authToken,this.state.behaviorId)
@@ -199,9 +201,13 @@ export default class ArticleScreen extends Component {
     }
 
   render(){
+    if (this.state.finishedMounting){
+      console.log("here")
     let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
+    console.log('anser')
     let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
-    let caption = this.createISC(this.state.descript, '<Description>', '</Description>');
+    console.log("theory")
+    let caption = this.state.descript;//this.createISC(this.state.descript, '<Description>', '</Description>');
 
     let directions = this.state.suggestion.map((dir,i) =>{
       var icons = this.getIcon(this.state.icons[i])
@@ -285,8 +291,10 @@ export default class ArticleScreen extends Component {
     </ScrollView>
     </View>
     );
-
+  }else{
+    return null
   }
+}
 }
 
 const styles = StyleSheet.create({
