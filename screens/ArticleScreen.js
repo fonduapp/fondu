@@ -7,6 +7,7 @@ import Modal from 'react-native-modal';
 import ReferencePopUp from '../components/ReferencePopUp';
 import ReportProbPopUp from '../components/ReportProbPopUp';
 import InfoButton from '../components/InfoButton';
+import { shadowStyle } from '../styles/shadow.style.js';
 
 import {Icon} from 'react-native-elements';
 
@@ -349,8 +350,7 @@ const styles = StyleSheet.create({
    },
 
   shadowStyle: {
-    shadowRadius: 10,
-    shadowOpacity: .2,
+    ...shadowStyle.primaryShadowStyle,
   },
 
   headerText:{
