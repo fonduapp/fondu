@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         width: 200,
         elevation: 0,
+        shadowOpacity: 0,
     },
     buttonStyleCheck:{
         position:'relative', 
