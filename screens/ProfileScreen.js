@@ -11,7 +11,8 @@ import {
   Dimensions,
   Animated,
   StatusBar,
-  AsyncStorage
+  AsyncStorage,
+  TextInput,
 } from 'react-native';
 import theme from '../styles/theme.style.js';
 import {textStyle} from '../styles/text.style.js';
@@ -21,6 +22,8 @@ import { Icon, Avatar } from 'react-native-elements';
 import {LineChart} from 'react-native-chart-kit';
 import { shortDayNames } from '../constants/Date.js';
 import fetch, { _getAuthTokenUserId } from '../utils/Fetch';
+import Color from 'color';
+import Switch from '../components/Switch';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;
@@ -45,13 +48,17 @@ export default class ProfileScreen extends Component {
       this.progressionDates.push(dateString);
     });
 
+    this.name = getParam('name', '');
+    this.email = getParam('email', '');
+
     this.state = {
     scrollBarValue: new Animated.Value(0),
     checkpointDayOpacity: new Animated.Value(1),
-    accountPairedNotif: true,
     accountPaired: getParam('paired', false),
     relationshipStatusSelectedIndex: -1,
     checkpointDaySelectedIndex: -1, 
+      learningReminder: false,
+      checkupReminder: false,
     };
 
     this.updateRelationshipInfo();
@@ -260,7 +267,7 @@ export default class ProfileScreen extends Component {
         <ProgressNavBar navigation={this.props.navigation} title = {"Profile"}/>
         <View style= {{alignItems: 'center', marginBottom: 20}}>
           <Avatar rounded size={100} icon={{name: 'person'}} />
-          <Text style={[textStyle.header4,{color:'white', marginTop: 5}]}>Joe Schmoe</Text>
+          <Text style={[textStyle.header4,{color:'white', marginTop: 5}]}>{this.name}</Text>
         </View>
         <View style={styles.containerLabel}>
           <TouchableOpacity style={styles.containerLabelContainer}
@@ -384,17 +391,14 @@ export default class ProfileScreen extends Component {
                 </ScrollView>
 
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
-                  {
-                    this.state.accountPairedNotif ?
-                    <View style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}>
-                      <Text style={styles.relationshipText}>Pair your account now!</Text>
-                      <TouchableOpacity style={{position:'absolute', left:0, top: 0, margin: 10}}
-                            onPress={() => this.setState({ accountPairedNotif:false })}>
-                        <Icon name = 'close' color='white'/>
-                      </TouchableOpacity>
+                  <View style={styles.accountSection}>
+                    <Text style={styles.accountHeaderText}>EMAIL</Text>
+                    <View style={styles.emailContainer}>
+                      <Text style={styles.email}>
+                        {this.email}
+                      </Text>
                     </View>
-                    : null
-                  }
+                  </View>
                   <View style={styles.accountSection}>
                     <Text style={styles.accountHeaderText}>RELATIONSHIP STATUS</Text>
                     <StyledButtonGroup
@@ -417,25 +421,39 @@ export default class ProfileScreen extends Component {
                   </Animated.View>
                   <View style={styles.accountSection}>
                     <Text style={styles.accountHeaderText}>PARTNER</Text>
-                    <View>
-                      <Text style={styles.accountText}>n/a</Text>
-                      <View style={[styles.accountText, { position: 'absolute', right: 0}]}>
-                        <Icon name = 'edit' color={theme.PRIMARY_COLOR}></Icon>
-                      </View>
-                    </View>
+                    <TextInput
+                      style={styles.partnerInput}
+                      placeholder="Link your partner through email"
+                      placeholderTextColor={Color(theme.TEXT_COLOR_2).alpha(0.5).string()}
+                      selectionColor={theme.PRIMARY_COLOR}
+                    />
                   </View>
                   <View style={styles.accountSection}>
-                    <Text style={styles.accountHeaderText}>TIME INTERVAL</Text>
-                    <View>
-                      <Text style={styles.accountText}>1 week</Text>
-                      <View style={[styles.accountText, { position: 'absolute', right: 0}]}>
-                        <Icon name = 'edit' color={theme.PRIMARY_COLOR}></Icon>
+                    <Text style={styles.accountHeaderText}>NOTIFICATION</Text>
+                    <View style={styles.notificationContainer}>
+                      <View style={styles.notificationRow}>
+                        <Text style={styles.notificationText}>Learning Reminder</Text>
+                        <Switch
+                          onValueChange={(val) => this.setState({ learningReminder: val })}
+                          value={this.state.learningReminder}
+                        />
+                      </View>
+                      <View style={styles.notificationRow}>
+                        <Text style={styles.notificationText}>Checkup Reminder</Text>
+                        <Switch
+                          onValueChange={(val) => this.setState({ checkupReminder: val })}
+                          value={this.state.checkupReminder}
+                        />
                       </View>
                     </View>
                   </View>
                   <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
                                     onPress = {this._signOut}>
                       <Text style={styles.relationshipText}>Sign out</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
+                                    onPress = {null}>
+                      <Text style={styles.relationshipText}>Report a Problem</Text>
                   </TouchableOpacity>
                 </ScrollView>
 
@@ -516,9 +534,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    borderRadius: 10,
-    paddingTop: 50,
-    paddingBottom: 50,
+    borderRadius: 20,
   },
   relationshipText:{
     color: 'white',
@@ -544,8 +560,46 @@ const styles = StyleSheet.create({
   },
   accountSection:{
     marginBottom: 10,
-  }
-
+  },
+  emailContainer: {
+    backgroundColor: theme.SECONDARY_COLOR,
+    height: 50,
+    borderRadius: 20,
+    justifyContent: 'center',
+    paddingLeft: 20,
+    marginVertical: 5,
+  },
+  email: {
+    fontSize: 14,
+    color: theme.TEXT_COLOR_2,
+    fontFamily: 'poppins-bold',
+  },
+  partnerInput: {
+    height: 50,
+    borderRadius: 20,
+    paddingLeft: 20,
+    marginVertical: 5,
+    borderWidth: 2,
+    borderColor: Color(theme.TEXT_COLOR_2).alpha(0.5).string(),
+    fontSize: 14,
+    color: theme.TEXT_COLOR_2,
+    fontFamily: 'poppins-bold',
+  },
+  notificationContainer: {
+    marginVertical: 5,
+  },
+  notificationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: 41,
+    alignItems: 'center',
+    marginVertical: 3,
+  },
+  notificationText: {
+    fontSize: 14,
+    color: theme.TEXT_COLOR_2,
+    fontFamily: 'poppins-bold',
+  },
 });
 const AreaLevelContainer = ({areaName, level, areaExp, totalExp}) =>{
   let progress = areaExp/totalExp

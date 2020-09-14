@@ -187,11 +187,25 @@ export default class HomeScreen extends Component {
       })
       .catch(console.error);
 
+    const usernameFetch = fetch('GET', 'username')
+      .then((responseJson) => {
+        setParams({ name: responseJson.username });
+      })
+      .catch(console.error);
+
+    const emailFetch = fetch('GET', 'email')
+      .then((responseJson) => {
+        setParams({ email: responseJson.email });
+      })
+      .catch(console.error);
+
     return Promise.all([
       relationshipInfoFetch,
       totalExpFetch,
       expProgressionFetch,
       areasFetch,
+      usernameFetch,
+      emailFetch,
     ]);
   }
 
@@ -478,6 +492,8 @@ export default class HomeScreen extends Component {
                                          totalExp: navigation.getParam('totalExp'),
                                          expProgression: navigation.getParam('expProgression'),
                                          relationshipInfo: navigation.getParam('relationshipInfo'),
+                                         name: navigation.getParam('name'),
+                                         email: navigation.getParam('email'),
                                        })}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>
