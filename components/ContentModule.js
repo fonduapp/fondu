@@ -17,7 +17,7 @@ class ContentModule extends Component {
     constructor(props){
         super(props)
         this.state = {
-            imgsrc:null,
+            imgsrc:"",
             suggestions:[],
             contentType:"",
             description: '',
@@ -232,7 +232,7 @@ class ContentModule extends Component {
             <View style = {{flex:1}}>
                 {this.getModuleContent()}
                 <Animated.View style={[styles.mainImageContainer,{opacity:this.props.imageOpacity}]}>
-                    <Image source={{uri:this.state.imgsrc}} style={styles.imageStyle}/>
+                    <Image source={this.state.imgsrc?{uri:this.state.imgsrc}:null} style={styles.imageStyle}/>
                 </Animated.View>
             </View>
                 
