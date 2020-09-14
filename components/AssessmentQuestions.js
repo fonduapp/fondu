@@ -140,10 +140,25 @@ export default class AssessmentQuestions extends Component {
     }
   }
 
+  isCurrentAnswerCorrect(){
+    return this.state.options[this.state.selectedOption].exp===10;
+  }
+
   check(){
 
+    result = this.isCurrentAnswerCorrect();
+
     this.setState({qFeedback: true});
-    this.props.questionFinish(this.state.options[this.state.selectedOption].exp===10, true);
+    this.props.questionFinish(result, true);
+
+    //if wrong add it to the end again
+    if(!result){
+      let questionToMove = jsonData[this.qno];
+      jsonData.splice(this.qno, 1);
+      jsonData.push(questionToMove);
+      this.qno--;
+    }
+
     let request;
     let idParam;
     switch(this.props.assessmentType) {

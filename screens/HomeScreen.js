@@ -69,6 +69,7 @@ export default class HomeScreen extends Component {
     let recArea = 0;
     const recAreaFetch = fetch('GET', 'recommendedArea')
       .then((responseJson) => {
+        console.log(responseJson);
         this.setState({
           recommendedArea: responseJson.area_name,
         });
