@@ -212,8 +212,8 @@ export default class ResultsPage extends Component {
                         screenWidth={screenWidth}
                         itemList={behaviorList}
                         selectedItem={recBehaviors[selectedBehaviorIndex]}
-                        onPress={(newBehavior) => {
-                          onPressNewBehavior(selectedBehaviorIndex, newBehavior);
+                        onPress={(index) => {
+                          onPressNewBehavior(selectedBehaviorIndex, index);
                         }}
                         scrollToSelected={isOpenBehaviors}
                         selectedButtonColor={Color(theme.TEXT_COLOR).alpha(0.5).string()}
