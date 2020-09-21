@@ -24,9 +24,12 @@ import { shortDayNames } from '../constants/Date.js';
 import fetch, { _getAuthTokenUserId } from '../utils/Fetch';
 import Color from 'color';
 import Switch from '../components/Switch';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 const mainPadding = 30;
+// height of avatar container
+const avatarHeight = 180;
 
 export default class ProfileScreen extends Component {
 
@@ -59,6 +62,8 @@ export default class ProfileScreen extends Component {
     checkpointDaySelectedIndex: -1, 
       learningReminder: false,
       checkupReminder: false,
+      leftScrollY: new Animated.Value(0),
+      rightScrollY: new Animated.Value(0),
     };
 
     this.updateRelationshipInfo();
@@ -172,15 +177,6 @@ export default class ProfileScreen extends Component {
       .catch(console.error);
   }
 
-  _moveScrollBar = (event) => {
-    Animated.timing(this.state.scrollBarValue, {
-      toValue: (event.nativeEvent.contentOffset.x*(width-mainPadding*2)/width)/2,
-      duration: 0,
-      useNativeDriver: true,
-    }).start();
-
-  };
-
   _signOut = async () => {
 
     //clear authToken and userId
@@ -247,6 +243,8 @@ export default class ProfileScreen extends Component {
       checkpointDayOpacity,
       relationshipStatusSelectedIndex,
       checkpointDaySelectedIndex,
+      leftScrollY,
+      rightScrollY,
     } = this.state;
     const line = {
       labels: this.progressionDates,
@@ -261,205 +259,273 @@ export default class ProfileScreen extends Component {
     // TODO: replace with actual value
     const totalRelationshipExp = 100;
 
+    const slidingHeaderTranslate = Animated.add(
+      Animated.multiply(
+        scrollBarValue.interpolate({
+          inputRange: [0, width],
+          outputRange: [1, 0],
+          extrapolate: 'clamp',
+        }),
+        leftScrollY.interpolate({
+          inputRange: [0, avatarHeight],
+          outputRange: [0, -avatarHeight],
+          extrapolate: 'clamp',
+        }),
+      ),
+      Animated.multiply(
+        scrollBarValue.interpolate({
+          inputRange: [0, width],
+          outputRange: [0, 1],
+          extrapolate: 'clamp',
+        }),
+        rightScrollY.interpolate({
+          inputRange: [0, avatarHeight],
+          outputRange: [0, -avatarHeight],
+          extrapolate: 'clamp',
+        }),
+      ),
+    );
+
+    const scrollIndicatorTranslate = scrollBarValue.interpolate({
+      inputRange: [0, width],
+      outputRange: [0, width / 2 - mainPadding],
+    });
+
     return (
       <View style = {styles.container}>
         <StatusBar hidden />
-        <ProgressNavBar navigation={this.props.navigation} title = {"Profile"}/>
-        <View style= {{alignItems: 'center', marginBottom: 20}}>
-          <Avatar rounded size={100} icon={{name: 'person'}} />
-          <Text style={[textStyle.header4,{color:'white', marginTop: 5}]}>{this.name}</Text>
+        <View style={styles.navBarWrapper}>
+          <LinearGradient
+            colors={[theme.PRIMARY_COLOR, 'transparent']}
+            start={[0, 0.65]}
+          >
+            <ProgressNavBar navigation={this.props.navigation} title = {"Profile"}/>
+          </LinearGradient>
         </View>
-        <View style={styles.containerLabel}>
-          <TouchableOpacity style={styles.containerLabelContainer}
-                            onPress={() => { this.scroll.scrollTo({ x: 0 }) }}>
-            <Text style={styles.textContainer}>Performance</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.containerLabelContainer}
-                            onPress={() => { this.scroll.scrollTo({ x: width*2 }) }}>
-            <Text style={styles.textContainer}>Account</Text>
-          </TouchableOpacity>
-          
-        </View>
-        <View style={styles.welcomeContainer}>
-          <Animated.View style={[styles.containerLabel, 
-              {transform: [
-                {
-                  translateX: scrollBarValue
-                }
-              ]}
-              ]}>
-              <View style={styles.containerLabelScrollContainer}>
+        <View style={styles.mainScrollWrapper}>
+          <Animated.View style={[
+            styles.slidingHeader,
+            { transform: [{ translateY: slidingHeaderTranslate }] },
+          ]}>
+            <View style= {styles.avatarContainer}>
+              <Avatar rounded size={100} icon={{name: 'person'}} />
+              <Text style={[textStyle.header4,{color:'white', marginTop: 5}]}>{this.name}</Text>
+            </View>
+            <View style={styles.stickyHeader}>
+              <View style={[styles.containerLabel, styles.stickyHeaderLabelsContainer]}>
+                <TouchableOpacity style={styles.containerLabelContainer}
+                                  onPress={() => { this.scroll.scrollTo({ x: 0 }) }}>
+                  <Text style={styles.textContainer}>Performance</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.containerLabelContainer}
+                                  onPress={() => { this.scroll.scrollTo({ x: width*2 }) }}>
+                  <Text style={styles.textContainer}>Account</Text>
+                </TouchableOpacity>
               </View>
-              <View style={styles.containerLabelScrollContainerNoBorder}>
+              <View style={styles.stickyHeaderScrollContainer}>
+                <Animated.View style={[styles.containerLabel, 
+                    {transform: [
+                      {
+                        translateX: scrollIndicatorTranslate
+                      }
+                    ]}
+                    ]}>
+                    <View style={styles.containerLabelScrollContainer}>
+                    </View>
+                    <View style={styles.containerLabelScrollContainerNoBorder}>
+                    </View>
+                </Animated.View>
               </View>
+            </View>
           </Animated.View>
-          <ScrollView
-                onLayout={this.onLayoutScrollView}
-                style={{flex:1}}
-                contentContainerStyle={styles.contentContainer}
-                horizontal= {true}
-                decelerationRate={0}
-                snapToInterval={width}
-                snapToAlignment={"center"}
-                decelerationRate="fast"
-                showsHorizontalScrollIndicator={false}
-                onScroll={this._moveScrollBar}
-                ref={(node) => this.scroll = node}>
+          <View style={styles.welcomeContainer}>
+            <Animated.ScrollView
+                  onLayout={this.onLayoutScrollView}
+                  style={{flex:1}}
+                  contentContainerStyle={styles.contentContainer}
+                  horizontal= {true}
+                  decelerationRate={0}
+                  snapToInterval={width}
+                  snapToAlignment={"center"}
+                  decelerationRate="fast"
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { x: scrollBarValue } } }],
+                    {  useNativeDriver: true },
+                  )}
+                  ref={(node) => this.scroll = node}>
 
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {this.getRelationshipStatus() !== 1 && this.state.accountPaired ?
-                  <>
-                  <Text style = {[styles.performanceHeaderText,{marginTop: 20}]}>Your Relationship Level</Text>
-                  <View style= {{
-                    flexDirection:'row', 
-                    alignItems:'center',
-                  }}>
-                  <StatsContainer icon="favorite" 
-                                  mainText={`lv ${this.relationshipLevel}`}
-                                  color={theme.PRIMARY_COLOR_3}
-                                  textColor='white'/>
-                  <ProgressBar
-                    progress={Math.min(1,
-                      this.relationshipExp/totalRelationshipExp)}
-                    color={theme.PRIMARY_COLOR_3}
-                    style={{marginLeft: 15, flex: 1}}
-                    label={`${this.relationshipExp}/${totalRelationshipExp}`}/>
-                  
-                  </View>
-                  </>
-                  :
-                  null
-
-                }
-                  <Text style = {styles.performanceHeaderText}>Your Statistics</Text>
-                  <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
-                    <StatsContainer icon="whatshot" 
-                                    mainText={this.streak} 
-                                    subText="week streak" 
-                                    color={theme.SECONDARY_COLOR}
-                                    textColor = {theme.TEXT_COLOR}/>
-                    <StatsContainer icon="star" 
-                                    mainText={this.totalExp}
-                                    subText="XP earned" 
-                                    color={theme.SECONDARY_COLOR}
-                                    style={{marginLeft: 10}}
-                                    textColor = {theme.TEXT_COLOR}/>
-                  </View>
-                  <Text style = {styles.performanceHeaderText}>Your XP Earned</Text>
-                  <View style={{alignSelf:"center"}}>
-                    <LineChart
-                      data={line}
-                      width={width}
-                      height={180}
-                      chartConfig={{
-                        backgroundGradientFrom: 'white',
-                        backgroundGradientTo: 'white',
-                        color: (opacity = 1) => `rgba(123, 127, 255, ${opacity})`,
-                        decimalPlaces: 0,
-                        propsForLabels:{fontFamily:'poppins-bold', fontWeight: 'bold', opacity: 0.5},
-                        fillShadowGradient:theme.PRIMARY_COLOR,
-                        fillShadowGradientOpacity:0.5
-
-                      }}
-
-                      bezier={false}
-                      withInnerLines={false}
-                      withOuterLines={false}
-                      fontFamily={"poppins-bold"}
-                      segments={2}
-                      fromZero={true}
-                      withDots={true}
-                    />
-
-                  </View>
-                  <Text style = {styles.performanceHeaderText}>Area Level</Text>
-                  <View style={{flexDirection:'column', justifyContent:'space-evenly', flex:1 }}>
-                    {
-                      this.allAreas.map((area, key)=>(
-                        <AreaLevelContainer areaName={area.area_name} 
-                                            key={key} 
-                                            level={this.areaLevels[area.area_id].area_level}
-                                            totalExp = {this.areaLevels[area.area_id].total_exp}
-                                            areaExp = {this.areaLevels[area.area_id].area_exp}
-                        />
-                      ))
-                    }
-                    
-                  </View>
-
-
-                </ScrollView>
-
-                <ScrollView contentContainerStyle={styles.scrollContainer}>
-                  <View style={styles.accountSection}>
-                    <Text style={styles.accountHeaderText}>EMAIL</Text>
-                    <View style={styles.emailContainer}>
-                      <Text style={styles.email}>
-                        {this.email}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.accountSection}>
-                    <Text style={styles.accountHeaderText}>RELATIONSHIP STATUS</Text>
-                    <StyledButtonGroup
-                      onPress={this.onPressRelationshipStatus}
-                      selectedIndex={relationshipStatusSelectedIndex}
-                      buttons={['Single', 'Relationship', 'Other']}
-                    />
-                  </View>
-                  <Animated.View
-                    style={styles.accountSection}
-                    opacity={checkpointDayOpacity}
-                    onLayout={this.onLayoutCheckpointDay}
+                  <Animated.ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    onScroll={Animated.event(
+                      [{ nativeEvent: { contentOffset: { y: leftScrollY } } }],
+                      { useNativeDriver: true },
+                    )}
+                    snapToOffsets={[avatarHeight]}
+                    snapToEnd={false}
+                    showsVerticalScrollIndicator={false}
                   >
-                    <Text style={styles.accountHeaderText}>CHECKPOINT DAY</Text>
-                    <StyledButtonGroup
-                      onPress={this.onPressCheckpointDay}
-                      selectedIndex={checkpointDaySelectedIndex}
-                      buttons={shortDayNames}
-                    />
-                  </Animated.View>
-                  <View style={styles.accountSection}>
-                    <Text style={styles.accountHeaderText}>PARTNER</Text>
-                    <TextInput
-                      style={styles.partnerInput}
-                      placeholder="Link your partner through email"
-                      placeholderTextColor={Color(theme.TEXT_COLOR_2).alpha(0.5).string()}
-                      selectionColor={theme.PRIMARY_COLOR}
-                    />
-                  </View>
-                  <View style={styles.accountSection}>
-                    <Text style={styles.accountHeaderText}>NOTIFICATION</Text>
-                    <View style={styles.notificationContainer}>
-                      <View style={styles.notificationRow}>
-                        <Text style={styles.notificationText}>Learning Reminder</Text>
-                        <Switch
-                          onValueChange={(val) => this.setState({ learningReminder: val })}
-                          value={this.state.learningReminder}
-                        />
-                      </View>
-                      <View style={styles.notificationRow}>
-                        <Text style={styles.notificationText}>Checkup Reminder</Text>
-                        <Switch
-                          onValueChange={(val) => this.setState({ checkupReminder: val })}
-                          value={this.state.checkupReminder}
-                        />
+                  {this.getRelationshipStatus() !== 1 && this.state.accountPaired ?
+                    <>
+                    <Text style = {[styles.performanceHeaderText,{marginTop: 20}]}>Your Relationship Level</Text>
+                    <View style= {{
+                      flexDirection:'row', 
+                      alignItems:'center',
+                    }}>
+                    <StatsContainer icon="favorite" 
+                                    mainText={`lv ${this.relationshipLevel}`}
+                                    color={theme.PRIMARY_COLOR_3}
+                                    textColor='white'/>
+                    <ProgressBar
+                      progress={Math.min(1,
+                        this.relationshipExp/totalRelationshipExp)}
+                      color={theme.PRIMARY_COLOR_3}
+                      style={{marginLeft: 15, flex: 1}}
+                      label={`${this.relationshipExp}/${totalRelationshipExp}`}/>
+                    
+                    </View>
+                    </>
+                    :
+                    null
+
+                  }
+                    <Text style = {styles.performanceHeaderText}>Your Statistics</Text>
+                    <View style={{flexDirection:'row', justifyContent:'space-evenly'}}>
+                      <StatsContainer icon="whatshot" 
+                                      mainText={this.streak} 
+                                      subText="week streak" 
+                                      color={theme.SECONDARY_COLOR}
+                                      textColor = {theme.TEXT_COLOR}/>
+                      <StatsContainer icon="star" 
+                                      mainText={this.totalExp}
+                                      subText="XP earned" 
+                                      color={theme.SECONDARY_COLOR}
+                                      style={{marginLeft: 10}}
+                                      textColor = {theme.TEXT_COLOR}/>
+                    </View>
+                    <Text style = {styles.performanceHeaderText}>Your XP Earned</Text>
+                    <View style={{alignSelf:"center"}}>
+                      <LineChart
+                        data={line}
+                        width={width}
+                        height={180}
+                        chartConfig={{
+                          backgroundGradientFrom: 'white',
+                          backgroundGradientTo: 'white',
+                          color: (opacity = 1) => `rgba(123, 127, 255, ${opacity})`,
+                          decimalPlaces: 0,
+                          propsForLabels:{fontFamily:'poppins-bold', fontWeight: 'bold', opacity: 0.5},
+                          fillShadowGradient:theme.PRIMARY_COLOR,
+                          fillShadowGradientOpacity:0.5
+
+                        }}
+
+                        bezier={false}
+                        withInnerLines={false}
+                        withOuterLines={false}
+                        fontFamily={"poppins-bold"}
+                        segments={2}
+                        fromZero={true}
+                        withDots={true}
+                      />
+
+                    </View>
+                    <Text style = {styles.performanceHeaderText}>Area Level</Text>
+                    <View style={{flexDirection:'column', justifyContent:'space-evenly', flex:1 }}>
+                      {
+                        this.allAreas.map((area, key)=>(
+                          <AreaLevelContainer areaName={area.area_name} 
+                                              key={key} 
+                                              level={this.areaLevels[area.area_id].area_level}
+                                              totalExp = {this.areaLevels[area.area_id].total_exp}
+                                              areaExp = {this.areaLevels[area.area_id].area_exp}
+                          />
+                        ))
+                      }
+                      
+                    </View>
+
+                  </Animated.ScrollView>
+
+                  <Animated.ScrollView
+                    contentContainerStyle={styles.scrollContainer}
+                    onScroll={Animated.event(
+                      [{ nativeEvent: { contentOffset: { y: rightScrollY } } }],
+                      { useNativeDriver: true },
+                    )}
+                    snapToOffsets={[avatarHeight]}
+                    snapToEnd={false}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    <View style={styles.accountSection}>
+                      <Text style={styles.accountHeaderText}>EMAIL</Text>
+                      <View style={styles.emailContainer}>
+                        <Text style={styles.email}>
+                          {this.email}
+                        </Text>
                       </View>
                     </View>
-                  </View>
-                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
-                                    onPress = {this._signOut}>
-                      <Text style={styles.relationshipText}>Sign out</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
-                                    onPress = {null}>
-                      <Text style={styles.relationshipText}>Report a Problem</Text>
-                  </TouchableOpacity>
-                </ScrollView>
+                    <View style={styles.accountSection}>
+                      <Text style={styles.accountHeaderText}>RELATIONSHIP STATUS</Text>
+                      <StyledButtonGroup
+                        onPress={this.onPressRelationshipStatus}
+                        selectedIndex={relationshipStatusSelectedIndex}
+                        buttons={['Single', 'Relationship', 'Other']}
+                      />
+                    </View>
+                    <Animated.View
+                      style={styles.accountSection}
+                      opacity={checkpointDayOpacity}
+                      onLayout={this.onLayoutCheckpointDay}
+                    >
+                      <Text style={styles.accountHeaderText}>CHECKPOINT DAY</Text>
+                      <StyledButtonGroup
+                        onPress={this.onPressCheckpointDay}
+                        selectedIndex={checkpointDaySelectedIndex}
+                        buttons={shortDayNames}
+                      />
+                    </Animated.View>
+                    <View style={styles.accountSection}>
+                      <Text style={styles.accountHeaderText}>PARTNER</Text>
+                      <TextInput
+                        style={styles.partnerInput}
+                        placeholder="Link your partner through email"
+                        placeholderTextColor={Color(theme.TEXT_COLOR_2).alpha(0.5).string()}
+                        selectionColor={theme.PRIMARY_COLOR}
+                      />
+                    </View>
+                    <View style={styles.accountSection}>
+                      <Text style={styles.accountHeaderText}>NOTIFICATION</Text>
+                      <View style={styles.notificationContainer}>
+                        <View style={styles.notificationRow}>
+                          <Text style={styles.notificationText}>Learning Reminder</Text>
+                          <Switch
+                            onValueChange={(val) => this.setState({ learningReminder: val })}
+                            value={this.state.learningReminder}
+                          />
+                        </View>
+                        <View style={styles.notificationRow}>
+                          <Text style={styles.notificationText}>Checkup Reminder</Text>
+                          <Switch
+                            onValueChange={(val) => this.setState({ checkupReminder: val })}
+                            value={this.state.checkupReminder}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                    <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
+                                      onPress = {this._signOut}>
+                        <Text style={styles.relationshipText}>Sign out</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.relationshipButton,{ backgroundColor: theme.PRIMARY_COLOR_7}]}
+                                      onPress = {null}>
+                        <Text style={styles.relationshipText}>Report a Problem</Text>
+                    </TouchableOpacity>
+                  </Animated.ScrollView>
 
-              </ScrollView>
+                </Animated.ScrollView>
+          </View>
         </View>
-
       </View>
     );
   }
@@ -468,14 +534,32 @@ export default class ProfileScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:theme.PRIMARY_COLOR,
+    backgroundColor: theme.PRIMARY_COLOR,
+  },
+  navBarWrapper: {
+    width: '100%',
+    // float above sliding header
+    zIndex: 2,
+  },
+  mainScrollWrapper: {
+    flex: 1,
+  },
+  slidingHeader: {
+    position: 'absolute',
+    width: '100%',
+    // float above scrollViews
+    zIndex: 1,
+    backgroundColor: theme.PRIMARY_COLOR,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    height: avatarHeight,
   },
   contentContainer:{
     paddingTop: 20,
   },
   welcomeContainer: {
     alignItems: 'center',
-    marginTop: 10,
     backgroundColor: 'white',
     flex:1,
 
@@ -486,6 +570,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingLeft: mainPadding,
     paddingRight: mainPadding,
+  },
+  stickyHeaderLabelsContainer: {
+    paddingBottom: 10,
   },
   containerLabelContainer:{
     flex:1,
@@ -501,6 +588,9 @@ const styles = StyleSheet.create({
     height:150,
     backgroundColor: '#F2F2F2',
     marginBottom: 30,
+  },
+  stickyHeaderScrollContainer: {
+    backgroundColor: 'white',
   },
   containerLabelScrollContainer:{
     flex:1,
@@ -528,6 +618,9 @@ const styles = StyleSheet.create({
     width: width,
     alignItems: 'stretch',
     paddingHorizontal:30 ,
+    // The sliding header floats on top of the scrollViews, so we need to add
+    // padding to push the content into the visible area below the header.
+    paddingTop: 230,
   },
   relationshipButton:{
     height: 50,
