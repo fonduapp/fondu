@@ -202,15 +202,12 @@ export default class AssessmentQuestions extends Component {
       extraOptionSelected: false,
     });
 
-
     if(this.qno < jsonData.length-1){
       this.qno++
       this.updateQuestion(true);
       this.setState({
         countCheck: 0,
       });
-
-
       
     }else{
       
@@ -257,8 +254,6 @@ export default class AssessmentQuestions extends Component {
       this.isCurrentAnswerCorrect(options, i);
       return options[i];
     }
-
-    console.log(options);
 
   }
 
