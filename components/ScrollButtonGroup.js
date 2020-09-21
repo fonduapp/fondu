@@ -9,6 +9,8 @@ import {
 import theme from '../styles/theme.style';
 import Color from 'color';
 import { textStyle } from '../styles/text.style';
+import { shadowStyle } from '../styles/shadow.style.js';
+
 
 const buttonMarginHorizontal = 13;
 const buttonsPerColumn = 3;
@@ -63,10 +65,7 @@ export default class ScrollButtonGroup extends Component {
       },
       button: {
         backgroundColor: 'white',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
+        ...shadowStyle.primaryShadowStyle,
         borderRadius: 20,
         justifyContent: 'center',
         height: 75,

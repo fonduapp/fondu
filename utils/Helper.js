@@ -60,6 +60,7 @@ export function renderText(content, tag) {
         isArray = true;
     }
     var result = content.match(pattern)
+    if (result == null) return;
     if (isArray){
       result = result.map((group,i)=>{
         group = group.replace('<'+tag+'>','');
@@ -84,7 +85,7 @@ export function createISC(text, tag, endtag){
           start = res.indexOf('</isc>') + 6;
           return <Text style = {{flexDirection: 'row'}}>
             <Text>{sub}</Text>
-            <Text style = {{ fontFamily: 'poppins-bold'}} onPress={() => this.setState({showRef:true})}>{cit}</Text>
+            <Text onPress={() => this.setState({showRef:true})}>{cit}</Text>
             </Text>
         });
 

@@ -24,6 +24,7 @@ import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import StyledButtonGroup from '../components/StyledButtonGroup';
 import fetch from '../utils/Fetch.js';
+import { shadowStyle } from '../styles/shadow.style.js';
 
 class LandingScreen extends React.Component {
   static navigationOptions = {
@@ -541,11 +542,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   buttonGroupContainer: {
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
+    ...shadowStyle.primaryShadowStyle,
     width: '130%',
     marginTop: '5%',
     marginBottom: '20%',
@@ -602,7 +599,7 @@ const StyledInput = (props) => {
           color: darkText?theme.TEXT_COLOR_2:'white',
         }}
         inputContainerStyle={{ borderColor: darkText?darkTextColor:'rgba(255, 255, 255, 0.5)' }}
-        selectionColor={theme.PRIMARY_COLOR}
+        selectionColor= {darkText? theme.TEXT_COLOR_2:'white'}
         { ...rest }
       />
       {!renderErrorAbove && errorComponent}

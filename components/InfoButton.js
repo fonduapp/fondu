@@ -3,7 +3,8 @@ import { Text, Dimensions, TouchableOpacity, View, StyleSheet } from 'react-nati
 import ReferencePopUp from '../components/ReferencePopUp';
 import {textStyle} from '../styles/text.style.js';
 import {Icon} from 'react-native-elements';
-import { createISC, renderText} from '../utils/Helper.js'
+import { createISC, renderText} from '../utils/Helper.js';
+import { shadowStyle } from '../styles/shadow.style.js';
 
 
 
@@ -115,9 +116,8 @@ const styles = StyleSheet.create({
     marginLeft:width*1/12,
     marginRight:width*1/15,
     width:width*4/5,
-    shadowOffset:{  width: 5,  height: 5,  },
+    ...shadowStyle.primaryShadowStyle,
     shadowColor: '#475279',
-    shadowOpacity: .5,
     alignItems:'center',
   },
   innerDirectionContainer:{
