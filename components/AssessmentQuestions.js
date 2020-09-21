@@ -140,19 +140,27 @@ export default class AssessmentQuestions extends Component {
     }
   }
 
-  isCurrentAnswerCorrect(){
-    return this.state.options[this.state.selectedOption].exp===10;
+  isCurrentAnswerCorrect(options, selectedOption){
+    if(this.state.assessmentType === 'learning'){
+      return this.state.options[this.state.selectedOption].exp===10;
+    }
+    else if(this.state.assessmentType === 'review'){
+      return this.state.options[this.state.selectedOption].exp===50;
+    }
+    else{
+      return false
+    }
   }
 
   check(){
 
-    result = this.isCurrentAnswerCorrect();
+    result = this.isCurrentAnswerCorrect(this.state.options, this.state.selectedOption);
 
     this.setState({qFeedback: true});
     this.props.questionFinish(result, true);
 
     //if wrong add it to the end again
-    if(!result){
+    if(this.props.assessmentType === 'learning' && !result){
       let questionToMove = jsonData[this.qno];
       jsonData.splice(this.qno, 1);
       jsonData.push(questionToMove);
@@ -193,6 +201,7 @@ export default class AssessmentQuestions extends Component {
       selectedOption: -1,
       extraOptionSelected: false,
     });
+
 
     if(this.qno < jsonData.length-1){
       this.qno++
@@ -245,9 +254,11 @@ export default class AssessmentQuestions extends Component {
 
   findCorrectAnswer(options){
     for (let i = 0; i < options.length; i++) {
-      if(options[i].exp===10)
-        return options[i];
+      this.isCurrentAnswerCorrect(options, i);
+      return options[i];
     }
+
+    console.log(options);
 
   }
 

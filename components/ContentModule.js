@@ -17,7 +17,7 @@ class ContentModule extends Component {
     constructor(props){
         super(props)
         this.state = {
-            imgsrc:"",
+            imgsrc:null,
             suggestions:[],
             contentType:"",
             description: '',
