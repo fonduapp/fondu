@@ -39,11 +39,9 @@ export default class AssessmentScreen extends Component{
       assessmentType,
       questionDone:false,
       questionRight: false,
-      recArea:'nothing',
-      areaId: -1,
+      focusAreaIndex: -1,
       behaviorId : navigation.getParam('behaviorId','none'),
       recBehaviors: [],
-      allAreas: [],
       allBehaviors: [],
       checkpointDay: 'Sunday',
     }
@@ -73,27 +71,24 @@ export default class AssessmentScreen extends Component{
   }
 
   _seeResults(){
-    fetch('GET', 'recommendedArea')
-      .then(({
-        area_id: areaId,
-        area_name: recArea,
-      }) => {
-        this.updateArea({ recArea, areaId });
-        this.fetchAllAreas();
+    Promise.all([fetch('GET', 'recommendedArea'), this.fetchAllAreas()])
+      .then(([{ area_id: areaId }]) => {
+        const focusAreaIndex = this.allAreas.findIndex((area) => area.id === areaId);
+        if (focusAreaIndex >= 0) {
+          this.updateArea(focusAreaIndex);
+        }
         this.setState({ screen: 'result' });
       })
       .catch(console.error);
   }
 
-  updateArea(recAreaId) {
-    const { recArea, areaId } = recAreaId;
-
+  updateArea(focusAreaIndex) {
     this.setState({
-      areaId,
-      recArea,
+      focusAreaIndex,
       recBehaviors: [],
     });
 
+    const areaId = this.allAreas[focusAreaIndex].id;
     this.fetchSuggestedBehaviors(areaId);
     this.fetchAllBehaviors(areaId);
   }
@@ -121,13 +116,12 @@ export default class AssessmentScreen extends Component{
   }
 
   fetchAllAreas() {
-    fetch('GET', 'allAreas')
+    return fetch('GET', 'allAreas')
       .then((responseJson) => {
-        const nameIdPairs = responseJson.map(({ area_id, area_name }) => [area_name, area_id]);
-        this.setState({
-          allAreas: responseJson.map((area) => area.area_name),
-          areaNameToId: Object.fromEntries(nameIdPairs),
-        });
+        this.allAreas = responseJson.map((area) => ({
+          name: area.area_name,
+          id: area.area_id,
+        }));
       })
       .catch(console.error);
   }
@@ -269,19 +263,14 @@ export default class AssessmentScreen extends Component{
         );
       case 'result':
         const {
-          recArea,
+          focusAreaIndex,
           recBehaviors,
-          areaNameToId,
-          allAreas,
           allBehaviors,
         } = this.state;
 
-        const changeRecArea = (recArea) => {
-          if (this.state.recArea !== recArea) {
-            this.updateArea({
-              recArea,
-              areaId: areaNameToId[recArea],
-            });
+        const changeRecArea = (index) => {
+          if (index !== focusAreaIndex) {
+            this.updateArea(index);
           }
         };
 
@@ -296,12 +285,12 @@ export default class AssessmentScreen extends Component{
         return (
           <ResultsPage
             styles={styles}
-            recArea={recArea}
+            recArea={this.allAreas[focusAreaIndex].name}
             onPressNext={this.resultOnPressNext}
             recBehaviors={recBehaviors.map((val) => val.behavior_name)}
             onPressNewFocus={changeRecArea}
             onPressNewBehavior={changeRecBehavior}
-            focusList={allAreas}
+            focusList={this.allAreas.map((area) => area.name)}
             behaviorList={allBehaviors.map((behavior) => behavior.behavior_name)}
           />
         );
