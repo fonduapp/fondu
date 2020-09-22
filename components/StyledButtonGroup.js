@@ -5,6 +5,7 @@ import {
   Text,
 } from 'react-native';
 import theme from '../styles/theme.style.js';
+import { shadowStyle } from '../styles/shadow.style.js';
 
 const StyledButtonGroup = (props) => {
   const {
@@ -61,11 +62,7 @@ const StyledButtonGroup = (props) => {
             ...(selectedIndex === i
               ? {
                   backgroundColor: 'white',
-                  elevation: 5,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.8,
-                  shadowRadius: 2,
+                  ...shadowStyle.primaryShadowStyle,
                 }
               : {}
             ),

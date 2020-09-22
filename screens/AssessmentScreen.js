@@ -114,7 +114,7 @@ export default class AssessmentScreen extends Component{
     return fetch('GET', 'allBehaviors', { areaId })
       .then((responseJson) => {
         this.setState({
-          allBehaviors: responseJson.map((behavior) => behavior.behavior_name),
+          allBehaviors: responseJson,
         });
       })
       .catch(console.error);
@@ -285,10 +285,10 @@ export default class AssessmentScreen extends Component{
           }
         };
 
-        const changeRecBehavior = (index, recBehavior) => {
+        const changeRecBehavior = (indexInRecList, indexInFullList) => {
           this.setState(({ recBehaviors: oldRecBehaviors }) => {
             const newRecBehaviors = oldRecBehaviors.slice();
-            newRecBehaviors[index] = recBehavior;
+            newRecBehaviors[indexInRecList] = allBehaviors[indexInFullList];
             return { recBehaviors: newRecBehaviors };
           });
         };
@@ -302,7 +302,7 @@ export default class AssessmentScreen extends Component{
             onPressNewFocus={changeRecArea}
             onPressNewBehavior={changeRecBehavior}
             focusList={allAreas}
-            behaviorList={allBehaviors}
+            behaviorList={allBehaviors.map((behavior) => behavior.behavior_name)}
           />
         );
       case 'setCheckpointDay':

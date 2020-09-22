@@ -16,6 +16,7 @@ import NextButton from './NextButton';
 import theme from '../styles/theme.style';
 import ScrollButtonGroup from './ScrollButtonGroup';
 import Color from 'color';
+import { shadowStyle } from '../styles/shadow.style.js';
 
 const contentWidth = 275;
 const {
@@ -212,8 +213,8 @@ export default class ResultsPage extends Component {
                         screenWidth={screenWidth}
                         itemList={behaviorList}
                         selectedItem={recBehaviors[selectedBehaviorIndex]}
-                        onPress={(newBehavior) => {
-                          onPressNewBehavior(selectedBehaviorIndex, newBehavior);
+                        onPress={(index) => {
+                          onPressNewBehavior(selectedBehaviorIndex, index);
                         }}
                         scrollToSelected={isOpenBehaviors}
                         selectedButtonColor={Color(theme.TEXT_COLOR).alpha(0.5).string()}
@@ -270,10 +271,7 @@ const styleSheet = StyleSheet.create({
     borderRadius: 20,
     height: 75,
     justifyContent: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
+    ...shadowStyle.primaryShadowStyle,
     paddingHorizontal: 10,
   },
   selectedButton: {

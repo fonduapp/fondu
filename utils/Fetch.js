@@ -77,6 +77,9 @@ export async function _getAuthTokenUserId(){
 //   extraParams: object with params other than authToken and userId
 // returns a promise that resolves with the result of parsing the response as JSON or text
 export default async function fetch(requestType, requestName, extraParams = {}) {
+  // TODO: replace with real email GET request
+  if (requestName === 'email') return { email: 'JOESCHMOE@yahoo.com' };
+
   const {
     authToken,
     userId,

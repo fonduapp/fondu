@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import theme from '../styles/theme.style.js';
 import { Button } from 'react-native-elements';
-import {textStyle} from '../styles/text.style.js';
+import { textStyle } from '../styles/text.style.js';
+import { shadowStyle } from '../styles/shadow.style.js';
 
 
 export default class NextButton extends Component {
@@ -36,12 +37,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
     display: 'flex',
     justifyContent:'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-
-
+    ...shadowStyle.primaryShadowStyle,
   },
   nextButtonTitle:{
     fontSize: 14,
