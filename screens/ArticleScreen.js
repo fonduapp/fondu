@@ -127,7 +127,6 @@ export default class ArticleScreen extends Component {
             icons:(this.renderText(responseJson.behavior_text, 'SuggestionIcon')),
             image: 'http://192.241.153.104:3000/behaviorImage/'+userId+'/'+authToken+'/' + behaviorId,
           })
-          console.log('icons')
         })
         .then(()=>
         fetch('GET', 'relatedBehaviors', { behaviorId })
@@ -203,12 +202,9 @@ export default class ArticleScreen extends Component {
   render(){
     if (this.state.finishedMounting){
     let answer = this.createISC(this.state.answer, '<Answer>', '</Answer>');
-    console.log('anser')
     let theory = this.createISC(this.state.Theory, '<Theory>', '</Theory>');
-    console.log("theory")
     let caption = this.createISC(this.state.descript, '<Description>', '</Description>');
-    console.log("description")
-
+    let research = this.createISC(this.state.research, '<Research>', '</Research>');
     let directions = this.state.suggestion.map((dir,i) =>{
       var icons = this.getIcon(this.state.icons[i])
       return<InfoButton
@@ -216,7 +212,7 @@ export default class ArticleScreen extends Component {
         iconName= {icons[1]}
         iconType={icons[0]}
         label={dir}
-        research = {this.state.research}
+        research = {research[i]}
         reference={this.state.reference}
       />
     });

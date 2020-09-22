@@ -75,21 +75,28 @@ export function renderText(content, tag) {
 //parses through text with given tags, and turns the isc into a button
 export function createISC(text, tag, endtag){
       //console.log("tag to read\t\t\t"+tag);
+
       let result = text.map((res,i) =>{
+
         var citList = this.renderText(res, 'isc');
-        var start = 0;
+
+        var start = [];
+        start[0] = 0;
         if (citList){
         let citations = citList.map((cit,i) =>{
-          var index = res.indexOf('<isc>',start);
-          var sub = res.substring(start, index);
-          start = res.indexOf('</isc>') + 6;
+          var index = res.indexOf('<isc>',start[0]);
+          var sub = res.substring(start[0], index);
+          start[0] = res.indexOf('</isc>') + 6;
           return <Text style = {{flexDirection: 'row'}}>
             <Text>{sub}</Text>
             <Text onPress={() => this.setState({showRef:true})}>{cit}</Text>
             </Text>
         });
+        var remaining = res.substring(start[0]);
+        start[0] = remaining.indexOf('</isc>') + 6;
+        remaining = remaining.substring(start[0]);
 
-        var remaining = res.substring(start);
+
         return<Text style = {{flexDirection: 'row'}}>
           {citations}
           <Text>{remaining}</Text>
@@ -106,7 +113,7 @@ export function createISC(text, tag, endtag){
 
 
   export function italicize(res){
-          var title = this.renderText(res, 'i');
+          //var title = this.renderText(res, 'i');
           var start = 0;
           var index = res.indexOf('<i>',start);
           var subStart = res.substring(start, index);

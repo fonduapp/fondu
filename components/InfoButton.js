@@ -81,7 +81,7 @@ export default class InfoButton extends Component {
           </TouchableOpacity>
 
           <Text style={styles.dropDownText}>
-            {research[0]}
+            {research}
           </Text>
           </TouchableOpacity>
           );
@@ -89,8 +89,8 @@ export default class InfoButton extends Component {
       }
 
   render(){
-    let research = this.createISC(this.props.research, '<Research>', '</Research>');
-    var buttons = this.screens(research);
+
+    var buttons = this.screens(this.props.research);
   return (
     <View>
       {buttons}
