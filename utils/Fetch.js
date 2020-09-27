@@ -41,6 +41,7 @@ const allParamNames = {
     usageQuestions: ['userId', 'authToken', 'behaviorId'],
     suggestedBehaviors: ['userId', 'authToken', 'areaId'],
     nextAssessDate: ['userId', 'authToken'],
+    currentArea: ['userId', 'authToken'],
     currentBehaviors: ['userId', 'authToken'],
     areaLevel: ['userId', 'authToken', 'areaId'],
     streak: ['userId', 'authToken', 'currentDate'],
