@@ -296,8 +296,8 @@ export default class ProfileScreen extends Component {
         <StatusBar hidden />
         <View style={styles.navBarWrapper}>
           <LinearGradient
-            colors={[theme.PRIMARY_COLOR, 'transparent']}
-            start={[0, 0.65]}
+            colors={[theme.PRIMARY_COLOR, Color(theme.PRIMARY_COLOR).alpha(0).string()]}
+            locations={[0.65, 1]}
           >
             <ProgressNavBar navigation={this.props.navigation} title = {"Profile"}/>
           </LinearGradient>
