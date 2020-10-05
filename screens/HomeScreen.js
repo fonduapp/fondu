@@ -396,58 +396,64 @@ export default class HomeScreen extends Component {
                       outputRange: [0, 1, 0],
                       extrapolate: "clamp"
                     });
-                    if(!this.state.recommendedBehaviors[key].completed){
-                      return(
-                        <ContentModule
-                                   title = {this.state.recommendedBehaviors[key].name}
-                                   key={index}
-                                   onPress={() => this.props.navigation.navigate('Assessment',{
-                                     behaviorId:key,
-                                     assessmentType:'learning',
-                                     assessmentComplete:()=>this.learningAssessComplete(key),
-                                   })}
-                                   behaviorId={key}
-                                   style = {{}}
-                                   width = {moduleWidth}
-                                   space = {moduleSpace}
-                                   imageOpacity = {opacity}
-                                   contentType= {'learn'}
-                        />
-                      )
-                    }
-                    else{
-                      return(
-                        <ContentModule
-                                   title = {this.state.recommendedBehaviors[key].name}
-                                   key={index}
-                                   behaviorId={key}
-                                   style = {{}}
-                                   width = {moduleWidth}
-                                   space = {moduleSpace}
-                                   imageOpacity = {opacity}
-                                   contentType= {'suggest'}
-                        />
-                      )
-                    }
 
+                    // to get the image in each ContentModule to overlap the next ContentModule,
+                    // we wrap the ContentModules in Views with decreasing zIndices N,..., 1, 0
+                    const indexFromLengthToOne = (
+                      Object.keys(this.state.recommendedBehaviors).length - index
+                    );
+
+                    return (
+                      <View key={key} style={{ zIndex: indexFromLengthToOne }}>
+                        {!this.state.recommendedBehaviors[key].completed
+                          ? (
+                            <ContentModule
+                                       title = {this.state.recommendedBehaviors[key].name}
+                                       onPress={() => this.props.navigation.navigate('Assessment',{
+                                         behaviorId:key,
+                                         assessmentType:'learning',
+                                         assessmentComplete:()=>this.learningAssessComplete(key),
+                                       })}
+                                       behaviorId={key}
+                                       style = {{}}
+                                       width = {moduleWidth}
+                                       space = {moduleSpace}
+                                       imageOpacity = {opacity}
+                                       contentType= {'learn'}
+                            />
+                          )
+                          : (
+                            <ContentModule
+                                       title = {this.state.recommendedBehaviors[key].name}
+                                       behaviorId={key}
+                                       style = {{}}
+                                       width = {moduleWidth}
+                                       space = {moduleSpace}
+                                       imageOpacity = {opacity}
+                                       contentType= {'suggest'}
+                            />
+                          )
+                        }
+                      </View>
+                    );
                   })
                   :null
                 }
-                <ContentModule title = 'Checkpoint'
-                               key = {99}
-                               onPress={() => this.props.navigation.navigate('Assessment',{
-                                 behaviors: Object.keys(this.state.recommendedBehaviors),
-                                 assessmentType: 'review',
-                                 assessmentComplete: this.reviewAssessComplete,
-                               })}
-                               width = {moduleWidth}
-                               space = {moduleSpace}
-                               behaviors = {this.state.recommendedBehaviors}
-                               contentType= {'check'}
-                               nextAssessDate={this.nextAssessDate}
-                               unlockReview={unlockReview}
-                />
-
+                <View key="check" style={{ zIndex: 0 /* below all other ContentModules */ }}>
+                  <ContentModule title = 'Checkpoint'
+                                 onPress={() => this.props.navigation.navigate('Assessment',{
+                                   behaviors: Object.keys(this.state.recommendedBehaviors),
+                                   assessmentType: 'review',
+                                   assessmentComplete: this.reviewAssessComplete,
+                                 })}
+                                 width = {moduleWidth}
+                                 space = {moduleSpace}
+                                 behaviors = {this.state.recommendedBehaviors}
+                                 contentType= {'check'}
+                                 nextAssessDate={this.nextAssessDate}
+                                 unlockReview={unlockReview}
+                  />
+                </View>
               </Animated.ScrollView>
             </View>
           </View>
