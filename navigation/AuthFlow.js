@@ -1,26 +1,19 @@
 import * as React from 'react';
 import {
-  ActivityIndicator,
-  Button,
-  StatusBar,
   StyleSheet,
   View,
   AsyncStorage,
   Text,
   TouchableOpacity,
-  TextInput,
-  Picker,
   ImageBackground,
 } from 'react-native';
 import Color from 'color';
 import NextButton from '../components/NextButton';
-import CustomTextInput from '../components/CustomTextInput';
 import theme from '../styles/theme.style.js';
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {textStyle} from '../styles/text.style.js';
 import PopUp from '../components/PopUp.js';
-import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import StyledButtonGroup from '../components/StyledButtonGroup';
 import fetch from '../utils/Fetch.js';
