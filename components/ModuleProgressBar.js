@@ -60,6 +60,7 @@ export default class ContentModule extends Component {
                   width * (i + 1)
                 ],
                 outputRange: [0, 1, 0],
+                extrapolate: "clamp",
               });
 
 	      //Create the parent and add the children
