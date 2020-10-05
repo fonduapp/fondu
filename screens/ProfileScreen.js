@@ -413,7 +413,7 @@ export default class ProfileScreen extends Component {
                           backgroundGradientTo: 'white',
                           color: (opacity = 1) => `rgba(123, 127, 255, ${opacity})`,
                           decimalPlaces: 0,
-                          propsForLabels:{fontFamily:'poppins-bold', fontWeight: 'bold', opacity: 0.5},
+                          propsForLabels:{fontWeight: 'bold', opacity: 0.5},
                           fillShadowGradient:theme.PRIMARY_COLOR,
                           fillShadowGradientOpacity:0.5
 
