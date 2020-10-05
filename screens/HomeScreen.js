@@ -366,7 +366,6 @@ export default class HomeScreen extends Component {
                 horizontal= {true}
                 decelerationRate={0}
                 snapToInterval={snapToInterval}
-                snapToAlignment={"center"}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
                 onScroll={Animated.event(

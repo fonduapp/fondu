@@ -347,7 +347,6 @@ export default class AssessmentScreen extends Component{
                   horizontal= {true}
                   decelerationRate={0}
                   snapToInterval={width}
-                  snapToAlignment={"center"}
                   decelerationRate="fast"
                   showsHorizontalScrollIndicator={false}
                   onScroll={Animated.event(

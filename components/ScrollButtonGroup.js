@@ -104,7 +104,6 @@ export default class ScrollButtonGroup extends Component {
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={contentWidth + 2 * buttonMarginHorizontal}
-        snapToAlignment="center"
         decelerationRate="fast"
         contentContainerStyle={styles.container}
       >
