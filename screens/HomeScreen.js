@@ -559,6 +559,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: theme.SECONDARY_COLOR,
     borderRadius: 20,
+    overflow: 'hidden', // hide background outside border
     color: theme.TEXT_COLOR,
     ...textStyle.label,
   },
