@@ -500,6 +500,7 @@ export default class HomeScreen extends Component {
                                          relationshipInfo: navigation.getParam('relationshipInfo'),
                                          name: navigation.getParam('name'),
                                          email: navigation.getParam('email'),
+                                         initialAssessTaken: navigation.getParam('initialAssessTaken')
                                        })}>
                                       <Avatar rounded size = "small" icon={{name: 'person'}}/>
                     </TouchableOpacity>

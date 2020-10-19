@@ -41,15 +41,18 @@ export default class ProfileScreen extends Component {
     this.allAreas = getParam('allAreas', []);
     this.areaLevels = getParam('areaLevels', {});
     this.totalExp = getParam('totalExp', 0);
+    this.initialAssessTaken = getParam('initialAssessTaken', false);
     this.progressionExps = [];
     this.progressionDates = [];
-    getParam('expProgression', []).forEach(({ exp, date: dateString }) => {
-      this.progressionExps.push(exp);
-      const date = new Date(dateString);
-      const dateFormatted = `${1 + date.getMonth()}/${date.getDate()}`;
-      // TODO: replace with dateFormatted
-      this.progressionDates.push(dateString);
-    });
+    let expProgression = getParam('expProgression', []);
+    if(expProgression)
+      expProgression.forEach(({ exp, date: dateString }) => {
+        this.progressionExps.push(exp);
+        const date = new Date(dateString);
+        const dateFormatted = `${1 + date.getMonth()}/${date.getDate()}`;
+        // TODO: replace with dateFormatted
+        this.progressionDates.push(dateString);
+      });
 
     this.name = getParam('name', '');
     this.email = getParam('email', '');
@@ -305,22 +308,26 @@ export default class ProfileScreen extends Component {
         <View style={styles.mainScrollWrapper}>
           <Animated.View style={[
             styles.slidingHeader,
-            { transform: [{ translateY: slidingHeaderTranslate }] },
+            { transform: [{ translateY: slidingHeaderTranslate}] },
           ]}>
             <View style= {styles.avatarContainer}>
               <Avatar rounded size={100} icon={{name: 'person'}} />
               <Text style={[textStyle.header4,{color:'white', marginTop: 5}]}>{this.name}</Text>
             </View>
+            {this.initialAssessTaken?
             <View style={styles.stickyHeader}>
               <View style={[styles.containerLabel, styles.stickyHeaderLabelsContainer]}>
+              
                 <TouchableOpacity style={styles.containerLabelContainer}
                                   onPress={() => { this.scroll.scrollTo({ x: 0 }) }}>
                   <Text style={styles.textContainer}>Performance</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={styles.containerLabelContainer}
                                   onPress={() => { this.scroll.scrollTo({ x: width*2 }) }}>
                   <Text style={styles.textContainer}>Account</Text>
                 </TouchableOpacity>
+                
               </View>
               <View style={styles.stickyHeaderScrollContainer}>
                 <Animated.View style={[styles.containerLabel, 
@@ -336,7 +343,7 @@ export default class ProfileScreen extends Component {
                     </View>
                 </Animated.View>
               </View>
-            </View>
+            </View>:null}
           </Animated.View>
           <View style={styles.welcomeContainer}>
             <Animated.ScrollView
@@ -353,7 +360,7 @@ export default class ProfileScreen extends Component {
                     {  useNativeDriver: true },
                   )}
                   ref={(node) => this.scroll = node}>
-
+                  { this.initialAssessTaken?
                   <Animated.ScrollView
                     contentContainerStyle={styles.scrollContainer}
                     onScroll={Animated.event(
@@ -445,6 +452,7 @@ export default class ProfileScreen extends Component {
                     </View>
 
                   </Animated.ScrollView>
+                  :null}
 
                   <Animated.ScrollView
                     contentContainerStyle={styles.scrollContainer}
@@ -549,6 +557,10 @@ const styles = StyleSheet.create({
     // float above scrollViews
     zIndex: 1,
     backgroundColor: theme.PRIMARY_COLOR,
+  },
+  slidingHeaderNull: {
+    position: 'absolute',
+    width: '100%',
   },
   avatarContainer: {
     alignItems: 'center',
